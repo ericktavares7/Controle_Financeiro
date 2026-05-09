@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finance Simplefy</title>
+</head>
+
+<body>
+
+  <main class="dashboard-container">
+    <header class="dashboard-header">
+      <div class="brand-group">
+        <div class="logo">
+          <img id="main-logo" alt="logo">
+        </div>
+
+        <div class="brand-info">
+          <h1>Finance Simplefy</h1>
+          <p class="current-date">maio 2026 • dashboard pessoal</p>
+        </div>
+      </div>
+
+      <div class="status-badge">
+        <span>●</span> ao vivo
+      </div>
+    </header>
+
+    <nav class="main-nav">
+      <ul>
+        <li><button class="tab-btn active" data-tab="overview">Visão Geral</button></li>
+        <li><button class="tab-btn" data-tab="transacoes">Transações</button></li>
+        <li><button class="tab-btn" data-tab="ia">IA Financeira</button></li>
+      </ul>
+    </nav>
+
+    <section class="tab-section active" id="tab-overview">
+
+      <section class="summary-grid" id="summary-section">
+        <article class="card income" id="card-receita">
+          <header>
+            <span class="icon">↑</span>
+            <h3>Receita</h3>
+          </header>
+          <p class="value" id="display-receita">R$ 0,00</p>
+        </article>
+
+        <article class="card expense" id="card-despesa">
+          <header>
+            <span class="icon">↓</span>
+            <h3>Despesas</h3>
+          </header>
+          <p class="value" id="display-despesa">R$ 0,00</p>
+        </article>
+
+        <article class="card balance" id="card-saldo">
+          <header>
+            <span class="icon">◈</span>
+            <h3>Saldo Livre</h3>
+          </header>
+          <p class="value" id="display-saldo">R$ 0,00</p>
+        </article>
+
+        <article class="card savings" id="card-poupanca">
+          <header>
+            <span class="icon">★</span>
+            <h3>Taxa de Poupança</h3>
+          </header>
+          <p class="value" id="display-poupanca">0%</p>
+        </article>
+
+        <article class="card caixinha" id="card-caixinha">
+          <header>
+            <span class="icon">🐷</span>
+            <h3>Caixinhas</h3>
+          </header>
+          <p class="value" id="display-caixinha">R$ 0,00</p>
+        </article>
+      </section>
+
+      <section class="charts-container">
+        <article class="chart-card evolution">
+          <header>
+            <h3>Evolução Mensal</h3>
+          </header>
+          <div class="canvas-wrapper">
+            <canvas id="mainEvolutionChart"></canvas>
+          </div>
+        </article>
+
+        <article class="chart-card categories">
+          <header>
+            <h3>Por Categoria</h3>
+          </header>
+          <div class="category-bars" id="categoryList">
+            <div class="bar-item">
+              <div class="bar-info">
+                <span>Moradia</span>
+                <span>R$ 2.200,00</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill income-fill width-70"></div>
+              </div>
+            </div>
+
+            <div class="bar-item">
+              <div class="bar-info">
+                <span>Alimentação</span>
+                <span>R$ 1.100,00</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill expense-fill width-45"></div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="add-transaction-section">
+        <h3>Nova Transação</h3>
+        <form class="form-group" id="form-transacao">
+          <input type="text" placeholder="Descrição" class="input-full">
+
+          <div class="form-row">
+            <input type="number" placeholder="Valor (R$)" class="input-amount">
+            <select aria-label="Tipo de transação" title="Tipo de transação" class="select-type">
+              <option value="expense">Despesa</option>
+              <option value="income">Receita</option>
+              <option value="saving">🐷 Caixinha</option>
+            </select>
+          </div>
+
+          <select name="categoria" aria-label="Categoria da transação" title="Categoria da transação"
+            class="input-full select-category">
+            <optgroup label="🏠 Despesas">
+              <option value="Alimentação">🍔 Alimentação</option>
+              <option value="Moradia">🏠 Moradia</option>
+              <option value="Transporte">🚗 Transporte</option>
+              <option value="Saúde">💊 Saúde</option>
+              <option value="Lazer">🎮 Lazer</option>
+              <option value="Outros">📦 Outros</option>
+            </optgroup>
+
+            <!-- Cartão de crédito -->
+            <optgroup label="💳 Cartão de Crédito">
+              <option value="Cartão Nubank">💳 Nubank</option>
+              <option value="Cartão Inter">💳 Mercado Pago</option>
+              <option value="Cartão C6">💳 Caixa</option>
+              <option value="Cartão Outro">💳 Neon</option>
+            </optgroup>
+
+            <!-- Caixinhas -->
+            <optgroup label="🏦 Caixinhas">
+              <option value="Caixinha Emergência">🐷 Emergência</option>
+              <option value="Caixinha Viagem">✈️ Planos</option>
+              <option value="Caixinha Eletrônicos">📱 Eletrônicos</option>
+            </optgroup>
+
+            <!-- Receitas -->
+            <optgroup label="💰 Receitas">
+              <option value="Salário">💰 Salário</option>
+              <option value="Freelance">💻 Freelance</option>
+              <option value="Investimentos">📈 Investimentos</option>
+              <option value="Renda Extra">⚡ Renda Extra</option>
+            </optgroup>
+          </select>
+
+          <button type="submit" class="btn-add">+ Adicionar Transação</button>
+        </form>
+        <section class="add-transaction-section">
+          <h3>Histórico</h3>
+
+          <div id="transaction-list"></div>
+        </section>
+      </section>
+
+    </section>
+
+    <section class="tab-section" id="tab-transacoes">
+      <section class="add-transaction-section">
+        <h3>Histórico de Transações</h3>
+        <div id="transaction-list"></div>
+      </section>
+    </section>
+
+    <section class="tab-section" id="tab-ia">
+      <section class="add-transaction-section" id="chat-card">
+        <div id="chat-header">
+          <span></span>
+          <h3>Assistente Financeiro com IA</h3>
+        </div>
+        <div id="chat-mensagens">
+          <div class="msg msg-assistente">
+            Olá! Analisei suas finanças e estou pronto para responder. Pergunte qualquer coisa!
+          </div>
+        </div>
+        <div id="chat-input-area">
+          <input type="text" id="chat-input" placeholder="Pergunte sobre suas finanças...">
+          <button type="button" id="chat-enviar">→</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+</body>
+
+</html>

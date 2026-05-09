@@ -1,0 +1,107 @@
+#transaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.tx-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--bordas);
+  transition: background 0.15s;
+  border-radius: 8px;
+}
+
+.tx-item:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Ícone redondo */
+.tx-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.tx-icon--income {
+  background: rgba(0, 255, 178, 0.1);
+  color: var(--entradas);
+}
+
+.tx-icon--expense {
+  background: rgba(255, 107, 53, 0.1);
+  color: var(--saidas);
+}
+
+/* Descrição e meta */
+.tx-info {
+  flex: 1;
+  min-width: 0;
+  /* impede overflow */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tx-desc {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--txt_principal);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tx-meta {
+  font-size: 11px;
+  color: var(--txt_secondario);
+}
+
+/* Valor + botão de deletar */
+.tx-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.tx-val {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tx-val--income {
+  color: var(--entradas);
+}
+
+.tx-val--expense {
+  color: var(--saidas);
+}
+
+/* Botão de deletar */
+.tx-delete {
+  background: none;
+  border: none;
+  color: var(--txt_secondario);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.15s;
+  line-height: 1;
+}
+
+.tx-delete:hover {
+  background: rgba(255, 107, 53, 0.15);
+  color: var(--saidas);
+}

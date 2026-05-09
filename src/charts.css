@@ -1,0 +1,93 @@
+/* CONTAINER DOS GRÁFICOS (GRID RESPONSIVO) */
+.charts-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  /* Padrão Mobile: Uma coluna */
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+/* CARD DE GRÁFICO (BASE) */
+.chart-card {
+  background-color: var(--cards);
+  border: 1px solid var(--bordas);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.chart-card h3 {
+  font-size: 0.75rem;
+  color: var(--txt_secondario);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1.5rem;
+}
+
+/* 1. GRÁFICO DE EVOLUÇÃO (ESQUERDA/TOPO) */
+.canvas-wrapper {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.canvas-wrapper canvas {
+  display: block;
+  max-width: 100%;
+  height: 100%;
+}
+
+/* 2. GRÁFICO DE CATEGORIAS (DIREITA/BAIXO) */
+.category-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bar-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.bar-info .cat-name {
+  color: var(--txt_secondario);
+}
+
+.bar-info .cat-value {
+  color: var(--txt_principal);
+  font-family: 'Syne', sans-serif;
+  /* Ou Manrope Bold */
+}
+
+/* A "PISTA" DA BARRA */
+.bar-track {
+  width: 100%;
+  height: 6px;
+  background-color: #0f1f35;
+  /* Fundo escuro para destacar o neon */
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* O PREENCHIMENTO NEON */
+.bar-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Animação suave ao carregar */
+}
