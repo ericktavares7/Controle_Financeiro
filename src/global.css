@@ -67,7 +67,6 @@ a {
 .dashboard-header {
   display: flex;
   flex-direction: column;
-  /* Empilha logo e data no mobile */
   gap: 12px;
   align-items: flex-start;
 }

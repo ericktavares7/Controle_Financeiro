@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Finance Simplefy</title>
+  <link id="favicon" rel="icon" type="image/png" href="">
 </head>
 
 <body>
@@ -18,7 +19,7 @@
 
         <div class="brand-info">
           <h1>Finance Simplefy</h1>
-          <p class="current-date">maio 2026 • dashboard pessoal</p>
+          <p class="current-date" id="header-date">maio 2026 • dashboard pessoal</p>
         </div>
       </div>
 
@@ -38,21 +39,32 @@
     <section class="tab-section active" id="tab-overview">
 
       <section class="summary-grid" id="summary-section">
-        <article class="card income" id="card-receita">
-          <header>
-            <span class="icon">↑</span>
-            <h3>Receita</h3>
-          </header>
-          <p class="value" id="display-receita">R$ 0,00</p>
-        </article>
 
-        <article class="card expense" id="card-despesa">
-          <header>
-            <span class="icon">↓</span>
-            <h3>Despesas</h3>
-          </header>
-          <p class="value" id="display-despesa">R$ 0,00</p>
-        </article>
+        <div class="actions-grid">
+          <button id="dash-card-receita" class="action-card btn-income">
+            <div class="action-icon">＋</div>
+            <div class="action-info">
+              <small>Novo Ganho</small>
+              <strong>RECEITA</strong>
+            </div>
+          </button>
+
+          <button id="dash-card-despesa" class="action-card btn-expense">
+            <div class="action-icon">－</div>
+            <div class="action-info">
+              <small>Novo Gasto</small>
+              <strong>DESPESA</strong>
+            </div>
+          </button>
+        </div>
+
+        <button id="dash-card-caixinhas" class="action-card btn-caixinha">
+          <div class="action-icon">🚀</div>
+          <div class="action-info">
+            <small>CAIXINHAS</small>
+            <strong id="saldo-caixinhas">R$ 0.00</strong>
+          </div>
+        </button>
 
         <article class="card balance" id="card-saldo">
           <header>
@@ -68,15 +80,9 @@
             <h3>Taxa de Poupança</h3>
           </header>
           <p class="value" id="display-poupanca">0%</p>
+          <p id="msg-poupanca" class="poupanca-msg"></p>
         </article>
 
-        <article class="card caixinha" id="card-caixinha">
-          <header>
-            <span class="icon">🐷</span>
-            <h3>Caixinhas</h3>
-          </header>
-          <p class="value" id="display-caixinha">R$ 0,00</p>
-        </article>
       </section>
 
       <section class="charts-container">
@@ -113,74 +119,142 @@
                 <div class="bar-fill expense-fill width-45"></div>
               </div>
             </div>
+
           </div>
         </article>
       </section>
 
-      <section class="add-transaction-section">
-        <h3>Nova Transação</h3>
-        <form class="form-group" id="form-transacao">
-          <input type="text" placeholder="Descrição" class="input-full">
-
-          <div class="form-row">
-            <input type="number" placeholder="Valor (R$)" class="input-amount">
-            <select aria-label="Tipo de transação" title="Tipo de transação" class="select-type">
-              <option value="expense">Despesa</option>
-              <option value="income">Receita</option>
-              <option value="saving">🐷 Caixinha</option>
-            </select>
+      <div id="modal-registro" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Nova Transação</h2>
+            <button type="button" id="fechar-modal" class="btn-close">&times;</button>
           </div>
 
-          <select name="categoria" aria-label="Categoria da transação" title="Categoria da transação"
-            class="input-full select-category">
-            <optgroup label="🏠 Despesas">
-              <option value="Alimentação">🍔 Alimentação</option>
-              <option value="Moradia">🏠 Moradia</option>
-              <option value="Transporte">🚗 Transporte</option>
-              <option value="Saúde">💊 Saúde</option>
-              <option value="Lazer">🎮 Lazer</option>
-              <option value="Outros">📦 Outros</option>
-            </optgroup>
+          <form id="form-transacao">
+            <div class="form-group">
+              <label for="input-desc">Descrição</label>
+              <input type="text" id="input-desc" placeholder="Ex: Aluguel, Mercado, Freelance..." required>
+            </div>
 
-            <!-- Cartão de crédito -->
-            <optgroup label="💳 Cartão de Crédito">
-              <option value="Cartão Nubank">💳 Nubank</option>
-              <option value="Cartão Inter">💳 Mercado Pago</option>
-              <option value="Cartão C6">💳 Caixa</option>
-              <option value="Cartão Outro">💳 Neon</option>
-            </optgroup>
+            <div class="form-group">
+              <label for="input-val">Valor (R$)</label>
+              <input type="number" step="0.01" id="input-val" placeholder="0,00" required>
+            </div>
 
-            <!-- Caixinhas -->
-            <optgroup label="🏦 Caixinhas">
-              <option value="Caixinha Emergência">🐷 Emergência</option>
-              <option value="Caixinha Viagem">✈️ Planos</option>
-              <option value="Caixinha Eletrônicos">📱 Eletrônicos</option>
-            </optgroup>
+            <div class="form-group">
+              <label for="input-data">Data</label>
+              <input type="date" id="input-data">
+            </div>
 
-            <!-- Receitas -->
-            <optgroup label="💰 Receitas">
-              <option value="Salário">💰 Salário</option>
-              <option value="Freelance">💻 Freelance</option>
-              <option value="Investimentos">📈 Investimentos</option>
-              <option value="Renda Extra">⚡ Renda Extra</option>
-            </optgroup>
-          </select>
+            <div class="form-group">
+              <label for="input-cat">Categoria</label>
+              <select id="input-cat" class="select-category" required>
 
-          <button type="submit" class="btn-add">+ Adicionar Transação</button>
-        </form>
-        <section class="add-transaction-section">
-          <h3>Histórico</h3>
+                <optgroup label="💳 DESPESAS" id="group-despesas">
+                  <option value="Alimentação">Alimentação</option>
+                  <option value="Transporte">Transporte</option>
+                  <option value="Lazer">Lazer</option>
+                  <option value="Moradia">Moradia</option>
+                  <option value="Saúde">Saúde</option>
+                  <option value="Educação">Educação</option>
+                  <option value="Outros">Outros</option>
+                  <option value="Cartão de Crédito">Cartão de Crédito</option>
+                </optgroup>
 
-          <div id="transaction-list"></div>
-        </section>
+                <optgroup label="💰 RECEITAS" id="group-receitas">
+                  <option value="Salário">Salário</option>
+                  <option value="Freelance">Freelance</option>
+                  <option value="Investimentos">Investimentos</option>
+                  <option value="Presente">Presente</option>
+                  <option value="Extra">Renda Extra</option>
+                </optgroup>
+
+                <optgroup label="🚀 CAIXINHAS" id="group-caixinhas" style="display: none;">
+                  <option value="Reserva de Emergência">Reserva de Emergência</option>
+                  <option value="Metas">Metas</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <input type="hidden" id="input-tipo" value="expense">
+
+            <button type="submit" class="btn-save">Confirmar Registro</button>
+          </form>
+        </div>
+      </div>
+
+      <section class="add-transaction-section">
+        <h3>Histórico Recente</h3>
+        <div id="transaction-list"></div>
       </section>
 
     </section>
 
     <section class="tab-section" id="tab-transacoes">
       <section class="add-transaction-section">
-        <h3>Histórico de Transações</h3>
-        <div id="transaction-list"></div>
+        <!-- Seletor de mês -->
+        <div>
+          <h3>Histórico de Transações</h3>
+          <select aria-label="FILTRAR O MÊS" id="filtro-mes" class="select-type">
+          </select>
+        </div>
+
+        <!-- KPIs do mês -->
+        <div>
+          <article class="card income" id="card-receita">
+            <header>
+              <span class="icon">↑</span>
+              <h3>Receita</h3>
+            </header>
+            <p class="value" id="mes-receita">R$ 0,00</p>
+            <p id="mes-receita-delta"></p>
+          </article>
+
+          <article class="card expense" id="card-despesa">
+            <header>
+              <span class="icon">↓</span>
+              <h3>Despesas</h3>
+            </header>
+            <p class="value" id="mes-despesa">R$ 0,00</p>
+            <p id="mes-despesa-delta"></p>
+          </article>
+
+          <article class="card balance">
+            <header>
+              <span class="icon">◈</span>
+              <h3>Saldo</h3>
+            </header>
+            <p class="value" id="mes-saldo">R$ 0,00</p>
+          </article>
+        </div>
+
+        <!-- Barras por categoria do mês -->
+        <div class="chart-card categories">
+          <div class="card-header-flex">
+            <header>
+              <h3>Por Categoria</h3>
+
+              <button id="btn-ordenar-valor" class="btn-filter-icon" title="Ordenar por valor">
+                <span id="sort-icon">⇅</span>
+              </button>
+          </div>
+          </header>
+          <div class="category-bars" id="mes-categorias"></div>
+        </div>
+
+        <!-- Lista de transações do mês -->
+        <div class="historico-segmentado">
+          <div class="card-historico">
+            <h4 class="titulo-receitas">💰 Receitas</h4>
+            <div id="lista-receitas-historico"></div>
+          </div>
+
+          <div class="card-historico">
+            <h4 class="titulo-despesas">💸 Despesas</h4>
+            <div id="lista-despesas-historico"></div>
+          </div>
+        </div>
       </section>
     </section>
 
