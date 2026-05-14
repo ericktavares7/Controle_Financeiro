@@ -10,9 +10,24 @@ import { db } from './firebase.js';
 import { collection, addDoc, query, orderBy, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 
 // --- VARIÁVEIS GLOBAIS ---
+
 let transactions = [];
 let grafico;
 let ordemCrescente = false;
+
+
+window.alternarOrdemFiltro = () => {
+  ordemCrescente = !ordemCrescente;
+
+  // Atualiza o ícone do botão para dar feedback visual
+  const btn = document.getElementById('btn-ordem');
+  if (btn) {
+    btn.innerHTML = ordemCrescente ? '▲' : '▼';
+  }
+
+  // RE-RENDERIZA o dashboard para aplicar a nova ordem
+  atualizarDashboard();
+};
 
 window.abrirModal = (tipo) => {
   const modal = document.getElementById('modal-registro');
@@ -132,7 +147,11 @@ function renderCategoriasGrafico(lista) {
   });
 
   let categoriasArray = Object.entries(totais);
-  categoriasArray.sort((a, b) => ordemCrescente ? a[1].valor - b[1].valor : b[1].valor - a[1].valor);
+  categoriasArray.sort((a, b) => {
+    return ordemCrescente
+      ? a[1].valor - b[1].valor  // Menor para Maior
+      : b[1].valor - a[1].valor; // Maior para Menor
+  });
 
   const maiorValor = Math.max(...categoriasArray.map(c => c[1].valor), 0);
   const cores = { income: '#00FFB2', expense: '#FF6B35', goal: '#00D1FF' };
@@ -404,12 +423,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const nova = {
       desc: document.getElementById('input-desc').value,
       val: parseFloat(document.getElementById('input-val').value),
-      type: document.getElementById('input-tipo').value, 
+      type: document.getElementById('input-tipo').value,
       cat: document.getElementById('input-cat').value,
-      createdAt: new Date() 
+      createdAt: new Date()
     };
 
-    const salvo = await dbAdd(nova); 
+    const salvo = await dbAdd(nova);
     if (salvo) {
       form.reset();
       window.fecharModal();

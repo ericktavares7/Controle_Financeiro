@@ -6,6 +6,32 @@
   font-size: 14px;
 }
 
+.meta-item>div {
+  display: flex;
+  flex-wrap: wrap;
+  /* O pulo do gato: se não couber, ele joga o valor para baixo */
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Garante que o nome da meta não "estique" o card */
+.meta-item span:first-child {
+  flex: 1;
+  /* Ocupa o espaço disponível */
+  white-space: nowrap;
+  /* Tenta manter em uma linha */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Se for muito grande, coloca "..." */
+  font-size: 0.8rem;
+}
+
+.meta-item span:last-child {
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
 .action-info strong {
   font-family: 'Manrope', sans-serif;
   letter-spacing: -0.5px;
@@ -58,7 +84,6 @@ small,
 /* Faz o terceiro card (Caixinhas) ocupar as duas colunas */
 #dash-card-caixinhas {
   grid-column: span 2;
-  min-height: 80px;
 }
 
 /* Ajuste nos textos internos para caberem lado a lado */
@@ -105,6 +130,21 @@ small,
     font-size: 18px;
   }
 
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 15px;
+  }
+
+  .meta-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+
+  }
+
   .value {
     font-size: 1.4rem;
     /* Destaque nos valores dos cards */
@@ -132,12 +172,14 @@ small,
     box-sizing: border-box;
   }
 
-  /* LINHA 1: Ações (Botões grandes e da mesma altura) */
   .top-actions-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    /* 3 colunas iguais */
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 20px;
+
+  }
+
+  #dash-card-caixinhas {
+    grid-column: span 1;
   }
 
   .card-action {
