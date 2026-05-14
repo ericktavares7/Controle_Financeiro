@@ -5,7 +5,6 @@ import './charts.css';
 import './chat.css';
 import './transactions.css';
 import './responsive.css';
-import logoImg from './assets/logo_finance.png';
 import Chart from 'chart.js/auto';
 import { db } from './firebase.js';
 import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc } from "firebase/firestore";
@@ -390,10 +389,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 1. BUSCA DADOS INICIAIS
   transactions = await dbLoadFirestore();
-
-  // 2. CONFIGURA O LOGO
-  const logo = document.getElementById('main-logo');
-  if (logo) logo.src = logoImg;
 
   // 3. INICIALIZA O GRÁFICO
   const ctx = document.getElementById('mainEvolutionChart')?.getContext('2d');
