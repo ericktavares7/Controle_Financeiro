@@ -77,53 +77,45 @@
    DESKTOP (1024px ou mais)
    ============================================================ */
 @media (min-width: 1024px) {
-
-  /* Container principal ajustado para telas ultra-wide */
   #app {
     display: flex;
     flex-direction: column;
     gap: 30px;
     max-width: 1800px;
+    /* Preenche telas largas */
     margin: 0 auto;
     padding: 40px;
   }
 
-  /* PRIMEIRA LINHA: Receita, Despesa e Caixinha (3 colunas iguais) */
+  /* Primeira Linha: 3 colunas iguais */
   .top-actions-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
 
-  /* SEGUNDA LINHA: Saldo Livre e Poupança (2 colunas ocupando tudo) */
+  /* Segunda Linha: 2 colunas largas */
   .summary-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
   }
 
-  /* Padronização de altura para os cards de ação não ficarem achatados */
-  .card-receita,
-  .card-despesa,
-  .card-caixinhas {
-    min-height: 180px;
+  /* Terceira Linha: Gráficos lado a lado */
+  .bottom-charts-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    /* Gráfico de linha ganha mais espaço */
+    gap: 30px;
+  }
+
+  /* Altura padronizada para os cards do topo não achatarem */
+  .card-action {
+    min-height: 160px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    text-align: center;
-  }
-
-  /* Gráfico e Categorias lado a lado na parte de baixo */
-  .bottom-section {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    /* Gráfico maior que a lista lateral */
-    gap: 30px;
-  }
-
-  .chart-card {
-    min-height: 500px;
   }
 }
 
