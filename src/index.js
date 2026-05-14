@@ -222,7 +222,7 @@ function renderCategoriasGrafico(lista) {
     return `
       <div class="category-bar-item" onclick="filtrarPorCategoria('${cat}')" style="margin-bottom: 12px; cursor:pointer;">
         <div class="bar-info">
-          <span style="color: ${corBarra}; font-weight: bold;">${cat}</span>
+          <span style="color: #fff; font-weight: 500;">${cat}</span>
           <span>${formatBRL(info.valor)}</span>
         </div>
         <div class="bar-bg">
