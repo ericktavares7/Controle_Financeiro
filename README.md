@@ -1,3 +1,5 @@
+acesso ao app https://financesimplefy-git-main-ericktavares7s-projects.vercel.app/
+
 🚀 Finance Simplefy - Dashboard Pessoal com IA (Em desenvolvimento)
 
 <img width="480" height="815" alt="image" src="https://github.com/user-attachments/assets/c5ef78ba-5eec-447e-82d7-fc127224b37c" />
