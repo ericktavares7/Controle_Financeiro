@@ -56,16 +56,31 @@ async function dbRemoveFirestore(id) {
 // --- NAVEGAÇÃO E MODAL (EXPOSTOS PARA O WINDOW) ---
 
 window.abrirModal = (tipo) => {
+
   const inputTipo = document.getElementById('input-tipo');
   const modal = document.getElementById('modal-registro');
+
+  const groupDespesas = document.getElementById('group-despesas');
+  const groupReceitas = document.getElementById('group-receitas');
+  const groupCaixinhas = document.getElementById('group-caixinhas');
+
   if (inputTipo && modal) {
     inputTipo.value = tipo;
+
+    if (groupDespesas) groupDespesas.style.display = (tipo === 'expense') ? 'block' : 'none';
+    if (groupReceitas) groupReceitas.style.display = (tipo === 'income') ? 'block' : 'none';
+    if (groupCaixinhas) groupCaixinhas.style.display = (tipo === 'goal') ? 'block' : 'none';
+
+    const select = document.getElementById('input-cat');
+    if (select) select.selectedIndex = 0;
+
     modal.classList.add('active');
   }
 };
 
 window.fecharModal = () => {
-  document.getElementById('modal-registro')?.classList.remove('active');
+  const modal = document.getElementById('modal-registro');
+  if (modal) modal.classList.remove('active');
 };
 
 window.irParaTransacoes = (e) => {
@@ -96,7 +111,6 @@ function renderListaTransacoes(listaFiltrada) {
   const lista = document.getElementById('transaction-list');
   if (!lista) return;
 
-  // 1. Limpa e desenha a lista
   lista.innerHTML = listaFiltrada.length === 0
     ? '<p style="text-align:center;padding:24px;">Nenhuma transação.</p>'
     : listaFiltrada.map(t => `
@@ -113,23 +127,16 @@ function renderListaTransacoes(listaFiltrada) {
           </div>
         </div>`).join('');
 
-  // 2. A MÁGICA: Em vez de colocar evento em cada botão, colocamos na lista toda
+  // Evento de clique na lista (APENAS para deletar)
   lista.onclick = async (event) => {
-    // Verifica se o que foi clicado é o botão de excluir
     const botaoExcluir = event.target.closest('.tx-delete');
-
     if (botaoExcluir) {
       const id = botaoExcluir.getAttribute('data-id');
-      console.log("Clicou para remover o ID:", id); // Isso vai aparecer no seu F12
-
       if (confirm('Deseja realmente excluir esta transação?')) {
         const sucesso = await dbRemoveFirestore(id);
         if (sucesso) {
-          // Remove da memória local e atualiza a tela
           transactions = transactions.filter(t => t.id !== id);
           atualizarDashboard();
-        } else {
-          alert("Erro ao excluir. Verifique se você tem permissão no Firebase.");
         }
       }
     }
@@ -187,11 +194,14 @@ function atualizarGrafico(chart, todasTransactions) {
 // --- INICIALIZAÇÃO ---
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // 1. BUSCA DADOS INICIAIS
   transactions = await dbLoadFirestore();
 
+  // 2. CONFIGURA O LOGO
   const logo = document.getElementById('main-logo');
   if (logo) logo.src = logoImg;
 
+  // 3. INICIALIZA O GRÁFICO
   const ctx = document.getElementById('mainEvolutionChart')?.getContext('2d');
   if (ctx) {
     grafico = new Chart(ctx, {
@@ -207,6 +217,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // 4. LÓGICA DE ABAS (Troca de telas)
+  const botoesTab = document.querySelectorAll('.tab-btn');
+  botoesTab.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const abaAlvo = btn.getAttribute('data-tab');
+
+      botoesTab.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const secaoOverview = document.getElementById('tab-overview');
+      const secaoTransacoes = document.getElementById('tab-transacoes');
+      const secaoIA = document.getElementById('tab-ia');
+
+      if (secaoOverview) secaoOverview.style.display = (abaAlvo === 'overview') ? 'block' : 'none';
+      if (secaoTransacoes) secaoTransacoes.style.display = (abaAlvo === 'transacoes') ? 'block' : 'none';
+      if (secaoIA) secaoIA.style.display = (abaAlvo === 'ia') ? 'block' : 'none';
+    });
+  });
+
+  // 5. CONFIGURAÇÃO DOS BOTÕES GLOBAIS
+  const btnFechar = document.getElementById('fechar-modal');
+  if (btnFechar) btnFechar.onclick = () => window.fecharModal();
+
+  const btnAddReceita = document.getElementById('dash-card-receita');
+  const btnAddDespesa = document.getElementById('dash-card-despesa');
+  const btnAddCaixinha = document.getElementById('dash-card-caixinha');
+
+  if (btnAddReceita) btnAddReceita.onclick = () => window.abrirModal('income');
+  if (btnAddDespesa) btnAddDespesa.onclick = () => window.abrirModal('expense');
+  if (btnAddCaixinha) btnAddCaixinha.onclick = () => window.abrirModal('goal');
+
+  // 6. FORMULÁRIO DE ENVIO
   const form = document.getElementById('form-transacao');
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -225,45 +267,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       form.reset();
       window.fecharModal();
     }
-
-
   });
 
+  // 7. FILTRO DE MÊS
   document.getElementById('filtro-mes')?.addEventListener('change', atualizarDashboard);
 
-  // --- LÓGICA DE ABAS ---
-
-  const botoesTab = document.querySelectorAll('.tab-btn');
-
-  botoesTab.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const abaAlvo = btn.getAttribute('data-tab');
-
-      // Atualiza estilo dos botões
-      botoesTab.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      // Seleciona as seções
-      const secaoOverview = document.getElementById('tab-overview');
-      const secaoTransacoes = document.getElementById('tab-transacoes');
-      const secaoIA = document.getElementById('tab-ia');
-
-      // Troca a visibilidade
-      if (secaoOverview) secaoOverview.style.display = (abaAlvo === 'overview') ? 'block' : 'none';
-      if (secaoTransacoes) secaoTransacoes.style.display = (abaAlvo === 'transacoes') ? 'block' : 'none';
-      if (secaoIA) secaoIA.style.display = (abaAlvo === 'ia') ? 'block' : 'none';
-    });
-  });
-
-  // --- VINCULAÇÃO DOS BOTÕES DE ADICIONAR (FORA DA FUNÇÃO DAS ABAS) ---
-  const btnAddReceita = document.getElementById('dash-card-receita');
-  const btnAddDespesa = document.getElementById('dash-card-despesa');
-  const btnAddCaixinha = document.getElementById('dash-card-caixinha');
-
-  // Só atribui o clique se o elemento existir na tela
-  if (btnAddReceita) btnAddReceita.onclick = () => window.abrirModal('income');
-  if (btnAddDespesa) btnAddDespesa.onclick = () => window.abrirModal('expense');
-  if (btnAddCaixinha) btnAddCaixinha.onclick = () => window.abrirModal('goal');
-  
+  // 8. COMANDO FINAL: DESENHA TUDO NA TELA
   atualizarDashboard();
 });
