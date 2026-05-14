@@ -80,39 +80,48 @@
 
   #app {
     width: 100%;
-    max-width: 100%;
-    /* Ocupa tudo, mas respeita a borda da janela */
-    padding: 20px 40px;
-    /* Dá um respiro nas laterais */
+    max-width: 1800px;
+    /* Aumentamos o limite para telas grandes */
+    margin: 0 auto;
     display: grid;
-    grid-template-columns: 1fr 350px;
-    gap: 24px;
+    grid-template-columns: 1fr 400px;
+    /* Coluna lateral um pouco maior */
+    gap: 30px;
+    padding: 40px;
     box-sizing: border-box;
-    /* Fundamental para o padding não "empurrar" o site pra fora */
   }
 
-  /* 2. Grid de Cards Superiores (Onde estão Receita, Despesa, etc) */
+  /* Faz os cards de cima ocuparem todo o espaço horizontal */
   .top-cards-grid {
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    align-items: stretch;
+    gap: 25px;
   }
 
   /* 3. Padronização dos Cards */
   .card-receita,
-  .card-despesa,
-  .card-caixinhas,
-  .card-saldo {
-    min-height: 140px;
+  .card-despesa {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 160px;
+    /* Aumentamos a altura mínima */
+  }
+
+  .card-receita button,
+  .card-despesa button {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: center;
-    padding: 24px;
-    border-radius: 16px;
-    background: #1a1a2e;
-    border: 1px solid #252540;
+    gap: 10px;
+    cursor: pointer;
   }
 
   /* Ajuste para os botões de Receita/Despesa não ficarem "achatados" */
@@ -133,8 +142,18 @@
   }
 
   .chart-card {
-    padding: 30px;
-    min-height: 450px;
+    grid-column: 1 / 2;
+    background: #161626;
+    border-radius: 20px;
+    padding: 35px;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .chart-container {
+    flex-grow: 1;
+    width: 100%;
   }
 
   .sidebar-content {
