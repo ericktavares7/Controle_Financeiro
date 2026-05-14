@@ -1,7 +1,7 @@
 .logo img {
   width: 32px;
   height: 32px;
-  background-color:#646cff;
+  background-color: #646cff;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -175,4 +175,95 @@
     border-left 1.5s ease-in-out;
 
   border-left: 4px solid transparent;
+}
+
+.auth-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0B0B15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.auth-card {
+  background: #161626;
+  padding: 40px;
+  border-radius: 20px;
+  border: 1px solid #252540;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.auth-header h2 {
+  font-size: 1.8rem;
+  color: #00FFB2;
+  margin-top: 10px;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.input-group input {
+  width: 100%;
+  background: #0B0B15;
+  border: 1px solid #252540;
+  padding: 12px;
+  border-radius: 10px;
+  color: white;
+  outline: none;
+}
+
+.input-group input:focus {
+  border-color: #00FFB2;
+  box-shadow: 0 0 10px #00FFB244;
+}
+
+.btn-neon {
+  width: 100%;
+  padding: 14px;
+  background: #00FFB2;
+  color: #0B0B15;
+  border: none;
+  border-radius: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-neon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px #00FFB266;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 20px;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.auth-footer a {
+  color: #00FFB2;
+  text-decoration: none;
+  font-weight: 600;
 }

@@ -22,6 +22,33 @@
 </head>
 
 <body>
+  
+  <div id="auth-container" class="auth-overlay">
+    <div class="auth-card">
+      <div class="auth-header">
+        <img src="logo.png" alt="Finance Simplefy" width="50">
+        <h2 id="auth-title">Bem-vindo de volta</h2>
+        <p id="auth-subtitle">Acesse sua conta para gerenciar suas finanças</p>
+      </div>
+
+      <form id="auth-form">
+        <div class="input-group">
+          <label>E-mail</label>
+          <input type="email" id="auth-email" placeholder="seu@email.com" required>
+        </div>
+        <div class="input-group">
+          <label>Senha</label>
+          <input type="password" id="auth-password" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" id="btn-auth-primary" class="btn-neon">Entrar</button>
+      </form>
+
+      <div class="auth-footer">
+        <p id="toggle-auth-text">Não tem uma conta? <a href="#" id="toggle-auth-link">Criar conta grátis</a></p>
+      </div>
+    </div>
+  </div>
 
   <main class="dashboard-container">
     <header class="dashboard-header">
