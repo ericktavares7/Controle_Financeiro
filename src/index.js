@@ -189,8 +189,10 @@ function renderListaTransacoes(listaFiltrada) {
 }
 
 function renderCategoriasGrafico(lista) {
-  const container = document.getElementById('mes-categorias');
-  if (!container) return;
+  const containerTransacoes = document.getElementById('mes-categorias');
+  const containerOverview = document.getElementById('categoryList');
+
+  if (!containerTransacoes && !containerOverview) return;
 
   // 1. Agrupar valores e tipos por categoria
   const totais = {};
@@ -234,6 +236,9 @@ function renderCategoriasGrafico(lista) {
       </div>
     `;
   }).join('');
+
+  if (containerTransacoes) containerTransacoes.innerHTML = htmlBarras;
+  if (containerOverview) containerOverview.innerHTML = htmlBarras;
 }
 
 // 5. Função de Filtro Visual (Destaque no histórico)
@@ -263,7 +268,7 @@ window.filtrarPorCategoria = (categoriaNome) => {
     listaParaLimpar.forEach(item => {
       item.classList.remove('destaque-categoria');
     });
-  }, 3000);
+  }, 2000);
 };
 
 function atualizarDashboard() {
@@ -307,6 +312,29 @@ function atualizarDashboard() {
 
   renderListaTransacoes(dadosExibicao);
   renderCategoriasGrafico(dadosExibicao);
+
+  // --- LÓGICA DA TAXA DE POUPANÇA ---
+  const displayPoupanca = document.getElementById('display-poupanca');
+  const msgPoupanca = document.getElementById('msg-poupanca');
+
+  if (receita > 0) {
+    const taxa = ((receita - despesa) / receita) * 100;
+    const taxaFinal = Math.max(0, taxa).toFixed(1); // Não deixa ser menor que 0%
+
+    if (displayPoupanca) displayPoupanca.textContent = `${taxaFinal}%`;
+
+    // Mensagens Motivadoras
+    let mensagem = "";
+    if (taxaFinal <= 0) mensagem = "Cuidado! Você está gastando tudo o que ganha. 🚨";
+    else if (taxaFinal < 15) mensagem = "Bom começo! Tente chegar aos 20% para sua reserva. 💰";
+    else if (taxaFinal < 30) mensagem = "Excelente! Você tem um ótimo controle financeiro. 🚀";
+    else mensagem = "Nível Supervisor! Seu futuro está garantido. 💎";
+
+    if (msgPoupanca) msgPoupanca.textContent = mensagem;
+  } else {
+    if (displayPoupanca) displayPoupanca.textContent = "0%";
+    if (msgPoupanca) msgPoupanca.textContent = "Aguardando receitas para calcular...";
+  }
 
   if (grafico) atualizarGrafico(grafico, transactions);
 }
