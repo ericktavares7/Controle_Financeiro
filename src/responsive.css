@@ -5,6 +5,17 @@
   /* Base do documento */
   font-size: 14px;
 }
+.meta-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.meta-header span {
+  font-size: 0.9rem; /* Fonte maior no mobile para facilitar a leitura */
+  white-space: nowrap; /* Evita quebras estranhas no texto */
+}
 
 .meta-item>div {
   display: flex;
@@ -84,6 +95,14 @@ small,
 /* Faz o terceiro card (Caixinhas) ocupar as duas colunas */
 #dash-card-caixinhas {
   grid-column: span 2;
+}
+
+/* Container dos cards inferiores */
+.dashboard-stats-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
 }
 
 /* Ajuste nos textos internos para caberem lado a lado */
