@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const btnAddReceita = document.getElementById('dash-card-receita');
   const btnAddDespesa = document.getElementById('dash-card-despesa');
-  const btnAddCaixinha = document.getElementById('dash-card-caixinha');
+  const btnAddCaixinha = document.getElementById('dash-card-caixinhas');
 
   if (btnAddReceita) btnAddReceita.onclick = () => window.abrirModal('income');
   if (btnAddDespesa) btnAddDespesa.onclick = () => window.abrirModal('expense');
