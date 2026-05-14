@@ -27,10 +27,16 @@ body {
 
 body {
   font-family: "Manrope", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-color);
   color: var(--txt_principal);
   margin: 0;
   padding: 24px;
+}
+
+button, input, select, textarea {
+  font-family: 'Manrope', sans-serif;
 }
 
 ::-webkit-scrollbar {

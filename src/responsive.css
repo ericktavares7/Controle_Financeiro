@@ -1,53 +1,77 @@
 /* ============================================================
    ESTILO BASE (MOBILE - SMARTPHONES)
    ============================================================ */
-
-.dashboard-container {
-  width: 100%;
-  padding-left: 20px;
-  padding-right: 20px;
-  margin: 0 auto;
-  box-sizing: border-box;
+:root {
+  /* Base do documento */
+  font-size: 14px;
 }
 
-/* Garante que os containers ocupem 100% sem vazar */
-.summary-grid,
-.charts-container,
-.add-transaction-section {
-  width: 100%;
+.action-info strong {
+  font-family: 'Manrope', sans-serif;
+  letter-spacing: -0.5px;
+  /* Deixa as letras um pouquinho mais juntas para caber melhor */
+}
+
+/* Títulos de Seção (Visão Geral, Transações) */
+h1 {
+  font-size: 1.5rem;
+}
+
+/* Títulos dos Cards (Receita, Despesa, Metas) */
+h3 {
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+}
+
+/* Valores Grandes (Saldo, Porcentagens) */
+.value {
+  font-size: 1.6rem !important;
+  font-weight: 800;
+}
+
+/* Textos Auxiliares e Labels de Input */
+small,
+.action-info small {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+/* Descrição das Transações no Histórico */
+.tx-desc {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Categorias e Metas */
+.meta-item span {
+  font-size: 0.85rem;
+}
+
+.top-actions-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  /* Força 1 coluna no mobile */
-  gap: 16px;
-  margin-top: 24px;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
-/* Força os cards a respeitarem o limite da tela */
-.card,
-.chart-card,
-.add-transaction-section {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
+/* Faz o terceiro card (Caixinhas) ocupar as duas colunas */
+#dash-card-caixinhas {
+  grid-column: span 2;
+  min-height: 80px;
 }
 
-/* Ajustes no Header para mobile - Mantendo o estilo FinanceOS */
-.dashboard-header {
+/* Ajuste nos textos internos para caberem lado a lado */
+.action-card {
   display: flex;
-  flex-direction: row;
-  /* Mantém horizontal se houver espaço */
-  justify-content: space-between;
   align-items: center;
-  padding: 20px 0;
+  padding: 12px;
+  gap: 8px;
+  width: 100%;
 }
 
-/* Inputs e Botões - Toque fácil */
-.input-full,
-.btn-add,
-.select-type,
-.input-amount {
-  width: 100% !important;
-  height: 48px;
+.action-info strong {
+  font-size: 0.9rem;
 }
 
 /* ============================================================
@@ -82,17 +106,17 @@
   }
 
   .value {
-    font-size: 2rem;
+    font-size: 1.4rem;
     /* Destaque nos valores dos cards */
   }
 
   h3 {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     /* Títulos dos cards mais visíveis */
   }
 
   .tx-desc {
-    font-size: 1.6rem;
+    font-size: 1.2rem;
     /* Descrição da transação no histórico */
   }
 
