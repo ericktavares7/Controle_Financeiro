@@ -77,45 +77,71 @@
    DESKTOP (1024px ou mais)
    ============================================================ */
 @media (min-width: 1024px) {
+
+  /* Container Principal */
   #app {
     display: flex;
     flex-direction: column;
-    gap: 30px;
-    max-width: 1800px;
-    /* Preenche telas largas */
+    gap: 25px;
+    max-width: 1600px;
+    /* Largura ideal para não sobrar tanto fundo */
     margin: 0 auto;
     padding: 40px;
+    box-sizing: border-box;
   }
 
-  /* Primeira Linha: 3 colunas iguais */
+  /* LINHA 1: Ações (Botões grandes e da mesma altura) */
   .top-actions-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    /* 3 colunas iguais */
     gap: 20px;
   }
 
-  /* Segunda Linha: 2 colunas largas */
-  .summary-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-
-  /* Terceira Linha: Gráficos lado a lado */
-  .bottom-charts-grid {
-    display: grid;
-    grid-template-columns: 1.4fr 1fr;
-    /* Gráfico de linha ganha mais espaço */
-    gap: 30px;
-  }
-
-  /* Altura padronizada para os cards do topo não achatarem */
   .card-action {
     min-height: 160px;
+    /* Garante que não fiquem "esmagados" */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    background: #161626;
+    border: 1px solid #252540;
+    border-radius: 15px;
+    transition: transform 0.2s;
+  }
+
+  /* LINHA 2: Resumo (Saldo e Poupança) */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    /* Saldo ganha mais destaque */
+    gap: 20px;
+  }
+
+  .card-summary {
+    min-height: 140px;
+    padding: 25px;
+    background: #161626;
+    border-radius: 15px;
+  }
+
+  /* LINHA 3: Gráficos Lado a Lado */
+  .bottom-charts-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    /* Gráfico de Evolução maior */
+    gap: 25px;
+    align-items: start;
+  }
+
+  .chart-card,
+  .category-card {
+    background: #161626;
+    padding: 30px;
+    border-radius: 15px;
+    min-height: 450px;
+    /* Altura para o gráfico respirar */
   }
 }
 

@@ -45,96 +45,72 @@
       </ul>
     </nav>
 
-    <section class="tab-section active" id="tab-overview">
+    Erick, agora sim! Com o seu HTML em mãos, vi que você já criou as divs necessárias, mas precisamos fazer um pequeno
+    ajuste de "hierarquia" para que o CSS do Grid que discutimos funcione perfeitamente.
 
-      <section class="summary-grid" id="summary-section">
+    No seu código, a .top-actions-grid está dentro de uma .actions-grid, e as sessões de saldo estão logo abaixo. Para o
+    layout de "painel" que você quer, vamos ajustar as classes para casarem com o CSS de Desktop.
 
-        <div class="actions-grid">
-          <div class="top-actions-grid">
+    1. Ajuste no HTML (Onde as peças se encaixam)
+    Substitua o início da sua <section class="tab-section active" id="tab-overview"> por este esquema abaixo. Eu
+      organizei as classes para que o navegador entenda quem deve ficar do lado de quem:
 
-            <button id="dash-card-receita" class="action-card btn-income">
-              <div class="action-icon">＋</div>
-              <div class="action-info">
-                <small>Novo Ganho</small>
-                <strong>RECEITA</strong>
-              </div>
-            </button>
+      HTML
+      <section class="tab-section active" id="tab-overview">
 
-            <button id="dash-card-despesa" class="action-card btn-expense">
-              <div class="action-icon">－</div>
-              <div class="action-info">
-                <small>Novo Gasto</small>
-                <strong>DESPESA</strong>
-              </div>
-            </button>
+        <div class="top-actions-grid">
+          <button id="dash-card-receita" class="action-card btn-income">
+            <div class="action-icon">＋</div>
+            <div class="action-info"><small>Novo Ganho</small><strong>RECEITA</strong></div>
+          </button>
 
-            <button id="dash-card-caixinhas" class="action-card btn-caixinha">
-              <div class="action-icon">🚀</div>
-              <div class="action-info">
-                <small>CAIXINHAS</small>
-                <strong id="saldo-caixinhas">R$ 0.00</strong>
-              </div>
-            </button>
+          <button id="dash-card-despesa" class="action-card btn-expense">
+            <div class="action-icon">－</div>
+            <div class="action-info"><small>Novo Gasto</small><strong>DESPESA</strong></div>
+          </button>
 
-          </div>
+          <button id="dash-card-caixinhas" class="action-card btn-caixinha">
+            <div class="action-icon">🚀</div>
+            <div class="action-info"><small>CAIXINHAS</small><strong id="saldo-caixinhas">R$ 0.00</strong></div>
+          </button>
+        </div>
 
-          <div class="summary-grid">
-            <article class="card balance" id="card-saldo">
-              <header>
-                <span class="icon">◈</span>
-                <h3>Saldo Livre</h3>
-              </header>
-              <p class="value" id="display-saldo">R$ 0,00</p>
-            </article>
+        <div class="summary-grid">
+          <article class="card balance" id="card-saldo">
+            <header><span class="icon">◈</span>
+              <h3>Saldo Livre</h3>
+            </header>
+            <p class="value" id="display-saldo">R$ 0,00</p>
+          </article>
 
-            <article class="card savings" id="card-poupanca">
-              <header>
-                <span class="icon">★</span>
-                <h3>Taxa de Poupança</h3>
-              </header>
-              <p class="value" id="display-poupanca">0%</p>
-              <p id="msg-poupanca" class="poupanca-msg"></p>
-            </article>
-          </div>
-      </section>
+          <article class="card savings" id="card-poupanca">
+            <header><span class="icon">★</span>
+              <h3>Taxa de Poupança</h3>
+            </header>
+            <p class="value" id="display-poupanca">0%</p>
+            <p id="msg-poupanca" class="poupanca-msg"></p>
+          </article>
+        </div>
 
-      <section class="charts-container">
-        <article class="chart-card evolution">
-          <header>
-            <h3>Evolução Mensal</h3>
-          </header>
-          <div class="canvas-wrapper">
-            <canvas id="mainEvolutionChart"></canvas>
-          </div>
-        </article>
-
-        <article class="chart-card categories">
-          <header>
-            <h3>Por Categoria</h3>
-          </header>
-          <div class="category-bars" id="categoryList">
-            <div class="bar-item">
-              <div class="bar-info">
-                <span>Moradia</span>
-                <span>R$ 2.200,00</span>
-              </div>
-              <div class="bar-track">
-                <div class="bar-fill income-fill width-70"></div>
-              </div>
+        <section class="bottom-charts-grid">
+          <article class="chart-card evolution">
+            <header>
+              <h3>Evolução Mensal</h3>
+            </header>
+            <div class="canvas-wrapper">
+              <canvas id="mainEvolutionChart"></canvas>
             </div>
+          </article>
 
-            <div class="bar-item">
-              <div class="bar-info">
-                <span>Alimentação</span>
-                <span>R$ 1.100,00</span>
-              </div>
-              <div class="bar-track">
-                <div class="bar-fill expense-fill width-45"></div>
-              </div>
+          <article class="chart-card categories">
+            <header>
+              <h3>Por Categoria</h3>
+            </header>
+            <div class="category-bars" id="categoryList">
             </div>
+          </article>
+        </section>
 
-          </div>
-        </article>
       </section>
 
       <div id="modal-registro" class="modal">
