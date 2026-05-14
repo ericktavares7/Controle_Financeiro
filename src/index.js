@@ -84,11 +84,39 @@ function formatDate(isoString) {
 
 // --- RENDERIZAÇÃO DA INTERFACE ---
 window.filtrarPorCategoria = (categoria) => {
-  const filtrados = transactions.filter(t => t.cat === categoria);
-  renderListaTransacoes(filtrados);
+  // 1. Mudamos para a aba de transações se não estivermos nela
+  const tabTransacoes = document.querySelector('[data-tab="transacoes"]');
+  if (tabTransacoes) tabTransacoes.click();
 
-  // Feedback visual: rola até a lista
-  document.getElementById('tab-transacoes').scrollIntoView({ behavior: 'smooth' });
+  // 2. Aguarda um tempo mínimo para a aba renderizar
+  setTimeout(() => {
+    const itens = document.querySelectorAll('.tx-item');
+    let primeiroItemencontrado = null;
+
+    itens.forEach(item => {
+      // Verifica se o texto da categoria está dentro do item
+      if (item.innerText.includes(categoria)) {
+        if (!primeiroItemencontrado) primeiroItemencontrado = item;
+
+        // Define a cor do brilho baseado no tipo (Receita ou Despesa)
+        const eReceita = item.querySelector('.tx-val--income');
+        item.style.setProperty('--cor-destaque', eReceita ? '#00FFB2' : '#FF6B35');
+
+        // Adiciona o brilho
+        item.classList.add('tx-highlight');
+
+        // Remove o brilho após 2 segundos
+        setTimeout(() => {
+          item.classList.remove('tx-highlight');
+        }, 2000);
+      }
+    });
+
+    // 3. Rola a tela até o primeiro item encontrado
+    if (primeiroItemencontrado) {
+      primeiroItemencontrado.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 100);
 };
 
 function renderCategoriasGrafico(lista) {
@@ -138,9 +166,11 @@ function atualizarDashboard() {
 
   // 1. Lógica de Filtro por Mês
   if (select && select.value) {
-    const [ano, mes] = select.value.split('-').map(Number);
     dadosExibicao = transactions.filter(t => {
       const d = new Date(t.createdAt?.seconds ? t.createdAt.seconds * 1000 : t.createdAt);
+
+      const [ano, mes] = select.value.split('-').map(Number);
+
       return d.getFullYear() === ano && d.getMonth() === mes;
     });
   }
@@ -353,15 +383,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const selectMes = document.getElementById('filtro-mes');
   if (selectMes) {
-    const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-    const dataAtual = new Date();
-    for (let i = 0; i < 12; i++) {
-      const opt = document.createElement('option');
-      opt.value = `${dataAtual.getFullYear()}-${i}`;
-      opt.innerHTML = `${meses[i]} ${dataAtual.getFullYear()}`;
-      if (i === dataAtual.getMonth()) opt.selected = true;
-      selectMes.appendChild(opt);
-    }
+    selectMes.addEventListener('change', () => {
+      console.log("Mês alterado para:", selectMes.value);
+      atualizarDashboard();
+    });
   }
 
   // 2. Evento do Formulário
