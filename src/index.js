@@ -59,7 +59,13 @@ window.abrirModal = (tipo) => {
 
   const inputTipo = document.getElementById('input-tipo');
   const modal = document.getElementById('modal-registro');
+  const modalContent = modal?.querySelector('.modal-content');
 
+  if (modalContent) {
+    modalContent.classList.remove('tipo-income', 'tipo-expense', 'tipo-goal');
+    modalContent.classList.add(`tipo-${tipo}`);
+  }
+  
   const groupDespesas = document.getElementById('group-despesas');
   const groupReceitas = document.getElementById('group-receitas');
   const groupCaixinhas = document.getElementById('group-caixinhas');

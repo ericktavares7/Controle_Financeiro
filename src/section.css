@@ -178,6 +178,35 @@
   box-shadow: 0 0 10px rgba(0, 255, 178, 0.1);
 }
 
+.btn-receita,
+#dash-card-receita {
+  border-bottom: 3px solid #00FFB2;
+  box-shadow: 0 4px 15px -5px rgba(0, 255, 178, 0.4);
+}
+
+.btn-despesa,
+#dash-card-despesa {
+  border-bottom: 3px solid #FF6B35;
+  box-shadow: 0 4px 15px -5px rgba(255, 107, 53, 0.4);
+}
+
+#dash-card-caixinhas {
+  border-bottom: 3px solid #00D1FF;
+  box-shadow: 0 4px 15px -5px rgba(0, 209, 255, 0.4);
+}
+
+.modal-content.tipo-income {
+  border-top: 4px solid #00FFB2;
+}
+
+.modal-content.tipo-expense {
+  border-top: 4px solid #FF6B35;
+}
+
+.modal-content.tipo-goal {
+  border-top: 4px solid #00D1FF;
+}
+
 .select-category {
   background-color: var(--bg_cards);
   color: #ffffff;
@@ -192,7 +221,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 
 .select-category option,
 .select-category optgroup {
