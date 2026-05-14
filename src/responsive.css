@@ -1,78 +1,49 @@
-/* ============================================================
-   ESTILO BASE & TIPOGRAFIA (MOBILE FIRST)
-   ============================================================ */
+/* --- BASE & MANROPE --- */
 :root {
   font-size: 14px;
   font-family: 'Manrope', sans-serif;
 }
 
 body {
+  background-color: #0B0B15;
+  color: #FFFFFF;
   -webkit-font-smoothing: antialiased;
 }
 
-h1 {
-  font-size: 1.5rem;
-}
-
-h3 {
-  font-size: 0.95rem;
-  letter-spacing: 0.5px;
-}
-
-.value {
-  font-size: 1.6rem !important;
-  font-weight: 800;
-}
-
-small,
-.action-info small {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  opacity: 0.7;
-}
-
-.action-info strong {
-  font-size: 0.9rem;
-  letter-spacing: -0.5px;
-}
-
-/* ============================================================
-   LAYOUT DOS CARDS DE AÇÃO (TOP GRID)
-   ============================================================ */
+/* --- GRID DE AÇÕES (RECEITA/DESPESA/CAIXINHA) --- */
 .top-actions-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  /* 2 colunas no mobile */
+  /* Mobile: 2 colunas */
   gap: 12px;
   margin-bottom: 20px;
 }
 
 #dash-card-caixinhas {
   grid-column: span 2;
-  /* Caixinhas ocupa a largura toda no mobile */
+  /* Ocupa a linha toda no mobile */
 }
 
-.action-card {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  gap: 8px;
+/* --- GRID DE SUMÁRIO (SAÚDE DA REGRA & POUPANÇA) --- */
+.summary-grid {
+  display: flex !important;
+  flex-direction: column;
+  /* Mobile: Um embaixo do outro */
+  gap: 16px;
   width: 100%;
 }
 
-/* ============================================================
-   SAÚDE DA REGRA & TAXA DE POUPANÇA (CARDS INFERIORES)
-   ============================================================ */
-.dashboard-stats-grid {
-  display: flex;
-  flex-direction: column;
-  /* Empilha cards no mobile para não cortar texto */
-  gap: 16px;
-  margin-top: 20px;
+.card-summary {
+  width: 100%;
+  padding: 20px;
+  background: #161626;
+  border-radius: 15px;
+  border: 1px solid #252540;
 }
 
+/* --- ESTILO DAS METAS --- */
 .meta-item {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .meta-header {
@@ -83,33 +54,27 @@ small,
 }
 
 .meta-header span {
+  font-weight: 600;
   font-size: 0.9rem;
-  white-space: nowrap;
 }
 
-/* Tratamento de estouro de texto nas metas */
-.meta-item span:first-child {
-  flex: 1;
-  white-space: nowrap;
+.progress-bar {
+  background: rgba(255, 255, 255, 0.05);
+  height: 8px;
+  border-radius: 10px;
   overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.8rem;
 }
 
-.meta-item span:last-child {
-  font-weight: 800;
-  font-size: 0.85rem;
+.progress-bar div {
+  height: 100%;
+  transition: 0.8s ease;
+  border-radius: 10px;
 }
 
-/* ============================================================
-   DESKTOP (Telas acima de 1024px)
-   ============================================================ */
+/* --- DESKTOP (TELAS GRANDES) --- */
 @media (min-width: 1024px) {
-  body {
-    font-size: 18px;
-  }
 
-  /* Grid de ações volta para 3 colunas lado a lado */
+  /* Volta para 3 colunas no topo */
   .top-actions-grid {
     grid-template-columns: 1fr 1fr 1fr;
     gap: 20px;
@@ -119,43 +84,17 @@ small,
     grid-column: span 1;
   }
 
-  /* Stats inferiores voltam a ficar lado a lado */
-  .dashboard-stats-grid {
+  /* Volta para lado a lado nos stats */
+  .summary-grid {
+    display: grid !important;
+    grid-template-columns: 1.5fr 1fr;
     flex-direction: row;
+    gap: 20px;
   }
 
-  .dashboard-stats-grid .card {
-    flex: 1;
-  }
-
-  /* Container Principal com limite de largura */
   #app {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    max-width: 1600px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 40px;
-  }
-
-  /* Gráficos e Categorias lado a lado */
-  .bottom-charts-grid {
-    display: grid;
-    grid-template-columns: 1.6fr 1fr;
-    gap: 25px;
-    align-items: start;
-  }
-}
-
-/* ============================================================
-   AJUSTES GERAIS DE FORMULÁRIO & HEADER
-   ============================================================ */
-@media (max-width: 600px) {
-
-  .form-row,
-  .dashboard-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
   }
 }
