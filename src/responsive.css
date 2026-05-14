@@ -35,7 +35,8 @@ body {
 
 .card-summary {
   width: 100%;
-  padding: 20px;
+  min-height: auto;
+  padding: 18px;
   background: #161626;
   border-radius: 15px;
   border: 1px solid #252540;
@@ -43,7 +44,7 @@ body {
 
 /* --- ESTILO DAS METAS --- */
 .meta-item {
-  margin-bottom: 15px;
+  margin-bottom: 5px;
 }
 
 .meta-header {
@@ -56,6 +57,13 @@ body {
 .meta-header span {
   font-weight: 600;
   font-size: 0.9rem;
+}
+
+#metas-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* Reduzi um pouco o gap para caber os 3 itens sem scroll excessivo */
 }
 
 .progress-bar {
@@ -96,5 +104,9 @@ body {
     max-width: 1400px;
     margin: 0 auto;
     padding: 40px;
+  }
+
+  .meta-item {
+    margin-bottom: 15px;
   }
 }

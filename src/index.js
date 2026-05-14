@@ -255,36 +255,38 @@ function atualizarDashboard() {
  */
 function atualizarMetasIA(receita, despesa, reserva) {
   const container = document.getElementById('metas-container');
-  if (!container) return;
+  if (!container || receita === 0) return;
 
-  if (receita === 0) {
-    container.innerHTML = '<p style="opacity:0.5; font-size:0.8rem;">Aguardando dados de maio 2026...</p>';
-    return;
-  }
-
+  // Cálculos das porcentagens reais
   const pEssencial = ((despesa / receita) * 100).toFixed(1);
   const pReserva = ((reserva / receita) * 100).toFixed(1);
-  const corEssencial = pEssencial > 70 ? "#FF6B35" : "#00FFB2";
+
+  const valorLazer = receita * 0.10;
+  const pLazer = 10.0; 
 
   container.innerHTML = `
-    <div class="meta-item" style="margin-bottom: 12px;">
-      <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;">
-        <span>Gastos Essenciais (Meta 70%)</span>
-        <span style="color:${corEssencial}; font-weight:bold;">${pEssencial}%</span>
+    <div class="meta-item">
+      <div class="meta-header">
+        <span>Essencial (Meta 70%)</span>
+        <span style="color: ${pEssencial > 70 ? '#FF6B35' : '#00FFB2'}">${pEssencial}%</span>
       </div>
-      <div style="background:rgba(255,255,255,0.05); height:8px; border-radius:10px;">
-        <div style="width:${Math.min(pEssencial, 100)}%; background:${corEssencial}; height:100%; border-radius:10px; box-shadow: 0 0 10px ${corEssencial}66; transition: 0.8s;"></div>
-      </div>
+      <div class="progress-bar"><div style="width:${Math.min(pEssencial, 100)}%; background:${pEssencial > 70 ? '#FF6B35' : '#00FFB2'}"></div></div>
     </div>
 
     <div class="meta-item">
-      <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;">
-        <span>Caixinhas/Reserva (Meta 20%)</span>
-        <span style="color:#00D1FF; font-weight:bold;">${pReserva}%</span>
+      <div class="meta-header">
+        <span>Reserva/Investimento (Meta 20%)</span>
+        <span style="color: #00D1FF">${pReserva}%</span>
       </div>
-      <div style="background:rgba(255,255,255,0.05); height:8px; border-radius:10px;">
-        <div style="width:${Math.min(pReserva, 100)}%; background:#00D1FF; height:100%; border-radius:10px; box-shadow: 0 0 10px #00D1FF66; transition: 0.8s;"></div>
+      <div class="progress-bar"><div style="width:${Math.min(pReserva, 100)}%; background:#00D1FF"></div></div>
+    </div>
+
+    <div class="meta-item">
+      <div class="meta-header">
+        <span>Estilo de Vida (Meta 10%)</span>
+        <span style="color: #FFD700">10%</span>
       </div>
+      <div class="progress-bar"><div style="width:10%; background:#FFD700; box-shadow: 0 0 10px #FFD70066;"></div></div>
     </div>
   `;
 }
