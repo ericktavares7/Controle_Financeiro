@@ -492,13 +492,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       val: parseFloat(document.getElementById('input-val').value),
       type: document.getElementById('input-tipo').value,
       cat: document.getElementById('input-cat').value,
-      date: document.getElementById('input-data').value ? new Date(document.getElementById('input-data').value + 'T00:00').toISOString() : new Date().toISOString()
+      createdAt: document.getElementById('input-data').value
+        ? new Date(document.getElementById('input-data').value + 'T12:00:00')
+        : new Date()
     };
 
     const salva = await dbAdd(nova);
     if (salva) {
-      transactions = [salva, ...transactions];
-      atualizarDashboard();
+
       form.reset();
       window.fecharModal();
     }
