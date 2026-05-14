@@ -48,12 +48,12 @@
       <section class="tab-section active" id="tab-overview">
 
         <div class="top-actions-grid">
-          <button id="dash-card-receita" class="action-card btn-income">
+          <button id="dash-card-receita" class="action-card btn-income" onclick="window.abrirModal('income')">
             <div class="action-icon">＋</div>
             <div class="action-info"><small>Novo Ganho</small><strong>RECEITA</strong></div>
           </button>
 
-          <button id="dash-card-despesa" class="action-card btn-expense">
+          <button id="dash-card-despesa" class="action-card btn-expense" onclick="window.abrirModal('expense')">
             <div class="action-icon">－</div>
             <div class="action-info"><small>Novo Gasto</small><strong>DESPESA</strong></div>
           </button>
@@ -106,7 +106,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h2>Nova Transação</h2>
-            <button type="button" id="fechar-modal" class="btn-close">&times;</button>
+            <button type="button" id="fechar-modal" class="btn-close" onclick="window.fecharModal()">&times;</button>
           </div>
 
           <form id="form-transacao">
