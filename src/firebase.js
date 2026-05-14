@@ -1,19 +1,19 @@
 import { initializeApp } from "firebase/app";
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  query, 
-  where, 
-  onSnapshot, 
-  serverTimestamp 
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  query,
+  where,
+  onSnapshot,
+  serverTimestamp
 } from "firebase/firestore";
-import { 
-  getAuth, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  onAuthStateChanged, 
-  signOut 
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
 } from "firebase/auth";
 
 // 1. Configuração do seu Firebase (Mantenha suas chaves aqui)
@@ -36,34 +36,39 @@ export const auth = getAuth(app);
 let userLogado = null;
 
 // --- MONITOR DE ESTADO DE LOGIN ---
-// Essa função roda automaticamente sempre que o usuário entra ou sai
+
 onAuthStateChanged(auth, (user) => {
   const authContainer = document.getElementById('auth-container');
-  
+
   if (user) {
+    // 1. Se já houver um escuta ativo de outra conta, desliga-o primeiro
+    if (unsubscribe) unsubscribe();
+
     userLogado = user;
-    // Se o elemento existir no seu HTML, ele esconde a tela de login
     if (authContainer) authContainer.style.display = 'none';
-    
-    // Inicia a escuta dos dados específicos DESTE usuário
-    dbListenFirestore(user.uid); 
+
+    // 2. Guarda o novo "interruptor"
+    unsubscribe = dbListenFirestore(user.uid);
   } else {
+    if (unsubscribe) unsubscribe(); // Desliga ao sair
     userLogado = null;
-    // Se não houver usuário, exibe a tela de login
     if (authContainer) authContainer.style.display = 'flex';
   }
 });
-
-// --- FUNÇÕES DE AUTENTICAÇÃO ---
 
 /**
  * Função para deslogar o usuário
  */
 export async function logOut() {
   try {
-    const confirmacao = confirm("Deseja realmente sair do Finance Simplefy?");
+    const confirmacao = confirm("Deseja realmente sair?");
     if (confirmacao) {
       await signOut(auth);
+      // LIMPEZA CRÍTICA: Remove os dados da memória ao sair
+      window.transactions = [];
+      if (typeof window.atualizarDashboard === "function") {
+        window.atualizarDashboard();
+      }
     }
   } catch (error) {
     console.error("Erro ao deslogar:", error);
@@ -81,7 +86,7 @@ if (toggleLink) {
   toggleLink.addEventListener('click', (e) => {
     e.preventDefault();
     modoLogin = !modoLogin;
-    
+
     // Atualiza os textos da interface
     document.getElementById('auth-title').textContent = modoLogin ? 'Bem-vindo de volta' : 'Criar Nova Conta';
     document.getElementById('btn-auth-primary').textContent = modoLogin ? 'Entrar' : 'Cadastrar';
@@ -141,14 +146,14 @@ function dbListenFirestore(userId) {
   // Fica observando mudanças (adicionar, remover, editar)
   onSnapshot(q, (snapshot) => {
     // Mapeia os documentos e salva na variável global window.transactions
-    window.transactions = snapshot.docs.map(doc => ({ 
-      id: doc.id, 
-      ...doc.data() 
+    window.transactions = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
     }));
 
     // Se a função de atualizar o dashboard existir no seu index.js, ela é disparada
     if (typeof window.atualizarDashboard === "function") {
-        window.atualizarDashboard();
+      window.atualizarDashboard();
     }
   });
 }
