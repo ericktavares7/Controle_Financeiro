@@ -79,12 +79,16 @@
 @media (min-width: 1024px) {
 
   #app {
+    width: 100%;
+    max-width: 100%;
+    /* Ocupa tudo, mas respeita a borda da janela */
+    padding: 20px 40px;
+    /* Dá um respiro nas laterais */
     display: grid;
-    grid-template-columns: 1fr 320px;
+    grid-template-columns: 1fr 350px;
     gap: 24px;
-    max-width: 1300px;
-    margin: 0 auto;
-    padding: 20px;
+    box-sizing: border-box;
+    /* Fundamental para o padding não "empurrar" o site pra fora */
   }
 
   /* 2. Grid de Cards Superiores (Onde estão Receita, Despesa, etc) */
