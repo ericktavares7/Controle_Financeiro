@@ -13,6 +13,7 @@ import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc } from "fir
 // --- VARIÁVEIS GLOBAIS ---
 let transactions = [];
 let grafico;
+let ordemCrescente = false;
 
 // --- FUNÇÕES DE BANCO DE DADOS ---
 
@@ -187,6 +188,67 @@ function renderListaTransacoes(listaFiltrada) {
   });
 }
 
+function renderCategoriasGrafico(lista) {
+  const container = document.getElementById('mes-categorias');
+  if (!container) return;
+
+  // 1. Filtra apenas despesas e agrupa por categoria
+  const totais = {};
+  lista.filter(t => t.type === 'expense').forEach(t => {
+    totais[t.cat] = (totais[t.cat] || 0) + t.val;
+  });
+
+  // 2. Transforma em array para poder ordenar
+  let categoriasArray = Object.entries(totais);
+
+  // Lógica de ordenação (vinculada ao seu botão ⇅)
+  categoriasArray.sort((a, b) => {
+    return ordemCrescente ? a[1] - b[1] : b[1] - a[1];
+  });
+
+  // 3. Acha o maior valor para que as barras sejam proporcionais
+  const maiorValor = Math.max(...categoriasArray.map(c => c[1]), 0);
+
+  // 4. Gera o HTML das barras com o evento de clique para filtrar
+  container.innerHTML = categoriasArray.map(([cat, val]) => {
+    const porcentagem = maiorValor > 0 ? (val / maiorValor) * 100 : 0;
+
+    return `
+      <div class="category-bar-item" onclick="filtrarPorCategoria('${cat}')" title="Clique para destacar no histórico">
+        <div class="bar-info">
+          <span>${cat}</span>
+          <span>${formatBRL(val)}</span>
+        </div>
+        <div class="bar-bg">
+          <div class="bar-fill" style="width: ${porcentagem}%; background: #FF6B35;"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// 5. Função de Filtro Visual (Destaque no histórico)
+window.filtrarPorCategoria = (categoriaNome) => {
+  // Remove destaque de todos primeiro
+  document.querySelectorAll('.tx-item').forEach(el => el.classList.remove('destaque-categoria'));
+
+  const itens = document.querySelectorAll('.tx-item');
+  let primeiroEncontrado = null;
+
+  itens.forEach(item => {
+    // Verifica se o texto da categoria está dentro do item
+    if (item.textContent.includes(categoriaNome)) {
+      item.classList.add('destaque-categoria');
+      if (!primeiroEncontrado) primeiroEncontrado = item;
+    }
+  });
+
+  // Scroll suave até o primeiro item da categoria
+  if (primeiroEncontrado) {
+    primeiroEncontrado.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+};
+
 function atualizarDashboard() {
   const select = document.getElementById('filtro-mes');
   let dadosExibicao = transactions;
@@ -228,7 +290,7 @@ function atualizarDashboard() {
 
   renderListaTransacoes(dadosExibicao);
   renderCategoriasGrafico(dadosExibicao);
-  
+
   if (grafico) atualizarGrafico(grafico, transactions);
 }
 
@@ -306,7 +368,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (btnAddReceita) btnAddReceita.onclick = () => window.abrirModal('income');
   if (btnAddDespesa) btnAddDespesa.onclick = () => window.abrirModal('expense');
   if (btnAddCaixinha) btnAddCaixinha.onclick = () => window.abrirModal('goal');
-
+  
+  const btnSort = document.getElementById('btn-ordenar-valor');
+  if (btnSort) {
+    btnSort.onclick = () => {
+      ordemCrescente = !ordemCrescente; // Inverte a ordem (Maior -> Menor / Menor -> Maior)
+      atualizarDashboard(); // Recarrega as barras com a nova ordem
+    };
+  }
   // Para ao clicar no fundo o card fechar.
   const modal = document.getElementById('modal-registro');
 

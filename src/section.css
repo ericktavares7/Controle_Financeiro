@@ -451,12 +451,69 @@
   overflow: hidden;
 }
 
-/* O preenchimento da barra */
 .bar-fill {
   height: 100%;
-  border-radius: 10px;
-  transition: width 0.5s ease;
-  /* Efeito suave ao carregar */
+  border-radius: 4px;
+  transition: width 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+
+  background: #FF6B35;
+}
+
+.category-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.category-bar-item {
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.category-bar-item:hover {
+  transform: translateX(5px);
+  opacity: 0.9;
+}
+
+.bar-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  color: #a0a0b8;
+  /* Cor cinza clara para os textos */
+}
+
+.bar-bg {
+  background: rgba(255, 255, 255, 0.05);
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.tx-item.destaque-categoria {
+  border-left: 6px solid #00FFB2 !important;
+  background: rgba(0, 255, 178, 0.1) !important;
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(0, 255, 178, 0.2);
+  transition: all 0.4s ease;
+  z-index: 10;
+}
+
+/* --- AJUSTE DOS CONTAINERS DE HISTÓRICO --- */
+.historico-segmentado {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+/* Responsivo: Em telas menores, as listas ficam uma embaixo da outra */
+@media (max-width: 768px) {
+  .historico-segmentado {
+    grid-template-columns: 1fr;
+  }
 }
 
 
