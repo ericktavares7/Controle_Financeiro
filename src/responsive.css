@@ -16,13 +16,16 @@
 .add-transaction-section {
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr; /* Força 1 coluna no mobile */
+  grid-template-columns: 1fr;
+  /* Força 1 coluna no mobile */
   gap: 16px;
   margin-top: 24px;
 }
 
 /* Força os cards a respeitarem o limite da tela */
-.card, .chart-card, .add-transaction-section {
+.card,
+.chart-card,
+.add-transaction-section {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -31,14 +34,18 @@
 /* Ajustes no Header para mobile - Mantendo o estilo FinanceOS */
 .dashboard-header {
   display: flex;
-  flex-direction: row; /* Mantém horizontal se houver espaço */
+  flex-direction: row;
+  /* Mantém horizontal se houver espaço */
   justify-content: space-between;
   align-items: center;
   padding: 20px 0;
 }
 
 /* Inputs e Botões - Toque fácil */
-.input-full, .btn-add, .select-type, .input-amount {
+.input-full,
+.btn-add,
+.select-type,
+.input-amount {
   width: 100% !important;
   height: 48px;
 }
@@ -48,7 +55,8 @@
    ============================================================ */
 @media (min-width: 768px) {
   .summary-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 cards por linha */
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 cards por linha */
   }
 
   .form-row {
@@ -56,14 +64,82 @@
     gap: 12px;
   }
 
-  .input-amount { flex: 2; }
-  .select-type { flex: 1; }
+  .input-amount {
+    flex: 2;
+  }
+
+  .select-type {
+    flex: 1;
+  }
 }
 
 /* ============================================================
    DESKTOP (1024px ou mais)
    ============================================================ */
 @media (min-width: 1024px) {
+
+  #app {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* 2. Grid de Cards Superiores (Onde estão Receita, Despesa, etc) */
+  .top-cards-grid {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    align-items: stretch;
+  }
+
+  /* 3. Padronização dos Cards */
+  .card-receita,
+  .card-despesa,
+  .card-caixinhas,
+  .card-saldo {
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 24px;
+    border-radius: 16px;
+    background: #1a1a2e;
+    border: 1px solid #252540;
+  }
+
+  /* Ajuste para os botões de Receita/Despesa não ficarem "achatados" */
+  .btn-action {
+    flex-direction: row;
+    gap: 15px;
+    height: 100%;
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* 4. Layout da Área Inferior (Gráfico + Lista) */
+  .main-content {
+    grid-column: 1 / 2;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .chart-card {
+    padding: 30px;
+    min-height: 450px;
+  }
+
+  .sidebar-content {
+    grid-column: 2 / 3;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
   .dashboard-container {
     max-width: 1200px;
     padding-left: 40px;
@@ -78,7 +154,7 @@
 
   /* Gráficos lado a lado */
   .charts-container {
-    grid-template-columns: 1.2fr 0.8fr; 
+    grid-template-columns: 1.2fr 0.8fr;
     gap: 24px;
     align-items: start;
   }
@@ -99,7 +175,7 @@
   .form-row {
     flex-direction: column;
   }
-  
+
   /* Ajuste para o Header não espremer no celular */
   .dashboard-header {
     flex-direction: column;
