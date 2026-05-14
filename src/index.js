@@ -192,7 +192,7 @@ function renderCategoriasGrafico(lista) {
   const container = document.getElementById('mes-categorias');
   if (!container) return;
 
-  // 1. Filtra apenas despesas e agrupa por categoria
+  // 1. Agrupar valores e tipos por categoria
   const totais = {};
   lista.forEach(t => {
     if (!totais[t.cat]) {
@@ -201,24 +201,29 @@ function renderCategoriasGrafico(lista) {
     totais[t.cat].valor += t.val;
   });
 
-  // 2. Transforma em array para poder ordenar
+  // 2. Transforma em array para ordenar
   let categoriasArray = Object.entries(totais);
 
-  // Lógica de ordenação (vinculada ao seu botão ⇅)
   categoriasArray.sort((a, b) => {
-    return ordemCrescente ? a[1] - b[1] : b[1] - a[1];
+    return ordemCrescente ? a[1].valor - b[1].valor : b[1].valor - a[1].valor;
   });
 
-  // 3. Acha o maior valor para que as barras sejam proporcionais
-  const maiorValor = Math.max(...categoriasArray.map(c => c[1]), 0);
+  const maiorValor = Math.max(...categoriasArray.map(c => c[1].valor), 0);
 
-  // 4. Gera o HTML das barras com o evento de clique para filtrar
-  container.innerHTML = categoriasArray.map(([cat, val]) => {
-    const porcentagem = maiorValor > 0 ? (val / maiorValor) * 100 : 0;
-    const corBarra = cores[info.tipo] || '#fff';
+  // Definição das cores (caso não estejam globais)
+  const coresMap = {
+    income: '#00FFB2',  // Verde
+    expense: '#FF6B35', // Laranja
+    goal: '#00D1FF'     // Azul
+  };
+
+  // 3. Gera o HTML (Ajustado os nomes das variáveis dentro do map)
+  container.innerHTML = categoriasArray.map(([cat, info]) => {
+    const porcentagem = maiorValor > 0 ? (info.valor / maiorValor) * 100 : 0;
+    const corBarra = coresMap[info.tipo] || '#fff';
 
     return `
- <div class="category-bar-item" onclick="filtrarPorCategoria('${cat}')" style="margin-bottom: 12px;">
+      <div class="category-bar-item" onclick="filtrarPorCategoria('${cat}')" style="margin-bottom: 12px; cursor:pointer;">
         <div class="bar-info">
           <span style="color: ${corBarra}; font-weight: bold;">${cat}</span>
           <span>${formatBRL(info.valor)}</span>
@@ -266,7 +271,7 @@ function atualizarDashboard() {
   if (select && select.value) {
     const [ano, mes] = select.value.split('-').map(Number);
     dadosExibicao = transactions.filter(t => {
-      const d = new Date(t.date);
+      const d = new Date(t.date + 'T12:00:00');
       return d.getFullYear() === ano && d.getMonth() === mes;
     });
   }
