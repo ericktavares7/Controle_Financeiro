@@ -50,48 +50,52 @@
       <section class="summary-grid" id="summary-section">
 
         <div class="actions-grid">
-          <button id="dash-card-receita" class="action-card btn-income">
-            <div class="action-icon">＋</div>
-            <div class="action-info">
-              <small>Novo Ganho</small>
-              <strong>RECEITA</strong>
-            </div>
-          </button>
+          <div class="top-actions-grid">
 
-          <button id="dash-card-despesa" class="action-card btn-expense">
-            <div class="action-icon">－</div>
-            <div class="action-info">
-              <small>Novo Gasto</small>
-              <strong>DESPESA</strong>
-            </div>
-          </button>
-        </div>
+            <button id="dash-card-receita" class="action-card btn-income">
+              <div class="action-icon">＋</div>
+              <div class="action-info">
+                <small>Novo Ganho</small>
+                <strong>RECEITA</strong>
+              </div>
+            </button>
 
-        <button id="dash-card-caixinhas" class="action-card btn-caixinha">
-          <div class="action-icon">🚀</div>
-          <div class="action-info">
-            <small>CAIXINHAS</small>
-            <strong id="saldo-caixinhas">R$ 0.00</strong>
+            <button id="dash-card-despesa" class="action-card btn-expense">
+              <div class="action-icon">－</div>
+              <div class="action-info">
+                <small>Novo Gasto</small>
+                <strong>DESPESA</strong>
+              </div>
+            </button>
+
+            <button id="dash-card-caixinhas" class="action-card btn-caixinha">
+              <div class="action-icon">🚀</div>
+              <div class="action-info">
+                <small>CAIXINHAS</small>
+                <strong id="saldo-caixinhas">R$ 0.00</strong>
+              </div>
+            </button>
+
           </div>
-        </button>
 
-        <article class="card balance" id="card-saldo">
-          <header>
-            <span class="icon">◈</span>
-            <h3>Saldo Livre</h3>
-          </header>
-          <p class="value" id="display-saldo">R$ 0,00</p>
-        </article>
+          <div class="summary-grid">
+            <article class="card balance" id="card-saldo">
+              <header>
+                <span class="icon">◈</span>
+                <h3>Saldo Livre</h3>
+              </header>
+              <p class="value" id="display-saldo">R$ 0,00</p>
+            </article>
 
-        <article class="card savings" id="card-poupanca">
-          <header>
-            <span class="icon">★</span>
-            <h3>Taxa de Poupança</h3>
-          </header>
-          <p class="value" id="display-poupanca">0%</p>
-          <p id="msg-poupanca" class="poupanca-msg"></p>
-        </article>
-
+            <article class="card savings" id="card-poupanca">
+              <header>
+                <span class="icon">★</span>
+                <h3>Taxa de Poupança</h3>
+              </header>
+              <p class="value" id="display-poupanca">0%</p>
+              <p id="msg-poupanca" class="poupanca-msg"></p>
+            </article>
+          </div>
       </section>
 
       <section class="charts-container">

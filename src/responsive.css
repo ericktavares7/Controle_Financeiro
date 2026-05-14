@@ -78,116 +78,52 @@
    ============================================================ */
 @media (min-width: 1024px) {
 
+  /* Container principal ajustado para telas ultra-wide */
   #app {
-    width: 100%;
-    max-width: 1800px;
-    /* Aumentamos o limite para telas grandes */
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    /* Coluna lateral um pouco maior */
+    display: flex;
+    flex-direction: column;
     gap: 30px;
+    max-width: 1800px;
+    margin: 0 auto;
     padding: 40px;
-    box-sizing: border-box;
   }
 
-  /* Faz os cards de cima ocuparem todo o espaço horizontal */
-  .top-cards-grid {
-    grid-column: 1 / -1;
+  /* PRIMEIRA LINHA: Receita, Despesa e Caixinha (3 colunas iguais) */
+  .top-actions-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 25px;
-  }
-
-  /* 3. Padronização dos Cards */
-  .card-receita,
-  .card-despesa {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 160px;
-    /* Aumentamos a altura mínima */
-  }
-
-  .card-receita button,
-  .card-despesa button {
-    width: 100%;
-    height: 100%;
-    background: transparent;
-    border: none;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    cursor: pointer;
-  }
-
-  /* Ajuste para os botões de Receita/Despesa não ficarem "achatados" */
-  .btn-action {
-    flex-direction: row;
-    gap: 15px;
-    height: 100%;
-    width: 100%;
-    justify-content: center;
-  }
-
-  /* 4. Layout da Área Inferior (Gráfico + Lista) */
-  .main-content {
-    grid-column: 1 / 2;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  .chart-card {
-    grid-column: 1 / 2;
-    background: #161626;
-    border-radius: 20px;
-    padding: 35px;
-    min-height: 500px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .chart-container {
-    flex-grow: 1;
-    width: 100%;
-  }
-
-  .sidebar-content {
-    grid-column: 2 / 3;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  .dashboard-container {
-    max-width: 1200px;
-    padding-left: 40px;
-    padding-right: 40px;
-  }
-
-  /* Força os 4 cards lado a lado no PC */
-  .summary-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
 
-  /* Gráficos lado a lado */
-  .charts-container {
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 24px;
-    align-items: start;
+  /* SEGUNDA LINHA: Saldo Livre e Poupança (2 colunas ocupando tudo) */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
   }
 
-  .canvas-wrapper {
-    height: 320px;
+  /* Padronização de altura para os cards de ação não ficarem achatados */
+  .card-receita,
+  .card-despesa,
+  .card-caixinhas {
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
   }
 
-  .card .value {
-    font-size: 22px;
+  /* Gráfico e Categorias lado a lado na parte de baixo */
+  .bottom-section {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    /* Gráfico maior que a lista lateral */
+    gap: 30px;
+  }
+
+  .chart-card {
+    min-height: 500px;
   }
 }
 
