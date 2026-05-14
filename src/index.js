@@ -194,8 +194,11 @@ function renderCategoriasGrafico(lista) {
 
   // 1. Filtra apenas despesas e agrupa por categoria
   const totais = {};
-  lista.filter(t => t.type === 'expense').forEach(t => {
-    totais[t.cat] = (totais[t.cat] || 0) + t.val;
+  lista.forEach(t => {
+    if (!totais[t.cat]) {
+      totais[t.cat] = { valor: 0, tipo: t.type };
+    }
+    totais[t.cat].valor += t.val;
   });
 
   // 2. Transforma em array para poder ordenar
@@ -212,15 +215,16 @@ function renderCategoriasGrafico(lista) {
   // 4. Gera o HTML das barras com o evento de clique para filtrar
   container.innerHTML = categoriasArray.map(([cat, val]) => {
     const porcentagem = maiorValor > 0 ? (val / maiorValor) * 100 : 0;
+    const corBarra = cores[info.tipo] || '#fff';
 
     return `
-      <div class="category-bar-item" onclick="filtrarPorCategoria('${cat}')" title="Clique para destacar no histórico">
+ <div class="category-bar-item" onclick="filtrarPorCategoria('${cat}')" style="margin-bottom: 12px;">
         <div class="bar-info">
-          <span>${cat}</span>
-          <span>${formatBRL(val)}</span>
+          <span style="color: ${corBarra}; font-weight: bold;">${cat}</span>
+          <span>${formatBRL(info.valor)}</span>
         </div>
         <div class="bar-bg">
-          <div class="bar-fill" style="width: ${porcentagem}%; background: #FF6B35;"></div>
+          <div class="bar-fill" style="width: ${porcentagem}%; background: ${corBarra};"></div>
         </div>
       </div>
     `;
@@ -247,6 +251,12 @@ window.filtrarPorCategoria = (categoriaNome) => {
   if (primeiroEncontrado) {
     primeiroEncontrado.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
+
+  setTimeout(() => {
+    itensParaDestacar.forEach(item => {
+      item.classList.remove('destaque-categoria');
+    });
+  }, 3000);
 };
 
 function atualizarDashboard() {
@@ -312,9 +322,41 @@ function atualizarGrafico(chart, todasTransactions) {
   chart.update();
 }
 
+function configurarFiltroMeses() {
+  const select = document.getElementById('filtro-mes');
+  if (!select) return;
+
+  const meses = [
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+  ];
+
+  const agora = new Date();
+  let htmlOptions = '<option value="">Todos os Meses</option>';
+
+  // Gera opções para os últimos 12 meses
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(agora.getFullYear(), agora.getMonth() - i, 1);
+    const mesNome = meses[d.getMonth()];
+    const ano = d.getFullYear();
+    const valor = `${ano}-${String(d.getMonth()).padStart(2, '0')}`; // Formato 2026-04
+
+    htmlOptions += `<option value="${valor}">${mesNome} ${ano}</option>`;
+  }
+
+  select.innerHTML = htmlOptions;
+
+  // Evento para atualizar tudo quando mudar o mês
+  select.addEventListener('change', () => {
+    atualizarDashboard();
+  });
+}
+
 // --- INICIALIZAÇÃO ---
 
 document.addEventListener('DOMContentLoaded', async () => {
+  configurarFiltroMeses();
+
   // 1. BUSCA DADOS INICIAIS
   transactions = await dbLoadFirestore();
 
@@ -368,7 +410,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (btnAddReceita) btnAddReceita.onclick = () => window.abrirModal('income');
   if (btnAddDespesa) btnAddDespesa.onclick = () => window.abrirModal('expense');
   if (btnAddCaixinha) btnAddCaixinha.onclick = () => window.abrirModal('goal');
-  
+
   const btnSort = document.getElementById('btn-ordenar-valor');
   if (btnSort) {
     btnSort.onclick = () => {
