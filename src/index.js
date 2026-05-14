@@ -13,9 +13,8 @@ import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc } from "fir
 // --- VARIÁVEIS GLOBAIS ---
 let transactions = [];
 let grafico;
-let ordemCrescente = null;
 
-// --- FUNÇÕES DE BANCO DE DADOS (FIREBASE) ---
+// --- FUNÇÕES DE BANCO DE DADOS ---
 
 async function dbLoadFirestore() {
   try {
@@ -38,11 +37,9 @@ async function dbAdd(novaTransacao) {
       ...novaTransacao,
       createdAt: new Date()
     });
-    console.log("✅ Salvo na nuvem com ID:", docRef.id);
-    // Retorna o objeto com o ID gerado pelo Firebase
     return { id: docRef.id, ...novaTransacao };
   } catch (e) {
-    console.error("❌ Erro ao salvar no Firebase:", e);
+    console.error("Erro ao salvar:", e);
     return null;
   }
 }
@@ -50,13 +47,38 @@ async function dbAdd(novaTransacao) {
 async function dbRemoveFirestore(id) {
   try {
     await deleteDoc(doc(db, "transacoes", id));
-    console.log("🗑️ Removido do Firebase");
     return true;
   } catch (e) {
-    console.error("Erro ao remover:", e);
     return false;
   }
 }
+
+// --- NAVEGAÇÃO E MODAL (EXPOSTOS PARA O WINDOW) ---
+
+window.abrirModal = (tipo) => {
+  const inputTipo = document.getElementById('input-tipo');
+  const modal = document.getElementById('modal-registro');
+  if (inputTipo && modal) {
+    inputTipo.value = tipo;
+    modal.classList.add('active');
+  }
+};
+
+window.fecharModal = () => {
+  document.getElementById('modal-registro')?.classList.remove('active');
+};
+
+window.irParaTransacoes = (e) => {
+  if (e) e.preventDefault();
+  document.getElementById('dashboard-section').style.display = 'none';
+  document.getElementById('transactions-section').style.display = 'block';
+};
+
+window.irParaDashboard = (e) => {
+  if (e) e.preventDefault();
+  document.getElementById('transactions-section').style.display = 'none';
+  document.getElementById('dashboard-section').style.display = 'block';
+};
 
 // --- UTILITÁRIOS ---
 
@@ -68,55 +90,15 @@ function formatDate(isoString) {
   return new Date(isoString).toLocaleDateString('pt-BR');
 }
 
-function calcTotais(transactions) {
-  let receita = 0; let despesa = 0; let caixinha = 0;
-  transactions.forEach(t => {
-    const valor = Number(t.val || t.amount || 0);
-    const tipo = String(t.type || t.tipo || '').toLowerCase().trim();
-    if (tipo === 'income' || tipo === 'receita') receita += valor;
-    else if (tipo === 'expense' || tipo === 'despesa' || tipo === 'saving') despesa += valor;
-    else if (tipo === 'goal' || tipo === 'caixinha') caixinha += valor;
-  });
-  return {
-    receita, despesa, saldo: receita - despesa, caixinha,
-    poupanca: receita > 0 ? Math.round(((receita - despesa) / receita) * 100) : 0
-  };
-}
+// --- RENDERIZAÇÃO ---
 
-function calcPorCategoria(transactions) {
-  return transactions
-    .filter(t => t.type === 'expense')
-    .reduce((acc, t) => {
-      const nomeExibicao = t.cat.startsWith('Cartão') ? 'Cartão de Crédito' : t.cat;
-      if (!acc[nomeExibicao]) acc[nomeExibicao] = { total: 0, original: t.cat };
-      acc[nomeExibicao].total += t.val;
-      return acc;
-    }, {});
-}
+function renderListaTransacoes(listaFiltrada) {
+  const lista = document.getElementById('transaction-list');
+  if (!lista) return;
 
-// --- RENDERIZAÇÃO DA INTERFACE ---
-
-function renderKPIs({ receita, despesa, saldo, poupanca }) {
-  const elSaldo = document.getElementById('display-saldo');
-  if (elSaldo) {
-    elSaldo.textContent = formatBRL(saldo);
-    elSaldo.style.color = saldo >= 0 ? 'var(--entradas)' : 'var(--saidas)';
-  }
-  const elPoupanca = document.getElementById('display-poupanca');
-  if (elPoupanca) elPoupanca.textContent = `${poupanca}%`;
-}
-
-function renderListaTransacoes(transactions) {
-  const getIconeTx = (t) => {
-    const tipo = String(t.type).toLowerCase();
-    if (tipo === 'goal' || tipo === 'caixinha') return '🚀';
-    if (t.cat && t.cat.includes('Cartão')) return '💳';
-    return tipo === 'income' || tipo === 'receita' ? '↑' : '↓';
-  };
-
-  const html = transactions.length === 0
-    ? '<p style="color:var(--txt_secondario);text-align:center;padding:24px 0;">Nenhuma transação.</p>'
-    : transactions.map(t => `
+  lista.innerHTML = listaFiltrada.length === 0
+    ? '<p style="text-align:center;padding:24px;">Nenhuma transação encontrada.</p>'
+    : listaFiltrada.map(t => `
         <div class="tx-item">
           <div class="tx-info">
             <span class="tx-desc">${t.desc}</span>
@@ -126,54 +108,55 @@ function renderListaTransacoes(transactions) {
             <span class="tx-val ${t.type === 'income' ? 'tx-val--income' : 'tx-val--expense'}">
               ${t.type === 'income' ? '+' : '−'}${formatBRL(t.val)}
             </span>
-            <button class="tx-delete" data-id="${t.id}" title="Remover">✕</button>
+            <button class="tx-delete" data-id="${t.id}">✕</button>
           </div>
         </div>`).join('');
 
-  const lista = document.getElementById('transaction-list');
-  if (lista) {
-    lista.innerHTML = html;
-    // Adiciona evento de clique nos botões de deletar
-    lista.querySelectorAll('.tx-delete').forEach(btn => {
-      btn.onclick = async () => {
-        const id = btn.getAttribute('data-id');
-        if (confirm('Excluir transação?')) {
-          const sucesso = await dbRemoveFirestore(id);
-          if (sucesso) {
-            transactions = transactions.filter(t => t.id !== id);
-            atualizarDashboard(grafico, transactions);
-          }
+  // Event Delegation para deletar
+  lista.querySelectorAll('.tx-delete').forEach(btn => {
+    btn.onclick = async () => {
+      const id = btn.getAttribute('data-id');
+      if (confirm('Excluir transação?')) {
+        if (await dbRemoveFirestore(id)) {
+          transactions = transactions.filter(t => t.id !== id);
+          atualizarDashboard();
         }
-      };
+      }
+    };
+  });
+}
+
+function atualizarDashboard() {
+  const select = document.getElementById('filtro-mes');
+  let dadosExibicao = transactions;
+
+  if (select && select.value) {
+    const [ano, mes] = select.value.split('-').map(Number);
+    dadosExibicao = transactions.filter(t => {
+      const d = new Date(t.date);
+      return d.getFullYear() === ano && d.getMonth() === mes;
     });
   }
-}
 
-function renderBarrasCategorias(transactions) {
-  const catEl = document.getElementById('mes-categorias');
-  if (!catEl) return;
-  const totaisCat = calcPorCategoria(transactions);
-  const entradas = Object.entries(totaisCat);
+  // Cálculos Básicos
+  let receita = 0, despesa = 0;
+  dadosExibicao.forEach(t => {
+    if (t.type === 'income') receita += t.val;
+    else despesa += t.val;
+  });
 
-  if (entradas.length === 0) {
-    catEl.innerHTML = '<p>Nenhuma despesa.</p>';
-    return;
+  // Atualiza KPIs
+  const elSaldo = document.getElementById('display-saldo');
+  if (elSaldo) {
+    elSaldo.textContent = formatBRL(receita - despesa);
+    elSaldo.style.color = (receita - despesa) >= 0 ? '#00FFB2' : '#FF6B35';
   }
 
-  const maximo = Math.max(...entradas.map(([, d]) => d.total));
-  catEl.innerHTML = entradas.map(([nome, dados]) => {
-    const pct = ((dados.total / maximo) * 100).toFixed(1);
-    return `
-      <div class="bar-item">
-        <div class="bar-info"><span>${nome}</span><span>${formatBRL(dados.total)}</span></div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-      </div>`;
-  }).join('');
+  renderListaTransacoes(dadosExibicao);
+  if (grafico) atualizarGrafico(grafico, transactions);
 }
 
-// --- LÓGICA DO GRÁFICO ---
-
-function atualizarGrafico(chart, transactions) {
+function atualizarGrafico(chart, todasTransactions) {
   const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
   const agora = new Date();
   const ultimos5 = Array.from({ length: 5 }, (_, i) => {
@@ -181,69 +164,31 @@ function atualizarGrafico(chart, transactions) {
     return { label: meses[d.getMonth()], ano: d.getFullYear(), mes: d.getMonth() };
   });
 
-  const datasets = [
-    { label: 'Despesas', type: 'expense', color: '#FF6B35' },
-    { label: 'Receitas', type: 'income', color: '#00FFB2' }
-  ].map(ds => ({
-    label: ds.label,
-    borderColor: ds.color,
-    data: ultimos5.map(({ ano, mes }) =>
-      transactions.filter(t => {
-        const d = new Date(t.date);
-        return t.type === ds.type && d.getFullYear() === ano && d.getMonth() === mes;
-      }).reduce((s, t) => s + t.val, 0)
-    )
-  }));
-
   chart.data.labels = ultimos5.map(m => m.label);
-  chart.data.datasets[0].data = datasets[0].data;
-  chart.data.datasets[1].data = datasets[1].data;
+  chart.data.datasets[0].data = ultimos5.map(m =>
+    todasTransactions.filter(t => t.type === 'expense' && new Date(t.date).getMonth() === m.mes).reduce((s, t) => s + t.val, 0)
+  );
+  chart.data.datasets[1].data = ultimos5.map(m =>
+    todasTransactions.filter(t => t.type === 'income' && new Date(t.date).getMonth() === m.mes).reduce((s, t) => s + t.val, 0)
+  );
   chart.update();
 }
 
-// --- LÓGICA CENTRAL ---
-
-function atualizarDashboard(chart, todasTransactions) {
-  const select = document.getElementById('filtro-mes');
-  let dadosParaExibir = todasTransactions;
-
-  if (select && select.value) {
-    const [ano, mes] = select.value.split('-').map(Number);
-    dadosParaExibir = todasTransactions.filter(t => {
-      const d = new Date(t.date);
-      return d.getFullYear() === ano && d.getMonth() === mes;
-    });
-  }
-
-  const totais = calcTotais(dadosParaExibir);
-  renderKPIs(totais);
-  renderBarrasCategorias(dadosParaExibir);
-  renderListaTransacoes(dadosParaExibir);
-  if (chart) atualizarGrafico(chart, todasTransactions);
-}
-
-// --- INICIALIZAÇÃO DO APP ---
+// --- INICIALIZAÇÃO ---
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. CARREGAR DADOS DA NUVEM
   transactions = await dbLoadFirestore();
-  document.title = "Finance Simplefy";
 
-  // 2. CONFIGURAR INTERFACE (LOGO E MÊS)
   const logo = document.getElementById('main-logo');
   if (logo) logo.src = logoImg;
 
-  const selectMes = document.getElementById('filtro-mes');
-  const hoje = `${new Date().getFullYear()}-${new Date().getMonth()}`;
-  if (selectMes && !selectMes.value) selectMes.value = hoje;
-
-  // 3. INICIALIZAR GRÁFICO (CHART.JS)
   const ctx = document.getElementById('mainEvolutionChart')?.getContext('2d');
   if (ctx) {
     grafico = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: [], datasets: [
+        labels: [],
+        datasets: [
           { label: 'Despesas', data: [], borderColor: '#FF6B35', tension: 0.4 },
           { label: 'Receitas', data: [], borderColor: '#00FFB2', tension: 0.4 }
         ]
@@ -252,57 +197,59 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 4. EVENTO DO FORMULÁRIO (SALVAR)
   const form = document.getElementById('form-transacao');
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const desc = document.getElementById('input-desc').value;
-    const val = parseFloat(document.getElementById('input-val').value);
-    const type = document.getElementById('input-tipo').value;
-    const cat = document.getElementById('input-cat').value;
-    const dateInput = document.getElementById('input-data').value;
-
-    if (!desc || isNaN(val)) return alert("Preencha os campos!");
-
     const nova = {
-      desc, val, type, cat,
-      date: dateInput ? new Date(dateInput + 'T00:00').toISOString() : new Date().toISOString()
+      desc: document.getElementById('input-desc').value,
+      val: parseFloat(document.getElementById('input-val').value),
+      type: document.getElementById('input-tipo').value,
+      cat: document.getElementById('input-cat').value,
+      date: document.getElementById('input-data').value ? new Date(document.getElementById('input-data').value + 'T00:00').toISOString() : new Date().toISOString()
     };
 
-    const transacaoSalva = await dbAdd(nova);
-    if (transacaoSalva) {
-      transactions = [transacaoSalva, ...transactions];
-      atualizarDashboard(grafico, transactions);
+    const salva = await dbAdd(nova);
+    if (salva) {
+      transactions = [salva, ...transactions];
+      atualizarDashboard();
       form.reset();
-      document.getElementById('modal-registro')?.classList.remove('active');
+      window.fecharModal();
     }
+
+
   });
 
-  // 5. EVENTOS DE FILTRO E ABAS
-  selectMes?.addEventListener('change', () => atualizarDashboard(grafico, transactions));
+  document.getElementById('filtro-mes')?.addEventListener('change', atualizarDashboard);
 
-  // Função para abrir modal de forma segura
-  const abrirModal = (tipo) => {
-    const inputTipo = document.getElementById('input-tipo');
-    const modal = document.getElementById('modal-registro');
-    if (inputTipo && modal) {
-      inputTipo.value = tipo;
-      modal.classList.add('active');
-    }
-  };
+  // --- LÓGICA DE ABAS ---
 
-  // Seleciona os cards e adiciona o evento apenas se eles existirem
-  const cardReceita = document.getElementById('dash-card-receita');
-  const cardDespesa = document.getElementById('dash-card-despesa');
+  const botoesTab = document.querySelectorAll('.tab-btn');
+  botoesTab.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const abaAlvo = btn.getAttribute('data-tab');
 
-  if (cardReceita) {
-    cardReceita.onclick = () => abrirModal('income');
-  }
+      // Estilo do botão
+      botoesTab.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
 
-  if (cardDespesa) {
-    cardDespesa.onclick = () => abrirModal('expense');
-  }
+      // Troca de telas (Ajuste os IDs conforme seu HTML)
+      const secaoOverview = document.getElementById('tab-overview');
+      const secaoTransacoes = document.getElementById('tab-transacoes');
+      const secaoIA = document.getElementById('tab-ia');
 
-  // 6. RENDERIZAR TUDO
-  atualizarDashboard(grafico, transactions);
+      if (secaoOverview) secaoOverview.style.display = 'none';
+      if (secaoTransacoes) secaoTransacoes.style.display = 'none';
+      if (secaoIA) secaoIA.style.display = 'none';
+
+      if (abaAlvo === 'overview' && secaoOverview) {
+        secaoOverview.style.display = 'block';
+      } else if (abaAlvo === 'transacoes' && secaoTransacoes) {
+        secaoTransacoes.style.display = 'block';
+      } else if (abaAlvo === 'ia' && secaoIA) {
+        secaoIA.style.display = 'block';
+      }
+    });
+  });
+
+  atualizarDashboard();
 });
