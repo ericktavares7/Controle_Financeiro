@@ -7,7 +7,7 @@ import './transactions.css';
 import './responsive.css';
 import Chart from 'chart.js/auto';
 import { db } from './firebase.js';
-import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 
 // --- VARIÁVEIS GLOBAIS ---
 let transactions = [];
@@ -16,33 +16,34 @@ let ordemCrescente = false;
 
 // --- FUNÇÕES DE BANCO DE DADOS ---
 
-async function dbLoadFirestore() {
-  try {
-    const q = query(collection(db, "transacoes"), orderBy("createdAt", "desc"));
-    const querySnapshot = await getDocs(q);
+function dbListenFirestore() {
+  const q = query(collection(db, "transacoes"), orderBy("createdAt", "desc"));
+
+  onSnapshot(q, (snapshot) => {
     const transacoesSincronizadas = [];
-    querySnapshot.forEach((doc) => {
+
+    snapshot.forEach((doc) => {
       transacoesSincronizadas.push({ id: doc.id, ...doc.data() });
     });
-    return transacoesSincronizadas;
-  } catch (e) {
-    console.error("Erro ao carregar dados:", e);
-    return [];
-  }
+
+    console.log("Dados atualizados em tempo real:", transacoesSincronizadas);
+
+    renderCategoriasGrafico(transacoesSincronizadas);
+    renderizarGraficoEvolucao(transacoesSincronizadas);
+    atualizarResumoFinanceiro(transacoesSincronizadas);
+
+  }, (error) => {
+    console.error("Erro ao escutar dados:", error);
+  });
 }
 
-async function dbAdd(novaTransacao) {
-  try {
-    const docRef = await addDoc(collection(db, "transacoes"), {
-      ...novaTransacao,
-      createdAt: new Date()
-    });
-    return { id: docRef.id, ...novaTransacao };
-  } catch (e) {
-    console.error("Erro ao salvar:", e);
-    return null;
-  }
-}
+await addDoc(collection(db, "transacoes"), {
+  desc: descricao,
+  val: valor,
+  type: tipo,
+  cat: categoria,
+  createdAt: new Date()
+});
 
 async function dbRemoveFirestore(id) {
   try {
@@ -179,7 +180,6 @@ function renderListaTransacoes(listaFiltrada) {
           if (sucesso) {
             // Atualiza a lista global e a interface
             transactions = transactions.filter(t => t.id !== id);
-            atualizarDashboard();
           }
         }
       }
@@ -387,24 +387,54 @@ function configurarFiltroMeses() {
 document.addEventListener('DOMContentLoaded', async () => {
   configurarFiltroMeses();
 
-  // 1. BUSCA DADOS INICIAIS
-  transactions = await dbLoadFirestore();
-
   // 3. INICIALIZA O GRÁFICO
-  const ctx = document.getElementById('mainEvolutionChart')?.getContext('2d');
-  if (ctx) {
-    grafico = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [
-          { label: 'Despesas', data: [], borderColor: '#FF6B35', tension: 0.4 },
-          { label: 'Receitas', data: [], borderColor: '#00FFB2', tension: 0.4 }
-        ]
+  const ctx = document.getElementById('mainEvolutionChart').getContext('2d');
+
+  const dadosEvolucao = {
+    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
+    datasets: [
+      {
+        label: 'Receitas',
+        data: [2000, 2200, 2100, 2500, 2800],
+        borderColor: '#00f2ff',
+        backgroundColor: 'rgba(0, 242, 255, 0.1)',
+        fill: true,
+        tension: 0.4
       },
-      options: { responsive: true, maintainAspectRatio: false }
-    });
-  }
+      {
+        label: 'Despesas',
+        data: [1800, 1900, 2500, 2100, 2400],
+        borderColor: '#ff4d4d',
+        backgroundColor: 'rgba(255, 77, 77, 0.1)',
+        fill: true,
+        tension: 0.4
+      }
+    ]
+  };
+
+  const dadosCategorias = [
+    { nome: 'Cartão de Crédito', valor: 2100, tipo: 'expense', porcentagem: 85 },
+    { nome: 'Salário', valor: 5500, tipo: 'income', porcentagem: 100 },
+    { nome: 'Moradia', valor: 750, tipo: 'expense', porcentagem: 30 }
+  ];
+
+  new Chart(ctx, {
+    type: 'line',
+    data: dadosEvolucao,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: '#888' }
+        }
+      },
+      scales: {
+        y: { grid: { color: '#252540' }, ticks: { color: '#888' } },
+        x: { grid: { display: false }, ticks: { color: '#888' } }
+      }
+    }
+  });
 
   // 4. LÓGICA DE ABAS (Troca de telas)
   const botoesTab = document.querySelectorAll('.tab-btn');
@@ -475,8 +505,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // 7. FILTRO DE MÊS
-  document.getElementById('filtro-mes')?.addEventListener('change', atualizarDashboard);
+  document.getElementById('filtro-mes')?.addEventListener('change', () => {
+    dbListenFirestore();
+  });
 
-  // 8. COMANDO FINAL: DESENHA TUDO NA TELA
-  atualizarDashboard();
+  document.addEventListener('DOMContentLoaded', () => {
+    dbListenFirestore();
+  });
 });
