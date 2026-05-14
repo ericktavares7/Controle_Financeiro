@@ -154,7 +154,7 @@ function renderBarrasCategorias(transactions) {
   if (!catEl) return;
   const totaisCat = calcPorCategoria(transactions);
   const entradas = Object.entries(totaisCat);
-  
+
   if (entradas.length === 0) {
     catEl.innerHTML = '<p>Nenhuma despesa.</p>';
     return;
@@ -187,7 +187,7 @@ function atualizarGrafico(chart, transactions) {
   ].map(ds => ({
     label: ds.label,
     borderColor: ds.color,
-    data: ultimos5.map(({ ano, mes }) => 
+    data: ultimos5.map(({ ano, mes }) =>
       transactions.filter(t => {
         const d = new Date(t.date);
         return t.type === ds.type && d.getFullYear() === ano && d.getMonth() === mes;
@@ -242,10 +242,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (ctx) {
     grafico = new Chart(ctx, {
       type: 'line',
-      data: { labels: [], datasets: [
-        { label: 'Despesas', data: [], borderColor: '#FF6B35', tension: 0.4 },
-        { label: 'Receitas', data: [], borderColor: '#00FFB2', tension: 0.4 }
-      ]},
+      data: {
+        labels: [], datasets: [
+          { label: 'Despesas', data: [], borderColor: '#FF6B35', tension: 0.4 },
+          { label: 'Receitas', data: [], borderColor: '#00FFB2', tension: 0.4 }
+        ]
+      },
       options: { responsive: true, maintainAspectRatio: false }
     });
   }
@@ -278,14 +280,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 5. EVENTOS DE FILTRO E ABAS
   selectMes?.addEventListener('change', () => atualizarDashboard(grafico, transactions));
-  
-  // BOTÕES PARA ABRIR MODAL
+
+  // Função para abrir modal de forma segura
   const abrirModal = (tipo) => {
-    document.getElementById('input-tipo').value = tipo;
-    document.getElementById('modal-registro').classList.add('active');
+    const inputTipo = document.getElementById('input-tipo');
+    const modal = document.getElementById('modal-registro');
+    if (inputTipo && modal) {
+      inputTipo.value = tipo;
+      modal.classList.add('active');
+    }
   };
-  document.getElementById('dash-card-receita')?.onclick = () => abrirModal('income');
-  document.getElementById('dash-card-despesa')?.onclick = () => abrirModal('expense');
+
+  // Seleciona os cards e adiciona o evento apenas se eles existirem
+  const cardReceita = document.getElementById('dash-card-receita');
+  const cardDespesa = document.getElementById('dash-card-despesa');
+
+  if (cardReceita) {
+    cardReceita.onclick = () => abrirModal('income');
+  }
+
+  if (cardDespesa) {
+    cardDespesa.onclick = () => abrirModal('expense');
+  }
 
   // 6. RENDERIZAR TUDO
   atualizarDashboard(grafico, transactions);
