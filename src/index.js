@@ -250,38 +250,39 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (btnAddDespesa) btnAddDespesa.onclick = () => window.abrirModal('expense');
   if (btnAddCaixinha) btnAddCaixinha.onclick = () => window.abrirModal('goal');
 
- // Para ao clicar no fundo o card fechar.
+  // Para ao clicar no fundo o card fechar.
   const modal = document.getElementById('modal-registro');
 
   modal?.addEventListener('click', (event) => {
     if (event.target === modal) {
       window.fecharModal();
     }
-
-    // 6. FORMULÁRIO DE ENVIO
-    const form = document.getElementById('form-transacao');
-    form?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const nova = {
-        desc: document.getElementById('input-desc').value,
-        val: parseFloat(document.getElementById('input-val').value),
-        type: document.getElementById('input-tipo').value,
-        cat: document.getElementById('input-cat').value,
-        date: document.getElementById('input-data').value ? new Date(document.getElementById('input-data').value + 'T00:00').toISOString() : new Date().toISOString()
-      };
-
-      const salva = await dbAdd(nova);
-      if (salva) {
-        transactions = [salva, ...transactions];
-        atualizarDashboard();
-        form.reset();
-        window.fecharModal();
-      }
-    });
-
-    // 7. FILTRO DE MÊS
-    document.getElementById('filtro-mes')?.addEventListener('change', atualizarDashboard);
-
-    // 8. COMANDO FINAL: DESENHA TUDO NA TELA
-    atualizarDashboard();
   });
+
+  // 6. FORMULÁRIO DE ENVIO
+  const form = document.getElementById('form-transacao');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nova = {
+      desc: document.getElementById('input-desc').value,
+      val: parseFloat(document.getElementById('input-val').value),
+      type: document.getElementById('input-tipo').value,
+      cat: document.getElementById('input-cat').value,
+      date: document.getElementById('input-data').value ? new Date(document.getElementById('input-data').value + 'T00:00').toISOString() : new Date().toISOString()
+    };
+
+    const salva = await dbAdd(nova);
+    if (salva) {
+      transactions = [salva, ...transactions];
+      atualizarDashboard();
+      form.reset();
+      window.fecharModal();
+    }
+  });
+
+  // 7. FILTRO DE MÊS
+  document.getElementById('filtro-mes')?.addEventListener('change', atualizarDashboard);
+
+  // 8. COMANDO FINAL: DESENHA TUDO NA TELA
+  atualizarDashboard();
+});
