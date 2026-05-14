@@ -194,35 +194,30 @@ function renderCategoriasGrafico(lista) {
 
   if (!containerTransacoes && !containerOverview) return;
 
-  // 1. Agrupar valores e tipos por categoria
+  // Se a lista estiver vazia, limpa os dois e sai
+  if (lista.length === 0) {
+    const msg = '<p style="opacity:0.5; text-align:center; padding:20px;">Sem dados.</p>';
+    if (containerTransacoes) containerTransacoes.innerHTML = msg;
+    if (containerOverview) containerOverview.innerHTML = msg;
+    return;
+  }
+
   const totais = {};
   lista.forEach(t => {
-    if (!totais[t.cat]) {
-      totais[t.cat] = { valor: 0, tipo: t.type };
-    }
+    if (!totais[t.cat]) totais[t.cat] = { valor: 0, tipo: t.type };
     totais[t.cat].valor += t.val;
   });
 
-  // 2. Transforma em array para ordenar
   let categoriasArray = Object.entries(totais);
-
-  categoriasArray.sort((a, b) => {
-    return ordemCrescente ? a[1].valor - b[1].valor : b[1].valor - a[1].valor;
-  });
+  categoriasArray.sort((a, b) => ordemCrescente ? a[1].valor - b[1].valor : b[1].valor - a[1].valor);
 
   const maiorValor = Math.max(...categoriasArray.map(c => c[1].valor), 0);
+  const cores = { income: '#00FFB2', expense: '#FF6B35', goal: '#00D1FF' };
 
-  // Definição das cores (caso não estejam globais)
-  const coresMap = {
-    income: '#00FFB2',  // Verde
-    expense: '#FF6B35', // Laranja
-    goal: '#00D1FF'     // Azul
-  };
-
-  // 3. Gera o HTML (Ajustado os nomes das variáveis dentro do map)
-  container.innerHTML = categoriasArray.map(([cat, info]) => {
+  // Criamos o HTML uma vez só
+  const htmlFinal = categoriasArray.map(([cat, info]) => {
     const porcentagem = maiorValor > 0 ? (info.valor / maiorValor) * 100 : 0;
-    const corBarra = coresMap[info.tipo] || '#fff';
+    const corBarra = cores[info.tipo] || '#ffffff';
 
     return `
       <div class="category-bar-item" onclick="filtrarPorCategoria('${cat}')" style="margin-bottom: 12px; cursor:pointer;">
@@ -237,8 +232,9 @@ function renderCategoriasGrafico(lista) {
     `;
   }).join('');
 
-  if (containerTransacoes) containerTransacoes.innerHTML = htmlBarras;
-  if (containerOverview) containerOverview.innerHTML = htmlBarras;
+  // INJETA NOS DOIS CONTAINERS (AQUI ERA O ERRO)
+  if (containerTransacoes) containerTransacoes.innerHTML = htmlFinal;
+  if (containerOverview) containerOverview.innerHTML = htmlFinal;
 }
 
 // 5. Função de Filtro Visual (Destaque no histórico)
