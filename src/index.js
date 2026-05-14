@@ -61,29 +61,42 @@ window.abrirModal = (tipo) => {
   const modal = document.getElementById('modal-registro');
   const modalContent = modal?.querySelector('.modal-content');
 
-  if (modalContent) {
-    modalContent.classList.remove('tipo-income', 'tipo-expense', 'tipo-goal');
-    modalContent.classList.add(`tipo-${tipo}`);
-  }
-  
-  const groupDespesas = document.getElementById('group-despesas');
-  const groupReceitas = document.getElementById('group-receitas');
-  const groupCaixinhas = document.getElementById('group-caixinhas');
-  const selectCat = document.getElementById('input-cat');
+  if (modal && modalContent) {
+    // 1. Limpa qualquer cor que tenha ficado de um clique anterior
+    modalContent.classList.remove('borda-receita', 'borda-despesa', 'borda-caixinha');
 
-  if (inputTipo && modal) {
-    inputTipo.value = tipo;
-
-    if (groupDespesas) groupDespesas.style.display = (tipo === 'expense') ? 'block' : 'none';
-    if (groupReceitas) groupReceitas.style.display = (tipo === 'income') ? 'block' : 'none';
-    if (groupCaixinhas) groupCaixinhas.style.display = (tipo === 'goal') ? 'block' : 'none';
-
-    if (selectCat) {
-      selectCat.value = (tipo === 'income') ? 'Salário' : (tipo === 'goal' ? 'Reserva de Emergência' : 'Alimentação');
+    // 2. Define qual classe aplicar e o valor do tipo
+    if (tipo === 'income') {
+      modalContent.classList.add('borda-receita');
+      inputTipo.value = 'income';
+    } else if (tipo === 'expense') {
+      modalContent.classList.add('borda-despesa');
+      inputTipo.value = 'expense';
+    } else if (tipo === 'goal') {
+      modalContent.classList.add('borda-caixinha');
+      inputTipo.value = 'goal';
     }
 
-    modal.classList.add('active');
-  }
+    const groupDespesas = document.getElementById('group-despesas');
+    const groupReceitas = document.getElementById('group-receitas');
+    const groupCaixinhas = document.getElementById('group-caixinhas');
+    const selectCat = document.getElementById('input-cat');
+
+    if (inputTipo && modal) {
+      inputTipo.value = tipo;
+
+      if (groupDespesas) groupDespesas.style.display = (tipo === 'expense') ? 'block' : 'none';
+      if (groupReceitas) groupReceitas.style.display = (tipo === 'income') ? 'block' : 'none';
+      if (groupCaixinhas) groupCaixinhas.style.display = (tipo === 'goal') ? 'block' : 'none';
+
+      if (selectCat) {
+        selectCat.value = (tipo === 'income') ? 'Salário' : (tipo === 'goal' ? 'Reserva de Emergência' : 'Alimentação');
+      }
+
+      modal.classList.add('active');
+      document.getElementById('input-desc')?.focus();
+    }
+  };
 };
 
 window.fecharModal = () => {

@@ -207,6 +207,22 @@
   border-top: 4px solid #00D1FF;
 }
 
+.modal-content.borda-receita {
+  border-top: 4px solid #00FFB2 !important;
+  box-shadow: 0 -5px 15px rgba(0, 255, 178, 0.2);
+  /* Brilho suave subindo */
+}
+
+.modal-content.borda-despesa {
+  border-top: 4px solid #FF6B35 !important;
+  box-shadow: 0 -5px 15px rgba(255, 107, 53, 0.2);
+}
+
+.modal-content.borda-caixinha {
+  border-top: 4px solid #00D1FF !important;
+  box-shadow: 0 -5px 15px rgba(0, 209, 255, 0.2);
+}
+
 .select-category {
   background-color: var(--bg_cards);
   color: #ffffff;
