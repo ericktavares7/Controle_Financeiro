@@ -59,6 +59,39 @@ async function dbRemoveFirestore(id) {
   }
 }
 
+// Função para deletar que o botão ✕ vai chamar
+window.deletarTransacao = async (id) => {
+  if (confirm('Deseja realmente excluir esta transação?')) {
+    const sucesso = await dbRemoveFirestore(id);
+    if (!sucesso) {
+      alert("Erro ao excluir. Tente novamente.");
+    }
+    // Nota: Não precisa atualizar a tela manualmente, o onSnapshot faz isso!
+  }
+};
+
+// Certifique-se que o abrirModal também esteja como window.
+window.abrirModal = (tipo) => {
+  const modal = document.getElementById('modal-registro');
+  const inputTipo = document.getElementById('input-tipo');
+  const modalContent = modal?.querySelector('.modal-content');
+
+  if (modal && inputTipo) {
+    inputTipo.value = tipo;
+
+    // Ajuste de cores da borda do modal conforme o tipo
+    if (modalContent) {
+      modalContent.classList.remove('borda-receita', 'borda-despesa', 'borda-caixinha');
+      if (tipo === 'income') modalContent.classList.add('borda-receita');
+      else if (tipo === 'expense') modalContent.classList.add('borda-despesa');
+      else if (tipo === 'goal') modalContent.classList.add('borda-caixinha');
+    }
+
+    modal.classList.add('active');
+    document.getElementById('input-desc')?.focus();
+  }
+};
+
 // --- UTILITÁRIOS ---
 
 function formatBRL(valor) {
@@ -146,6 +179,39 @@ function atualizarDashboard() {
     const taxa = Math.max(0, ((receita - despesa) / receita) * 100).toFixed(1);
     displayPoupanca.textContent = `${taxa}%`;
   }
+
+  renderListaTransacoes(dadosExibicao);
+}
+
+function renderListaTransacoes(listaFiltrada) {
+  const containerReceitas = document.getElementById('lista-receitas-historico');
+  const containerDespesas = document.getElementById('lista-despesas-historico');
+
+  if (!containerReceitas || !containerDespesas) return;
+
+  const criarTemplate = (t) => {
+    const dataMillis = t.createdAt?.seconds ? t.createdAt.seconds * 1000 : t.createdAt;
+
+    return `
+      <div class="tx-item">
+        <div class="tx-info">
+          <span class="tx-desc">${t.desc}</span>
+          <span class="tx-meta">${t.cat} · ${formatDate(dataMillis)}</span>
+        </div>
+        <div class="tx-right">
+          <span class="tx-val ${t.type === 'income' ? 'tx-val--income' : 'tx-val--expense'}">
+            ${t.type === 'income' ? '+' : '−'}${formatBRL(t.val)}
+          </span>
+          <button class="tx-delete" onclick="window.deletarTransacao('${t.id}')">✕</button>
+        </div>
+      </div>`;
+  };
+
+  const receitas = listaFiltrada.filter(t => t.type === 'income');
+  const despesas = listaFiltrada.filter(t => t.type === 'expense');
+
+  containerReceitas.innerHTML = receitas.length ? receitas.map(criarTemplate).join('') : '<p class="empty-msg">Nenhuma receita.</p>';
+  containerDespesas.innerHTML = despesas.length ? despesas.map(criarTemplate).join('') : '<p class="empty-msg">Nenhuma despesa.</p>';
 }
 
 function atualizarGrafico(chart, todasTransactions) {
