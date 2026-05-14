@@ -78,22 +78,21 @@
    ============================================================ */
 @media (min-width: 1024px) {
   body {
-    font-size: 16px;
-    /* Aumenta a base de 14px para 16px */
+    font-size: 18px;
   }
 
   .value {
-    font-size: 1.8rem !important;
+    font-size: 2rem;
     /* Destaque nos valores dos cards */
   }
 
   h3 {
-    font-size: 1.1rem;
+    font-size: 1.8rem;
     /* Títulos dos cards mais visíveis */
   }
 
   .tx-desc {
-    font-size: 1rem;
+    font-size: 1.6rem;
     /* Descrição da transação no histórico */
   }
 

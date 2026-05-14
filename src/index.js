@@ -162,23 +162,22 @@ function renderCategoriasGrafico(lista) {
 
 function atualizarDashboard() {
   const select = document.getElementById('filtro-mes');
-  let dadosExibicao = transactions;
+  if (!select) return;
 
-  // 1. Lógica de Filtro por Mês
-  if (select && select.value) {
-    dadosExibicao = transactions.filter(t => {
-      const d = new Date(t.createdAt?.seconds ? t.createdAt.seconds * 1000 : t.createdAt);
+  // 1. Pega o mês e ano selecionados no Select
+  const [anoFiltro, mesFiltro] = select.value.split('-').map(Number);
 
-      const [ano, mes] = select.value.split('-').map(Number);
+  // 2. Filtra as transações baseadas na escolha do usuário
+  const dadosExibicao = transactions.filter(t => {
+    // Tratativa para datas do Firestore (Timestamp) ou datas normais
+    const d = new Date(t.createdAt?.seconds ? t.createdAt.seconds * 1000 : t.createdAt);
+    return d.getFullYear() === anoFiltro && d.getMonth() === mesFiltro;
+  });
 
-      return d.getFullYear() === ano && d.getMonth() === mes;
-    });
-  }
-
-  // 2. Cálculos de Totais
+  // 3. Inicializa os contadores para os cálculos
   let receitaTotal = 0;
-  let despesaEssencial = 0; // Gastos fixos/essenciais
-  let reserva = 0;         // Caixinhas/Investimentos
+  let despesaEssencial = 0; // Gastos comuns
+  let reservaCaixinha = 0;  // Gastos marcados como 'goal'
 
   dadosExibicao.forEach(t => {
     if (t.type === 'income') {
@@ -186,13 +185,16 @@ function atualizarDashboard() {
     } else if (t.type === 'expense') {
       despesaEssencial += t.val;
     } else if (t.type === 'goal') {
-      reserva += t.val;
+      reservaCaixinha += t.val;
     }
   });
 
-  const saldoFinal = receitaTotal - despesaEssencial - reserva;
+  // 4. Cálculos de Saldo e Taxa de Poupança
+  const saldoFinal = receitaTotal - despesaEssencial - reservaCaixinha;
+  // A poupança real é o que sobra da receita após as despesas essenciais
+  const taxaPoupanca = receitaTotal > 0 ? ((receitaTotal - despesaEssencial) / receitaTotal * 100).toFixed(1) : 0;
 
-  // 3. Atualização dos Cards Básicos (Aba Transações)
+  // 5. Atualiza os Cards de Valor na Aba Transações
   const elMesReceita = document.getElementById('mes-receita');
   const elMesDespesa = document.getElementById('mes-despesa');
   const elMesSaldo = document.getElementById('mes-saldo');
@@ -201,23 +203,18 @@ function atualizarDashboard() {
   if (elMesDespesa) elMesDespesa.textContent = formatBRL(despesaEssencial);
   if (elMesSaldo) elMesSaldo.textContent = formatBRL(saldoFinal);
 
-  // 4. Interface de Metas 70/20/10 (Substituindo Saldo Livre)
-  atualizarMetasIA(receitaTotal, despesaEssencial, reserva);
-
-  // 5. Atualização da Taxa de Poupança (Ponto 5 do seu pedido)
+  // 6. Atualiza o Card da Taxa de Poupança (Com mensagens dinâmicas)
   const displayPoupanca = document.getElementById('display-poupanca');
   const msgPoupanca = document.getElementById('msg-poupanca');
 
   if (displayPoupanca) {
-    const taxa = receitaTotal > 0 ? ((receitaTotal - despesaEssencial) / receitaTotal * 100).toFixed(1) : 0;
-    displayPoupanca.textContent = `${taxa}%`;
-
+    displayPoupanca.textContent = `${taxaPoupanca}%`;
     if (msgPoupanca) {
-      if (taxa >= 20) {
+      if (taxaPoupanca >= 20) {
         msgPoupanca.textContent = "🚀 Excelente! Você está poupando acima da meta.";
         msgPoupanca.style.color = "#00FFB2";
-      } else if (taxa > 0) {
-        msgPoupanca.textContent = "Keep going! Tente reduzir gastos para chegar em 20%.";
+      } else if (taxaPoupanca > 0) {
+        msgPoupanca.textContent = "Keep going! Tente chegar em 20% de reserva.";
         msgPoupanca.style.color = "#FFD700";
       } else {
         msgPoupanca.textContent = "Atenção: Suas despesas estão consumindo toda a renda.";
@@ -226,46 +223,48 @@ function atualizarDashboard() {
     }
   }
 
-  // 6. Sincronização com outros componentes
+  // 7. Atualiza o Card de Metas 70/20/10 (IA Financeira)
+  atualizarMetasIA(receitaTotal, despesaEssencial, reservaCaixinha);
+
+  // 8. Atualiza o Gráfico e as Listas com os dados filtrados
   renderListaTransacoes(dadosExibicao);
   renderCategoriasGrafico(dadosExibicao);
 }
 
 /**
- * Função auxiliar para a lógica visual das metas (Ponto 6)
+ * Lógica visual para as barras de metas dentro do card
  */
 function atualizarMetasIA(receita, despesa, reserva) {
   const container = document.getElementById('metas-container');
   if (!container) return;
 
   if (receita === 0) {
-    container.innerHTML = '<p style="opacity:0.5">Aguardando registros para calcular metas...</p>';
+    container.innerHTML = '<p style="opacity:0.5; font-size:0.8rem;">Aguardando dados de maio 2026...</p>';
     return;
   }
 
   const pEssencial = ((despesa / receita) * 100).toFixed(1);
   const pReserva = ((reserva / receita) * 100).toFixed(1);
-
   const corEssencial = pEssencial > 70 ? "#FF6B35" : "#00FFB2";
 
   container.innerHTML = `
     <div class="meta-item" style="margin-bottom: 12px;">
-      <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+      <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;">
         <span>Gastos Essenciais (Meta 70%)</span>
-        <span style="color:${corEssencial}">${pEssencial}%</span>
+        <span style="color:${corEssencial}; font-weight:bold;">${pEssencial}%</span>
       </div>
-      <div style="background:rgba(255,255,255,0.1); height:6px; border-radius:4px;">
-        <div style="width:${Math.min(pEssencial, 100)}%; background:${corEssencial}; height:100%; border-radius:4px; transition: 0.5s;"></div>
+      <div style="background:rgba(255,255,255,0.05); height:8px; border-radius:10px;">
+        <div style="width:${Math.min(pEssencial, 100)}%; background:${corEssencial}; height:100%; border-radius:10px; box-shadow: 0 0 10px ${corEssencial}66; transition: 0.8s;"></div>
       </div>
     </div>
 
     <div class="meta-item">
-      <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
-        <span>Reserva/Investimentos (Meta 20%)</span>
-        <span style="color:#00D1FF">${pReserva}%</span>
+      <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;">
+        <span>Caixinhas/Reserva (Meta 20%)</span>
+        <span style="color:#00D1FF; font-weight:bold;">${pReserva}%</span>
       </div>
-      <div style="background:rgba(255,255,255,0.1); height:6px; border-radius:4px;">
-        <div style="width:${Math.min(pReserva, 100)}%; background:#00D1FF; height:100%; border-radius:4px; transition: 0.5s;"></div>
+      <div style="background:rgba(255,255,255,0.05); height:8px; border-radius:10px;">
+        <div style="width:${Math.min(pReserva, 100)}%; background:#00D1FF; height:100%; border-radius:10px; box-shadow: 0 0 10px #00D1FF66; transition: 0.8s;"></div>
       </div>
     </div>
   `;
@@ -345,82 +344,92 @@ window.abrirModal = (tipo) => {
 // --- INICIALIZAÇÃO ---
 
 document.addEventListener('DOMContentLoaded', () => {
+  // 1. POPULAR O SELECT DE MESES (Primeira tarefa: preparar o filtro)
+  popularSelectMeses();
 
+  // 2. CONFIGURAR O SELETOR DE ABAS (TABS)
   const tabs = document.querySelectorAll('.tab-btn');
   tabs.forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.tab;
+
+      // Remove classes ativas de tudo
       document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
-      document.getElementById(`tab-${target}`).classList.add('active');
       tabs.forEach(b => b.classList.remove('active'));
+
+      // Ativa a aba clicada
+      document.getElementById(`tab-${target}`)?.classList.add('active');
       btn.classList.add('active');
     });
   });
 
-  // 1. Configura o Gráfico
-  const ctx = document.getElementById('mainEvolutionChart')?.getContext('2d');
+  // 3. INICIALIZAR O GRÁFICO (Chart.js)
+  const ctx = document.getElementById('mainEvolutionChart');
   if (ctx) {
-    grafico = new Chart(ctx, {
+    grafico = new Chart(ctx.getContext('2d'), {
       type: 'line',
       data: {
         labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
         datasets: [
-          { label: 'Receitas', data: [], borderColor: '#00FFB2', tension: 0.4, fill: true, backgroundColor: 'rgba(0, 255, 178, 0.05)' },
-          { label: 'Despesas', data: [], borderColor: '#FF6B35', tension: 0.4, fill: true, backgroundColor: 'rgba(255, 107, 53, 0.05)' }
+          { label: 'Receitas', data: [], borderColor: '#00FFB2', backgroundColor: 'rgba(0, 255, 178, 0.1)', fill: true, tension: 0.4 },
+          { label: 'Despesas', data: [], borderColor: '#FF6B35', backgroundColor: 'rgba(255, 107, 53, 0.1)', fill: true, tension: 0.4 }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        scales: {
-          y: { ticks: { color: '#888' }, grid: { color: '#252540' } },
-          x: { ticks: { color: '#888' }, grid: { display: false } }
-        },
-        plugins: { legend: { labels: { color: '#888' } } }
+        plugins: { legend: { display: false } },
+        scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } }, x: { grid: { display: false }, ticks: { color: '#888' } } }
       }
     });
   }
 
+  // 4. ESCUTADOR DO SELECT DE MESES
   const selectMes = document.getElementById('filtro-mes');
-  if (selectMes) {
-    selectMes.addEventListener('change', () => {
-      console.log("Mês alterado para:", selectMes.value);
-      atualizarDashboard();
-    });
-  }
+  selectMes?.addEventListener('change', () => {
+    atualizarDashboard(); // Quando mudar o mês, recalcula tudo
+  });
 
-  // 2. Evento do Formulário
+  // 5. EVENTO DE FECHAR MODAL CLICANDO FORA
+  window.onclick = (event) => {
+    const modal = document.getElementById('modal-registro');
+    if (event.target === modal) window.fecharModal();
+  };
+
+  // 6. FORMULÁRIO DE ENVIO (SUBMIT)
   const form = document.getElementById('form-transacao');
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
+
     const nova = {
       desc: document.getElementById('input-desc').value,
       val: parseFloat(document.getElementById('input-val').value),
-      type: document.getElementById('input-tipo').value,
+      type: document.getElementById('input-tipo').value, 
       cat: document.getElementById('input-cat').value,
-      createdAt: new Date()
+      createdAt: new Date() 
     };
 
-    const salvo = await dbAdd(nova);
+    const salvo = await dbAdd(nova); 
     if (salvo) {
       form.reset();
       window.fecharModal();
     }
   });
 
-  // 3. Botão de Ordenação
-  document.getElementById('btn-ordenar-valor')?.addEventListener('click', () => {
-    ordemCrescente = !ordemCrescente;
-    renderCategoriasGrafico(transactions);
-  });
-
-  window.onclick = (event) => {
-    const modal = document.getElementById('modal-registro');
-    if (event.target === modal) {
-      window.fecharModal();
-    }
-  };
-
-  // 4. Inicia a escuta do Banco
   dbListenFirestore();
 });
+
+// --- FUNÇÃO AUXILIAR (Fora do DOM, mas chamada por ele) ---
+function popularSelectMeses() {
+  const select = document.getElementById('filtro-mes');
+  if (!select) return;
+
+  const mesesNomes = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+  const dataAtual = new Date();
+  const anoAtual = dataAtual.getFullYear();
+
+  select.innerHTML = mesesNomes.map((nome, index) => {
+    const selected = index === dataAtual.getMonth() ? 'selected' : '';
+    return `<option value="${anoAtual}-${index}" ${selected}>${nome} ${anoAtual}</option>`;
+  }).join('');
+}
