@@ -208,33 +208,27 @@ function atualizarDashboard() {
   const saldoTotal = receita - despesa;
 
   // --- ATUALIZAÇÃO DA VISÃO GERAL ---
-  const elSaldo = document.getElementById('display-saldo');
-  if (elSaldo) {
-    elSaldo.textContent = formatBRL(saldoTotal);
-    elSaldo.style.color = saldoTotal >= 0 ? '#00FFB2' : '#FF6B35';
+  const elSaldoLivre = document.getElementById('display-saldo');
+  if (elSaldoLivre) {
+    elSaldoLivre.textContent = formatBRL(receita - despesa);
   }
 
   // --- ABA DE TRANSAÇÕES (HISTÓRICO) ---
 
-  const elTransReceita = document.getElementById('transacoes-receita-valor');
-  const elTransDespesa = document.getElementById('transacoes-despesa-valor');
-  const elTransSaldo = document.getElementById('transacoes-saldo-valor');
+  const elMesReceita = document.getElementById('mes-receita');
+  const elMesDespesa = document.getElementById('mes-despesa');
+  const elMesSaldo = document.getElementById('mes-saldo');
 
-  if (elTransReceita) elTransReceita.textContent = formatBRL(receita);
-  if (elTransDespesa) elTransDespesa.textContent = formatBRL(despesa);
-  if (elTransSaldo) {
-    elTransSaldo.textContent = formatBRL(saldoTotal);
-    elTransSaldo.style.color = saldoTotal >= 0 ? '#00FFB2' : '#FF6B35';
-  }
-
-  if (elTransReceita) elTransReceita.textContent = formatBRL(receita);
-  if (elTransDespesa) elTransDespesa.textContent = formatBRL(despesa);
-  if (elTransSaldo) {
-    elTransSaldo.textContent = formatBRL(saldoTotal);
-    elTransSaldo.style.color = saldoTotal >= 0 ? '#00FFB2' : '#FF6B35';
+  if (elMesReceita) elMesReceita.textContent = formatBRL(receita);
+  if (elMesDespesa) elMesDespesa.textContent = formatBRL(despesa);
+  if (elMesSaldo) {
+    elMesSaldo.textContent = formatBRL(receita - despesa);
+    elMesSaldo.style.color = (receita - despesa) >= 0 ? '#00FFB2' : '#FF6B35';
   }
 
   renderListaTransacoes(dadosExibicao);
+  renderCategoriasGrafico(dadosExibicao);
+  
   if (grafico) atualizarGrafico(grafico, transactions);
 }
 
