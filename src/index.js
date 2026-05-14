@@ -63,6 +63,7 @@ window.abrirModal = (tipo) => {
   const groupDespesas = document.getElementById('group-despesas');
   const groupReceitas = document.getElementById('group-receitas');
   const groupCaixinhas = document.getElementById('group-caixinhas');
+  const selectCat = document.getElementById('input-cat');
 
   if (inputTipo && modal) {
     inputTipo.value = tipo;
@@ -71,8 +72,9 @@ window.abrirModal = (tipo) => {
     if (groupReceitas) groupReceitas.style.display = (tipo === 'income') ? 'block' : 'none';
     if (groupCaixinhas) groupCaixinhas.style.display = (tipo === 'goal') ? 'block' : 'none';
 
-    const select = document.getElementById('input-cat');
-    if (select) select.selectedIndex = 0;
+    if (selectCat) {
+      selectCat.value = (tipo === 'income') ? 'Salário' : (tipo === 'goal' ? 'Reserva de Emergência' : 'Alimentação');
+    }
 
     modal.classList.add('active');
   }
@@ -248,30 +250,38 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (btnAddDespesa) btnAddDespesa.onclick = () => window.abrirModal('expense');
   if (btnAddCaixinha) btnAddCaixinha.onclick = () => window.abrirModal('goal');
 
-  // 6. FORMULÁRIO DE ENVIO
-  const form = document.getElementById('form-transacao');
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const nova = {
-      desc: document.getElementById('input-desc').value,
-      val: parseFloat(document.getElementById('input-val').value),
-      type: document.getElementById('input-tipo').value,
-      cat: document.getElementById('input-cat').value,
-      date: document.getElementById('input-data').value ? new Date(document.getElementById('input-data').value + 'T00:00').toISOString() : new Date().toISOString()
-    };
+ // Para ao clicar no fundo o card fechar.
+  const modal = document.getElementById('modal-registro');
 
-    const salva = await dbAdd(nova);
-    if (salva) {
-      transactions = [salva, ...transactions];
-      atualizarDashboard();
-      form.reset();
+  modal?.addEventListener('click', (event) => {
+    if (event.target === modal) {
       window.fecharModal();
     }
+
+    // 6. FORMULÁRIO DE ENVIO
+    const form = document.getElementById('form-transacao');
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nova = {
+        desc: document.getElementById('input-desc').value,
+        val: parseFloat(document.getElementById('input-val').value),
+        type: document.getElementById('input-tipo').value,
+        cat: document.getElementById('input-cat').value,
+        date: document.getElementById('input-data').value ? new Date(document.getElementById('input-data').value + 'T00:00').toISOString() : new Date().toISOString()
+      };
+
+      const salva = await dbAdd(nova);
+      if (salva) {
+        transactions = [salva, ...transactions];
+        atualizarDashboard();
+        form.reset();
+        window.fecharModal();
+      }
+    });
+
+    // 7. FILTRO DE MÊS
+    document.getElementById('filtro-mes')?.addEventListener('change', atualizarDashboard);
+
+    // 8. COMANDO FINAL: DESENHA TUDO NA TELA
+    atualizarDashboard();
   });
-
-  // 7. FILTRO DE MÊS
-  document.getElementById('filtro-mes')?.addEventListener('change', atualizarDashboard);
-
-  // 8. COMANDO FINAL: DESENHA TUDO NA TELA
-  atualizarDashboard();
-});
