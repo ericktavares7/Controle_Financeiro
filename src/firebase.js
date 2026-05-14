@@ -80,9 +80,15 @@ document.getElementById('auth-form')?.addEventListener('submit', async (e) => {
 });
 
 // Função para deslogar (você pode chamar no clique de um botão "Sair")
-export async function logOut() {
-  await signOut(auth);
+async function logOut() {
+  try {
+    await signOut(auth);
+    
+  } catch (error) {
+    console.error("Erro ao sair:", error);
+  }
 }
+window.logOut = logOut;
 
 // --- FUNÇÕES DE BANCO DE DADOS ---
 export async function addTransaction(data) {
