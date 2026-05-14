@@ -129,39 +129,62 @@ function formatDate(isoString) {
 // --- RENDERIZAÇÃO ---
 
 function renderListaTransacoes(listaFiltrada) {
-  const lista = document.getElementById('transaction-list');
-  if (!lista) return;
+  const containerReceitas = document.getElementById('lista-receitas-historico');
+  const containerDespesas = document.getElementById('lista-despesas-historico');
 
-  lista.innerHTML = listaFiltrada.length === 0
-    ? '<p style="text-align:center;padding:24px;">Nenhuma transação.</p>'
-    : listaFiltrada.map(t => `
-        <div class="tx-item">
-          <div class="tx-info">
-            <span class="tx-desc">${t.desc}</span>
-            <span class="tx-meta">${t.cat} · ${formatDate(t.date)}</span>
-          </div>
-          <div class="tx-right">
-            <span class="tx-val ${t.type === 'income' ? 'tx-val--income' : 'tx-val--expense'}">
-              ${t.type === 'income' ? '+' : '−'}${formatBRL(t.val)}
-            </span>
-            <button class="tx-delete" data-id="${t.id}">✕</button>
-          </div>
-        </div>`).join('');
+  // Segurança: Se os containers não existirem na tela atual, a função para aqui
+  if (!containerReceitas || !containerDespesas) return;
 
-  // Evento de clique na lista (APENAS para deletar)
-  lista.onclick = async (event) => {
-    const botaoExcluir = event.target.closest('.tx-delete');
-    if (botaoExcluir) {
-      const id = botaoExcluir.getAttribute('data-id');
-      if (confirm('Deseja realmente excluir esta transação?')) {
-        const sucesso = await dbRemoveFirestore(id);
-        if (sucesso) {
-          transactions = transactions.filter(t => t.id !== id);
-          atualizarDashboard();
+  // 1. Separa os dados para cada bloco do histórico
+  const receitas = listaFiltrada.filter(t => t.type === 'income');
+  const despesas = listaFiltrada.filter(t => t.type === 'expense');
+
+  // 2. Template HTML para cada linha de transação
+  const criarTemplate = (t) => `
+    <div class="tx-item">
+      <div class="tx-info">
+        <span class="tx-desc">${t.desc}</span>
+        <span class="tx-meta">${t.cat} · ${formatDate(t.date)}</span>
+      </div>
+      <div class="tx-right">
+        <span class="tx-val ${t.type === 'income' ? 'tx-val--income' : 'tx-val--expense'}">
+          ${t.type === 'income' ? '+' : '−'}${formatBRL(t.val)}
+        </span>
+        <button class="tx-delete" data-id="${t.id}">✕</button>
+      </div>
+    </div>`;
+
+  // 3. Renderiza a lista de Receitas
+  containerReceitas.innerHTML = receitas.length
+    ? receitas.map(criarTemplate).join('')
+    : '<p style="text-align:center; padding:20px; opacity:0.5; font-size:0.9rem;">Nenhuma receita encontrada.</p>';
+
+  // 4. Renderiza a lista de Despesas
+  containerDespesas.innerHTML = despesas.length
+    ? despesas.map(criarTemplate).join('')
+    : '<p style="text-align:center; padding:20px; opacity:0.5; font-size:0.9rem;">Nenhuma despesa encontrada.</p>';
+
+  // 5. Lógica de Exclusão (Event Delegation) para os dois containers
+  [containerReceitas, containerDespesas].forEach(container => {
+    container.onclick = null;
+
+    container.onclick = async (event) => {
+      const botaoExcluir = event.target.closest('.tx-delete');
+
+      if (botaoExcluir) {
+        const id = botaoExcluir.getAttribute('data-id');
+
+        if (confirm('Deseja realmente excluir esta transação?')) {
+          const sucesso = await dbRemoveFirestore(id);
+          if (sucesso) {
+            // Atualiza a lista global e a interface
+            transactions = transactions.filter(t => t.id !== id);
+            atualizarDashboard();
+          }
         }
       }
-    }
-  };
+    };
+  });
 }
 
 function atualizarDashboard() {
@@ -176,18 +199,39 @@ function atualizarDashboard() {
     });
   }
 
-  // Cálculos Básicos
   let receita = 0, despesa = 0;
   dadosExibicao.forEach(t => {
     if (t.type === 'income') receita += t.val;
-    else despesa += t.val;
+    else if (t.type === 'expense') despesa += t.val;
   });
 
-  // Atualiza KPIs
+  const saldoTotal = receita - despesa;
+
+  // --- ATUALIZAÇÃO DA VISÃO GERAL ---
   const elSaldo = document.getElementById('display-saldo');
   if (elSaldo) {
-    elSaldo.textContent = formatBRL(receita - despesa);
-    elSaldo.style.color = (receita - despesa) >= 0 ? '#00FFB2' : '#FF6B35';
+    elSaldo.textContent = formatBRL(saldoTotal);
+    elSaldo.style.color = saldoTotal >= 0 ? '#00FFB2' : '#FF6B35';
+  }
+
+  // --- ABA DE TRANSAÇÕES (HISTÓRICO) ---
+
+  const elTransReceita = document.getElementById('transacoes-receita-valor');
+  const elTransDespesa = document.getElementById('transacoes-despesa-valor');
+  const elTransSaldo = document.getElementById('transacoes-saldo-valor');
+
+  if (elTransReceita) elTransReceita.textContent = formatBRL(receita);
+  if (elTransDespesa) elTransDespesa.textContent = formatBRL(despesa);
+  if (elTransSaldo) {
+    elTransSaldo.textContent = formatBRL(saldoTotal);
+    elTransSaldo.style.color = saldoTotal >= 0 ? '#00FFB2' : '#FF6B35';
+  }
+
+  if (elTransReceita) elTransReceita.textContent = formatBRL(receita);
+  if (elTransDespesa) elTransDespesa.textContent = formatBRL(despesa);
+  if (elTransSaldo) {
+    elTransSaldo.textContent = formatBRL(saldoTotal);
+    elTransSaldo.style.color = saldoTotal >= 0 ? '#00FFB2' : '#FF6B35';
   }
 
   renderListaTransacoes(dadosExibicao);
