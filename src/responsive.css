@@ -1,72 +1,29 @@
 /* ============================================================
-   ESTILO BASE (MOBILE - SMARTPHONES)
+   ESTILO BASE & TIPOGRAFIA (MOBILE FIRST)
    ============================================================ */
 :root {
-  /* Base do documento */
   font-size: 14px;
-}
-.meta-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.meta-header span {
-  font-size: 0.9rem; /* Fonte maior no mobile para facilitar a leitura */
-  white-space: nowrap; /* Evita quebras estranhas no texto */
-}
-
-.meta-item>div {
-  display: flex;
-  flex-wrap: wrap;
-  /* O pulo do gato: se não couber, ele joga o valor para baixo */
-  justify-content: space-between;
-  align-items: center;
-  gap: 4px;
-}
-
-/* Garante que o nome da meta não "estique" o card */
-.meta-item span:first-child {
-  flex: 1;
-  /* Ocupa o espaço disponível */
-  white-space: nowrap;
-  /* Tenta manter em uma linha */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  /* Se for muito grande, coloca "..." */
-  font-size: 0.8rem;
-}
-
-.meta-item span:last-child {
-  font-weight: 800;
-  font-size: 0.85rem;
-}
-
-.action-info strong {
   font-family: 'Manrope', sans-serif;
-  letter-spacing: -0.5px;
-  /* Deixa as letras um pouquinho mais juntas para caber melhor */
 }
 
-/* Títulos de Seção (Visão Geral, Transações) */
+body {
+  -webkit-font-smoothing: antialiased;
+}
+
 h1 {
   font-size: 1.5rem;
 }
 
-/* Títulos dos Cards (Receita, Despesa, Metas) */
 h3 {
   font-size: 0.95rem;
   letter-spacing: 0.5px;
 }
 
-/* Valores Grandes (Saldo, Porcentagens) */
 .value {
   font-size: 1.6rem !important;
   font-weight: 800;
 }
 
-/* Textos Auxiliares e Labels de Input */
 small,
 .action-info small {
   font-size: 0.75rem;
@@ -74,38 +31,27 @@ small,
   opacity: 0.7;
 }
 
-/* Descrição das Transações no Histórico */
-.tx-desc {
+.action-info strong {
   font-size: 0.9rem;
-  font-weight: 500;
+  letter-spacing: -0.5px;
 }
 
-/* Categorias e Metas */
-.meta-item span {
-  font-size: 0.85rem;
-}
-
+/* ============================================================
+   LAYOUT DOS CARDS DE AÇÃO (TOP GRID)
+   ============================================================ */
 .top-actions-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  /* 2 colunas no mobile */
   gap: 12px;
   margin-bottom: 20px;
 }
 
-/* Faz o terceiro card (Caixinhas) ocupar as duas colunas */
 #dash-card-caixinhas {
   grid-column: span 2;
+  /* Caixinhas ocupa a largura toda no mobile */
 }
 
-/* Container dos cards inferiores */
-.dashboard-stats-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 20px;
-}
-
-/* Ajuste nos textos internos para caberem lado a lado */
 .action-card {
   display: flex;
   align-items: center;
@@ -114,149 +60,99 @@ small,
   width: 100%;
 }
 
-.action-info strong {
-  font-size: 0.9rem;
-}
-
 /* ============================================================
-   TABLETS (768px ou mais)
+   SAÚDE DA REGRA & TAXA DE POUPANÇA (CARDS INFERIORES)
    ============================================================ */
-@media (min-width: 768px) {
-  .summary-grid {
-    grid-template-columns: repeat(2, 1fr);
-    /* 2 cards por linha */
-  }
+.dashboard-stats-grid {
+  display: flex;
+  flex-direction: column;
+  /* Empilha cards no mobile para não cortar texto */
+  gap: 16px;
+  margin-top: 20px;
+}
 
-  .form-row {
-    flex-direction: row;
-    gap: 12px;
-  }
+.meta-item {
+  margin-bottom: 10px;
+}
 
-  .input-amount {
-    flex: 2;
-  }
+.meta-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
 
-  .select-type {
-    flex: 1;
-  }
+.meta-header span {
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+/* Tratamento de estouro de texto nas metas */
+.meta-item span:first-child {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.8rem;
+}
+
+.meta-item span:last-child {
+  font-weight: 800;
+  font-size: 0.85rem;
 }
 
 /* ============================================================
-   DESKTOP (1024px ou mais)
+   DESKTOP (Telas acima de 1024px)
    ============================================================ */
 @media (min-width: 1024px) {
   body {
     font-size: 18px;
   }
 
-  .meta-item {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin-bottom: 15px;
-  }
-
-  .meta-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-
-  }
-
-  .value {
-    font-size: 1.4rem;
-    /* Destaque nos valores dos cards */
-  }
-
-  h3 {
-    font-size: 1.6rem;
-    /* Títulos dos cards mais visíveis */
-  }
-
-  .tx-desc {
-    font-size: 1.2rem;
-    /* Descrição da transação no histórico */
-  }
-
-  /* Container Principal */
-  #app {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    max-width: 1600px;
-    /* Largura ideal para não sobrar tanto fundo */
-    margin: 0 auto;
-    padding: 40px;
-    box-sizing: border-box;
-  }
-
+  /* Grid de ações volta para 3 colunas lado a lado */
   .top-actions-grid {
     grid-template-columns: 1fr 1fr 1fr;
     gap: 20px;
-
   }
 
   #dash-card-caixinhas {
     grid-column: span 1;
   }
 
-  .card-action {
-    min-height: 160px;
-    /* Garante que não fiquem "esmagados" */
+  /* Stats inferiores voltam a ficar lado a lado */
+  .dashboard-stats-grid {
+    flex-direction: row;
+  }
+
+  .dashboard-stats-grid .card {
+    flex: 1;
+  }
+
+  /* Container Principal com limite de largura */
+  #app {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: #161626;
-    border: 1px solid #252540;
-    border-radius: 15px;
-    transition: transform 0.2s;
+    gap: 25px;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 40px;
   }
 
-  /* LINHA 2: Resumo (Saldo e Poupança) */
-  .summary-grid {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    /* Saldo ganha mais destaque */
-    gap: 20px;
-  }
-
-  .card-summary {
-    min-height: 140px;
-    padding: 25px;
-    background: #161626;
-    border-radius: 15px;
-  }
-
-  /* LINHA 3: Gráficos Lado a Lado */
+  /* Gráficos e Categorias lado a lado */
   .bottom-charts-grid {
     display: grid;
     grid-template-columns: 1.6fr 1fr;
-    /* Gráfico de Evolução maior */
     gap: 25px;
     align-items: start;
-  }
-
-  .chart-card,
-  .category-card {
-    background: #161626;
-    padding: 30px;
-    border-radius: 15px;
-    min-height: 450px;
-    /* Altura para o gráfico respirar */
   }
 }
 
 /* ============================================================
-   AJUSTE PARA FORMULÁRIO NO MOBILE (Abaixo de 600px)
+   AJUSTES GERAIS DE FORMULÁRIO & HEADER
    ============================================================ */
 @media (max-width: 600px) {
-  .form-row {
-    flex-direction: column;
-  }
 
-  /* Ajuste para o Header não espremer no celular */
+  .form-row,
   .dashboard-header {
     flex-direction: column;
     align-items: flex-start;
