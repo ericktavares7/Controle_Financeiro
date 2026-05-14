@@ -96,8 +96,9 @@ function renderListaTransacoes(listaFiltrada) {
   const lista = document.getElementById('transaction-list');
   if (!lista) return;
 
+  // 1. Limpa e desenha a lista
   lista.innerHTML = listaFiltrada.length === 0
-    ? '<p style="text-align:center;padding:24px;">Nenhuma transação encontrada.</p>'
+    ? '<p style="text-align:center;padding:24px;">Nenhuma transação.</p>'
     : listaFiltrada.map(t => `
         <div class="tx-item">
           <div class="tx-info">
@@ -112,18 +113,27 @@ function renderListaTransacoes(listaFiltrada) {
           </div>
         </div>`).join('');
 
-  // Event Delegation para deletar
-  lista.querySelectorAll('.tx-delete').forEach(btn => {
-    btn.onclick = async () => {
-      const id = btn.getAttribute('data-id');
-      if (confirm('Excluir transação?')) {
-        if (await dbRemoveFirestore(id)) {
+  // 2. A MÁGICA: Em vez de colocar evento em cada botão, colocamos na lista toda
+  lista.onclick = async (event) => {
+    // Verifica se o que foi clicado é o botão de excluir
+    const botaoExcluir = event.target.closest('.tx-delete');
+
+    if (botaoExcluir) {
+      const id = botaoExcluir.getAttribute('data-id');
+      console.log("Clicou para remover o ID:", id); // Isso vai aparecer no seu F12
+
+      if (confirm('Deseja realmente excluir esta transação?')) {
+        const sucesso = await dbRemoveFirestore(id);
+        if (sucesso) {
+          // Remove da memória local e atualiza a tela
           transactions = transactions.filter(t => t.id !== id);
           atualizarDashboard();
+        } else {
+          alert("Erro ao excluir. Verifique se você tem permissão no Firebase.");
         }
       }
-    };
-  });
+    }
+  };
 }
 
 function atualizarDashboard() {
@@ -224,32 +234,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   // --- LÓGICA DE ABAS ---
 
   const botoesTab = document.querySelectorAll('.tab-btn');
+
   botoesTab.forEach(btn => {
     btn.addEventListener('click', () => {
       const abaAlvo = btn.getAttribute('data-tab');
 
-      // Estilo do botão
+      // Atualiza estilo dos botões
       botoesTab.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
-      // Troca de telas (Ajuste os IDs conforme seu HTML)
+      // Seleciona as seções
       const secaoOverview = document.getElementById('tab-overview');
       const secaoTransacoes = document.getElementById('tab-transacoes');
       const secaoIA = document.getElementById('tab-ia');
 
-      if (secaoOverview) secaoOverview.style.display = 'none';
-      if (secaoTransacoes) secaoTransacoes.style.display = 'none';
-      if (secaoIA) secaoIA.style.display = 'none';
-
-      if (abaAlvo === 'overview' && secaoOverview) {
-        secaoOverview.style.display = 'block';
-      } else if (abaAlvo === 'transacoes' && secaoTransacoes) {
-        secaoTransacoes.style.display = 'block';
-      } else if (abaAlvo === 'ia' && secaoIA) {
-        secaoIA.style.display = 'block';
-      }
+      // Troca a visibilidade
+      if (secaoOverview) secaoOverview.style.display = (abaAlvo === 'overview') ? 'block' : 'none';
+      if (secaoTransacoes) secaoTransacoes.style.display = (abaAlvo === 'transacoes') ? 'block' : 'none';
+      if (secaoIA) secaoIA.style.display = (abaAlvo === 'ia') ? 'block' : 'none';
     });
   });
 
+  // --- VINCULAÇÃO DOS BOTÕES DE ADICIONAR (FORA DA FUNÇÃO DAS ABAS) ---
+  const btnAddReceita = document.getElementById('dash-card-receita');
+  const btnAddDespesa = document.getElementById('dash-card-despesa');
+  const btnAddCaixinha = document.getElementById('dash-card-caixinha');
+
+  // Só atribui o clique se o elemento existir na tela
+  if (btnAddReceita) btnAddReceita.onclick = () => window.abrirModal('income');
+  if (btnAddDespesa) btnAddDespesa.onclick = () => window.abrirModal('expense');
+  if (btnAddCaixinha) btnAddCaixinha.onclick = () => window.abrirModal('goal');
+  
   atualizarDashboard();
 });
