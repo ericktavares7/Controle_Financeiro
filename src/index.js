@@ -83,6 +83,13 @@ function formatDate(isoString) {
 }
 
 // --- RENDERIZAÇÃO DA INTERFACE ---
+window.filtrarPorCategoria = (categoria) => {
+  const filtrados = transactions.filter(t => t.cat === categoria);
+  renderListaTransacoes(filtrados);
+
+  // Feedback visual: rola até a lista
+  document.getElementById('tab-transacoes').scrollIntoView({ behavior: 'smooth' });
+};
 
 function renderCategoriasGrafico(lista) {
   const containerOverview = document.getElementById('categoryList');
@@ -126,23 +133,112 @@ function renderCategoriasGrafico(lista) {
 }
 
 function atualizarDashboard() {
-  let receita = 0, despesa = 0;
-  transactions.forEach(t => {
-    if (t.type === 'income') receita += t.val;
-    else if (t.type === 'expense') despesa += t.val;
-  });
+  const select = document.getElementById('filtro-mes');
+  let dadosExibicao = transactions;
 
-  document.getElementById('display-saldo').textContent = formatBRL(receita - despesa);
-  document.getElementById('mes-receita').textContent = formatBRL(receita);
-  document.getElementById('mes-despesa').textContent = formatBRL(despesa);
-  document.getElementById('mes-saldo').textContent = formatBRL(receita - despesa);
-
-  if (receita > 0) {
-    const taxa = Math.max(0, ((receita - despesa) / receita) * 100).toFixed(1);
-    document.getElementById('display-poupanca').textContent = `${taxa}%`;
+  // 1. Lógica de Filtro por Mês
+  if (select && select.value) {
+    const [ano, mes] = select.value.split('-').map(Number);
+    dadosExibicao = transactions.filter(t => {
+      const d = new Date(t.createdAt?.seconds ? t.createdAt.seconds * 1000 : t.createdAt);
+      return d.getFullYear() === ano && d.getMonth() === mes;
+    });
   }
 
-  renderListaTransacoes(transactions);
+  // 2. Cálculos de Totais
+  let receitaTotal = 0;
+  let despesaEssencial = 0; // Gastos fixos/essenciais
+  let reserva = 0;         // Caixinhas/Investimentos
+
+  dadosExibicao.forEach(t => {
+    if (t.type === 'income') {
+      receitaTotal += t.val;
+    } else if (t.type === 'expense') {
+      despesaEssencial += t.val;
+    } else if (t.type === 'goal') {
+      reserva += t.val;
+    }
+  });
+
+  const saldoFinal = receitaTotal - despesaEssencial - reserva;
+
+  // 3. Atualização dos Cards Básicos (Aba Transações)
+  const elMesReceita = document.getElementById('mes-receita');
+  const elMesDespesa = document.getElementById('mes-despesa');
+  const elMesSaldo = document.getElementById('mes-saldo');
+
+  if (elMesReceita) elMesReceita.textContent = formatBRL(receitaTotal);
+  if (elMesDespesa) elMesDespesa.textContent = formatBRL(despesaEssencial);
+  if (elMesSaldo) elMesSaldo.textContent = formatBRL(saldoFinal);
+
+  // 4. Interface de Metas 70/20/10 (Substituindo Saldo Livre)
+  atualizarMetasIA(receitaTotal, despesaEssencial, reserva);
+
+  // 5. Atualização da Taxa de Poupança (Ponto 5 do seu pedido)
+  const displayPoupanca = document.getElementById('display-poupanca');
+  const msgPoupanca = document.getElementById('msg-poupanca');
+
+  if (displayPoupanca) {
+    const taxa = receitaTotal > 0 ? ((receitaTotal - despesaEssencial) / receitaTotal * 100).toFixed(1) : 0;
+    displayPoupanca.textContent = `${taxa}%`;
+
+    if (msgPoupanca) {
+      if (taxa >= 20) {
+        msgPoupanca.textContent = "🚀 Excelente! Você está poupando acima da meta.";
+        msgPoupanca.style.color = "#00FFB2";
+      } else if (taxa > 0) {
+        msgPoupanca.textContent = "Keep going! Tente reduzir gastos para chegar em 20%.";
+        msgPoupanca.style.color = "#FFD700";
+      } else {
+        msgPoupanca.textContent = "Atenção: Suas despesas estão consumindo toda a renda.";
+        msgPoupanca.style.color = "#FF6B35";
+      }
+    }
+  }
+
+  // 6. Sincronização com outros componentes
+  renderListaTransacoes(dadosExibicao);
+  renderCategoriasGrafico(dadosExibicao);
+}
+
+/**
+ * Função auxiliar para a lógica visual das metas (Ponto 6)
+ */
+function atualizarMetasIA(receita, despesa, reserva) {
+  const container = document.getElementById('metas-container');
+  if (!container) return;
+
+  if (receita === 0) {
+    container.innerHTML = '<p style="opacity:0.5">Aguardando registros para calcular metas...</p>';
+    return;
+  }
+
+  const pEssencial = ((despesa / receita) * 100).toFixed(1);
+  const pReserva = ((reserva / receita) * 100).toFixed(1);
+
+  const corEssencial = pEssencial > 70 ? "#FF6B35" : "#00FFB2";
+
+  container.innerHTML = `
+    <div class="meta-item" style="margin-bottom: 12px;">
+      <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+        <span>Gastos Essenciais (Meta 70%)</span>
+        <span style="color:${corEssencial}">${pEssencial}%</span>
+      </div>
+      <div style="background:rgba(255,255,255,0.1); height:6px; border-radius:4px;">
+        <div style="width:${Math.min(pEssencial, 100)}%; background:${corEssencial}; height:100%; border-radius:4px; transition: 0.5s;"></div>
+      </div>
+    </div>
+
+    <div class="meta-item">
+      <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:4px;">
+        <span>Reserva/Investimentos (Meta 20%)</span>
+        <span style="color:#00D1FF">${pReserva}%</span>
+      </div>
+      <div style="background:rgba(255,255,255,0.1); height:6px; border-radius:4px;">
+        <div style="width:${Math.min(pReserva, 100)}%; background:#00D1FF; height:100%; border-radius:4px; transition: 0.5s;"></div>
+      </div>
+    </div>
+  `;
 }
 
 function renderListaTransacoes(listaFiltrada) {
@@ -255,6 +351,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const selectMes = document.getElementById('filtro-mes');
+  if (selectMes) {
+    const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    const dataAtual = new Date();
+    for (let i = 0; i < 12; i++) {
+      const opt = document.createElement('option');
+      opt.value = `${dataAtual.getFullYear()}-${i}`;
+      opt.innerHTML = `${meses[i]} ${dataAtual.getFullYear()}`;
+      if (i === dataAtual.getMonth()) opt.selected = true;
+      selectMes.appendChild(opt);
+    }
+  }
+
   // 2. Evento do Formulário
   const form = document.getElementById('form-transacao');
   form?.addEventListener('submit', async (e) => {
@@ -279,6 +388,13 @@ document.addEventListener('DOMContentLoaded', () => {
     ordemCrescente = !ordemCrescente;
     renderCategoriasGrafico(transactions);
   });
+
+  window.onclick = (event) => {
+    const modal = document.getElementById('modal-registro');
+    if (event.target === modal) {
+      window.fecharModal();
+    }
+  };
 
   // 4. Inicia a escuta do Banco
   dbListenFirestore();

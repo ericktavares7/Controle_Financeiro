@@ -45,124 +45,125 @@
       </ul>
     </nav>
 
-      <section class="tab-section active" id="tab-overview">
+    <section class="tab-section active" id="tab-overview">
 
-        <div class="top-actions-grid">
-          <button id="dash-card-receita" class="action-card btn-income" onclick="window.abrirModal('income')">
-            <div class="action-icon">＋</div>
-            <div class="action-info"><small>Novo Ganho</small><strong>RECEITA</strong></div>
-          </button>
+      <div class="top-actions-grid">
+        <button id="dash-card-receita" class="action-card btn-income" onclick="window.abrirModal('income')">
+          <div class="action-icon">＋</div>
+          <div class="action-info"><small>Novo Ganho</small><strong>RECEITA</strong></div>
+        </button>
 
-          <button id="dash-card-despesa" class="action-card btn-expense" onclick="window.abrirModal('expense')">
-            <div class="action-icon">－</div>
-            <div class="action-info"><small>Novo Gasto</small><strong>DESPESA</strong></div>
-          </button>
+        <button id="dash-card-despesa" class="action-card btn-expense" onclick="window.abrirModal('expense')">
+          <div class="action-icon">－</div>
+          <div class="action-info"><small>Novo Gasto</small><strong>DESPESA</strong></div>
+        </button>
 
-          <button id="dash-card-caixinhas" class="action-card btn-caixinha">
-            <div class="action-icon">🚀</div>
-            <div class="action-info"><small>CAIXINHAS</small><strong id="saldo-caixinhas">R$ 0.00</strong></div>
-          </button>
-        </div>
-
-        <div class="summary-grid">
-          <article class="card balance" id="card-saldo">
-            <header><span class="icon">◈</span>
-              <h3>Saldo Livre</h3>
-            </header>
-            <p class="value" id="display-saldo">R$ 0,00</p>
-          </article>
-
-          <article class="card savings" id="card-poupanca">
-            <header><span class="icon">★</span>
-              <h3>Taxa de Poupança</h3>
-            </header>
-            <p class="value" id="display-poupanca">0%</p>
-            <p id="msg-poupanca" class="poupanca-msg"></p>
-          </article>
-        </div>
-
-        <section class="bottom-charts-grid">
-          <article class="chart-card evolution">
-            <header>
-              <h3>Evolução Mensal</h3>
-            </header>
-            <div class="canvas-wrapper">
-              <canvas id="mainEvolutionChart"></canvas>
-            </div>
-          </article>
-
-          <article class="chart-card categories">
-            <header>
-              <h3>Por Categoria</h3>
-            </header>
-            <div class="category-bars" id="categoryList">
-            </div>
-          </article>
-        </section>
-
-      </section>
-
-      <div id="modal-registro" class="modal">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h2>Nova Transação</h2>
-            <button type="button" id="fechar-modal" class="btn-close" onclick="window.fecharModal()">&times;</button>
-          </div>
-
-          <form id="form-transacao">
-            <div class="form-group">
-              <label for="input-desc">Descrição</label>
-              <input type="text" id="input-desc" placeholder="Ex: Aluguel, Mercado, Freelance..." required>
-            </div>
-
-            <div class="form-group">
-              <label for="input-val">Valor (R$)</label>
-              <input type="number" step="0.01" id="input-val" placeholder="0,00" required>
-            </div>
-
-            <div class="form-group">
-              <label for="input-data">Data</label>
-              <input type="date" id="input-data">
-            </div>
-
-            <div class="form-group">
-              <label for="input-cat">Categoria</label>
-              <select id="input-cat" class="select-category" required>
-
-                <optgroup label="💳 DESPESAS" id="group-despesas">
-                  <option value="Alimentação">Alimentação</option>
-                  <option value="Transporte">Transporte</option>
-                  <option value="Lazer">Lazer</option>
-                  <option value="Moradia">Moradia</option>
-                  <option value="Saúde">Saúde</option>
-                  <option value="Educação">Educação</option>
-                  <option value="Outros">Outros</option>
-                  <option value="Cartão de Crédito">Cartão de Crédito</option>
-                </optgroup>
-
-                <optgroup label="💰 RECEITAS" id="group-receitas">
-                  <option value="Salário">Salário</option>
-                  <option value="Freelance">Freelance</option>
-                  <option value="Investimentos">Investimentos</option>
-                  <option value="Presente">Presente</option>
-                  <option value="Extra">Renda Extra</option>
-                </optgroup>
-
-                <optgroup label="🚀 CAIXINHAS" id="group-caixinhas" style="display: none;">
-                  <option value="Reserva de Emergência">Reserva de Emergência</option>
-                  <option value="Metas">Metas</option>
-                </optgroup>
-              </select>
-            </div>
-
-            <input type="hidden" id="input-tipo" value="expense">
-
-            <button type="submit" class="btn-save">Confirmar Registro</button>
-          </form>
-        </div>
+        <button id="dash-card-caixinhas" class="action-card btn-caixinha" onclick="window.abrirModal('goal')">
+          <div class="action-icon">🚀</div>
+          <div class="action-info"><small>CAIXINHAS</small><strong id="saldo-caixinhas">R$ 0.00</strong></div>
+        </button>
       </div>
 
-      <!--
+      <div class="summary-grid">
+        <article class="card balance" id="card-metas">
+          <header><span class="icon">🎯</span>
+            <h3>Saúde da Regra 70/20/10</h3>
+          </header>
+          <div id="metas-container">
+          </div>
+        </article>
+
+        <article class="card savings" id="card-poupanca">
+          <header><span class="icon">★</span>
+            <h3>Taxa de Poupança</h3>
+          </header>
+          <p class="value" id="display-poupanca">0%</p>
+          <p id="msg-poupanca" class="poupanca-msg"></p>
+        </article>
+      </div>
+
+      <section class="bottom-charts-grid">
+        <article class="chart-card evolution">
+          <header>
+            <h3>Evolução Mensal</h3>
+          </header>
+          <div class="canvas-wrapper">
+            <canvas id="mainEvolutionChart"></canvas>
+          </div>
+        </article>
+
+        <article class="chart-card categories">
+          <header>
+            <h3>Por Categoria</h3>
+          </header>
+          <div class="category-bars" id="categoryList">
+          </div>
+        </article>
+      </section>
+
+    </section>
+
+    <div id="modal-registro" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Nova Transação</h2>
+          <button type="button" id="fechar-modal" class="btn-close" onclick="window.fecharModal()">&times;</button>
+        </div>
+
+        <form id="form-transacao">
+          <div class="form-group">
+            <label for="input-desc">Descrição</label>
+            <input type="text" id="input-desc" placeholder="Ex: Aluguel, Mercado, Freelance..." required>
+          </div>
+
+          <div class="form-group">
+            <label for="input-val">Valor (R$)</label>
+            <input type="number" step="0.01" id="input-val" placeholder="0,00" required>
+          </div>
+
+          <div class="form-group">
+            <label for="input-data">Data</label>
+            <input type="date" id="input-data">
+          </div>
+
+          <div class="form-group">
+            <label for="input-cat">Categoria</label>
+            <select id="input-cat" class="select-category" required>
+
+              <optgroup label="💳 DESPESAS" id="group-despesas">
+                <option value="Alimentação">Alimentação</option>
+                <option value="Transporte">Transporte</option>
+                <option value="Lazer">Lazer</option>
+                <option value="Moradia">Moradia</option>
+                <option value="Saúde">Saúde</option>
+                <option value="Educação">Educação</option>
+                <option value="Outros">Outros</option>
+                <option value="Cartão de Crédito">Cartão de Crédito</option>
+              </optgroup>
+
+              <optgroup label="💰 RECEITAS" id="group-receitas">
+                <option value="Salário">Salário</option>
+                <option value="Freelance">Freelance</option>
+                <option value="Investimentos">Investimentos</option>
+                <option value="Presente">Presente</option>
+                <option value="Extra">Renda Extra</option>
+              </optgroup>
+
+              <optgroup label="🚀 CAIXINHAS" id="group-caixinhas" style="display: none;">
+                <option value="Reserva de Emergência">Reserva de Emergência</option>
+                <option value="Metas">Metas</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <input type="hidden" id="input-tipo" value="expense">
+
+          <button type="submit" class="btn-save">Confirmar Registro</button>
+        </form>
+      </div>
+    </div>
+
+    <!--
       <section class="add-transaction-section">
         <h3>Histórico Recente</h3>
         <div id="transaction-list"></div>
