@@ -239,26 +239,28 @@ function renderCategoriasGrafico(lista) {
 // 5. Função de Filtro Visual (Destaque no histórico)
 window.filtrarPorCategoria = (categoriaNome) => {
   // Remove destaque de todos primeiro
-  document.querySelectorAll('.tx-item').forEach(el => el.classList.remove('destaque-categoria'));
+  document.querySelectorAll('.tx-item').forEach(el => {
+    el.classList.remove('destaque-categoria');
+  });
 
   const itens = document.querySelectorAll('.tx-item');
-  let primeiroEncontrado = null;
+  const listaParaLimpar = [];
 
   itens.forEach(item => {
-    // Verifica se o texto da categoria está dentro do item
+    // Verifica se a categoria está no texto do item
     if (item.textContent.includes(categoriaNome)) {
       item.classList.add('destaque-categoria');
-      if (!primeiroEncontrado) primeiroEncontrado = item;
+      listaParaLimpar.push(item);
     }
   });
 
-  // Scroll suave até o primeiro item da categoria
-  if (primeiroEncontrado) {
-    primeiroEncontrado.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // 2. Scroll para o primeiro item encontrado
+  if (listaParaLimpar.length > 0) {
+    listaParaLimpar[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   setTimeout(() => {
-    itensParaDestacar.forEach(item => {
+    listaParaLimpar.forEach(item => {
       item.classList.remove('destaque-categoria');
     });
   }, 3000);
