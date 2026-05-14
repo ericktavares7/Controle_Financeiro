@@ -267,3 +267,91 @@
   text-decoration: none;
   font-weight: 600;
 }
+
+.btn-logout {
+  background: transparent;
+  color: #ff4b4b;
+  /* Vermelho suave para indicar saída */
+  border: 1px solid rgba(255, 75, 75, 0.3);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  background: rgba(255, 75, 75, 0.1);
+  border-color: #ff4b4b;
+  box-shadow: 0 0 12px rgba(255, 75, 75, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Ajuste para o Header se você ainda não tiver */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.auth-header h2 {
+  font-size: 2.2rem;
+  /* Título bem imponente */
+  color: #00FFB2;
+  margin-top: 15px;
+  font-weight: 800;
+}
+
+.auth-header p {
+  font-size: 1.1rem;
+  /* Subtítulo maior */
+  color: #888;
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 10px;
+  color: #bbb;
+  font-size: 1.05rem;
+  /* Label mais visível */
+  font-weight: 600;
+}
+
+.input-group input {
+  width: 100%;
+  background: #0B0B15;
+  border: 1px solid #252540;
+  padding: 16px;
+  /* Aumentamos o respiro interno */
+  border-radius: 12px;
+  color: white;
+  font-size: 1.1rem;
+  /* Fonte do que você digita maior */
+  outline: none;
+  transition: 0.3s;
+}
+
+/* Botão de Entrar/Cadastrar maior */
+.btn-neon {
+  width: 100%;
+  padding: 18px;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Link de alternar conta */
+#toggle-auth-text {
+  font-size: 1rem;
+  margin-top: 25px;
+}
