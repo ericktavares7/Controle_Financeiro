@@ -19,6 +19,34 @@ body {
   position: relative;
 }
 
+.progress-bar div {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+}
+
+.progress-bar div::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: shine 2s infinite;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 /* A barra que preenche (Efeito Glow igual à foto) */
 .progress-fill.essencial {
   background: linear-gradient(90deg, #FF6B35, #ff936e);
