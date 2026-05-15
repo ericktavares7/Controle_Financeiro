@@ -142,7 +142,7 @@ export async function addTransaction(data) {
 
 function dbListenFirestore(userId) {
   const q = query(
-    collection(db, "transactions"),
+    collection(db, "transacoes"),
     where("userId", "==", userId)
   );
 
