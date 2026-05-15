@@ -43,6 +43,33 @@
   margin: 10px 0;
 }
 
+.dashboard-top-cards {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+/* Os 3 cards menores lado a lado */
+.top-card {
+    flex: 1; /* Faz os 3 terem o mesmo tamanho */
+    min-width: 200px;
+    padding: 1.5rem;
+    background-color: var(--cards);
+    border-radius: 1rem;
+    border: 1px solid var(--bordas);
+}
+
+/* O Card de Categoria (O "Pai" do gráfico) */
+.category-card-large {
+    width: 100%; /* Ocupa a largura toda */
+    min-height: 400px; /* Mais altura para o gráfico respirar */
+    background-color: var(--cards);
+    border-radius: 1rem;
+    border: 1px solid var(--bordas);
+    padding: 2rem;
+}
+
 .clickable {
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
