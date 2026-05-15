@@ -361,11 +361,8 @@
   cursor: pointer;
 }
 
-.actions-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin: 20px 0;
+.top-actions-grid {
+    margin-top: 0;
 }
 
 /* Base do Botão Padronizada */
@@ -712,11 +709,15 @@ select option {
   display: none;
   opacity: 0;
   transition: opacity 0.4s ease-in-out;
+  margin-top: 10px;
 }
 
 #tab-transacoes {
-  height: auto !important;
-  padding-top: 0;
+  /* Reduza o valor que estava antes para algo mais próximo da altura do header */
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .tab-section.active {
