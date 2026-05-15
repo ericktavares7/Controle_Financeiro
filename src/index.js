@@ -134,9 +134,8 @@ window.destacarCategoria = (nomeCat) => {
 
 // AJUSTE NA RENDERIZAÇÃO: Adicione o onclick na barra
 function renderCategoriasGrafico(lista) {
-  // 1. Aqui a gente define quem é o 'container'
   const container = document.getElementById('categoryList');
-  if (!container) return; // Se não achar o ID no HTML, ele para aqui e não dá erro
+  if (!container) return;
 
   const totais = {};
   lista.forEach(t => {
@@ -144,16 +143,19 @@ function renderCategoriasGrafico(lista) {
     totais[t.cat].valor += t.val;
   });
 
-  const categoriasArray = Object.entries(totais).sort((a, b) => b[1].valor - a[1].valor);
+  const categoriasArray = Object.entries(totais).sort((a, b) => {
+    return ordemCrescente ? a[1].valor - b[1].valor : b[1].valor - a[1].valor;
+  });
+
   const maiorValor = Math.max(...categoriasArray.map(c => c[1].valor), 0);
 
-  // 2. Agora o 'container' existe e podemos usar o innerHTML
+  // O pulo do gato: o HTML gerado aqui agora vai se encaixar no Grid de 2 colunas do CSS
   container.innerHTML = categoriasArray.map(([cat, info]) => {
     const porc = maiorValor > 0 ? (info.valor / maiorValor) * 100 : 0;
     const cor = info.tipo === 'income' ? '#00FFB2' : '#FF6B35';
-
+    
     return `
-      <div class="category-bar-item" onclick="window.destacarCategoria('${cat}')" style="cursor: pointer;">
+      <div class="category-bar-item" onclick="window.destacarCategoria('${cat}')">
         <div class="bar-info">
           <span>${cat}</span>
           <b>${formatBRL(info.valor)}</b>
