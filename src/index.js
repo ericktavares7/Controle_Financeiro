@@ -110,22 +110,36 @@ function atualizarMetasIA(receita, despesa, reserva) {
   `;
 }
 
-function renderCategoriasGrafico(lista) {
-  const container = document.getElementById('categoryList');
-  if (!container) return;
-  const totais = {};
-  lista.forEach(t => {
-    if (!totais[t.cat]) totais[t.cat] = { valor: 0, tipo: t.type };
-    totais[t.cat].valor += t.val;
-  });
-  const categoriasArray = Object.entries(totais).sort((a, b) => b[1].valor - a[1].valor);
-  const maiorValor = Math.max(...categoriasArray.map(c => c[1].valor), 0);
+window.destacarCategoria = (nomeCat) => {
+  // 1. Muda para a aba de transações automaticamente
+  const btnTransacoes = document.querySelector('[data-tab="transactions"]');
+  if (btnTransacoes) btnTransacoes.click();
 
+  // 2. Espera um pouquinho a aba carregar e procura os itens
+  setTimeout(() => {
+    const classeBusca = `.category-${nomeCat.replace(/\s+/g, '-')}`;
+    const itens = document.querySelectorAll(classeBusca);
+
+    if (itens.length > 0) {
+      itens.forEach(item => {
+        item.classList.add('destaque-temp'); // Adiciona o efeito
+        item.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Rola até o item
+
+        // Remove após 2 segundos
+        setTimeout(() => item.classList.remove('destaque-temp'), 2000);
+      });
+    }
+  }, 100);
+};
+
+// AJUSTE NA RENDERIZAÇÃO: Adicione o onclick na barra
+function renderCategoriasGrafico(lista) {
+  // ... (seu código anterior de totais e calculos)
   container.innerHTML = categoriasArray.map(([cat, info]) => {
     const porc = maiorValor > 0 ? (info.valor / maiorValor) * 100 : 0;
     const cor = info.tipo === 'income' ? '#00FFB2' : '#FF6B35';
     return `
-      <div class="category-bar-item">
+      <div class="category-bar-item" onclick="window.destacarCategoria('${cat}')" style="cursor: pointer;">
         <div class="bar-info"><span>${cat}</span><b>${formatBRL(info.valor)}</b></div>
         <div class="bar-bg"><div class="bar-fill" style="width:${porc}%; background:${cor}"></div></div>
       </div>`;
@@ -137,19 +151,27 @@ function renderListaTransacoes(lista) {
   const cDes = document.getElementById('lista-despesas-historico');
   if (!cRec || !cDes) return;
 
-  const template = (t) => `
-    <div class="tx-item">
+  const template = (t) => {
+    // 1. Criamos um ID único para cada linha e uma classe baseada na categoria
+    // O replace limpa espaços (ex: "Cartão de Crédito" vira "Cartão-de-Crédito")
+    const categoriaClasse = `cat-${(t.cat || 'Geral').replace(/\s+/g, '-')}`;
+    const corValor = t.type === 'income' ? '#00FFB2' : '#FF6B35';
+    const sinal = t.type === 'income' ? '+' : '-';
+
+    return `
+    <div class="tx-item ${categoriaClasse}" id="tx-${t.id}">
       <div class="tx-info">
         <span class="tx-desc">${t.desc}</span>
         <span class="tx-meta" style="color:rgba(255,255,255,0.4)">${t.cat || 'Geral'} · ${formatDate(t.createdAt)}</span>
       </div>
       <div class="tx-right">
-        <span class="tx-val" style="color:${t.type === 'income' ? '#00FFB2' : '#FF6B35'}">
-          ${t.type === 'income' ? '+' : '-'}${formatBRL(t.val)}
+        <span class="tx-val" style="color: ${corValor}; font-weight: bold;">
+          ${sinal} ${formatBRL(t.val)}
         </span>
         <button class="tx-delete" onclick="window.deletarTransacao('${t.id}')">✕</button>
       </div>
     </div>`;
+  };
 
   cRec.innerHTML = lista.filter(t => t.type === 'income').map(template).join('') || '<p>Sem receitas</p>';
   cDes.innerHTML = lista.filter(t => t.type !== 'income').map(template).join('') || '<p>Sem despesas</p>';

@@ -105,3 +105,17 @@
   background: rgba(255, 107, 53, 0.15);
   color: var(--saidas);
 }
+
+.tx-item.destaque-temp {
+  background: rgba(0, 255, 178, 0.15) !important;
+  /* Um leve brilho verde */
+  border-left: 4px solid #00FFB2 !important;
+  transform: scale(1.02);
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(0, 255, 178, 0.2);
+}
+
+/* Garante que o item volte ao normal suavemente */
+.tx-item {
+  transition: all 0.5s ease;
+}
