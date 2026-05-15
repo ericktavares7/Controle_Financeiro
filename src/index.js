@@ -6,7 +6,7 @@ import './chat.css';
 import './transactions.css';
 import './responsive.css';
 import Chart from 'chart.js/auto';
-import { db } from './firebase.js';
+import { db, auth } from './firebase.js';
 import { collection, addDoc, query, orderBy, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 
 // --- VARIÁVEIS GLOBAIS ---
@@ -49,31 +49,6 @@ window.deletarTransacao = async (id) => {
   }
 };
 
-// --- FUNÇÕES DE BANCO DE DADOS ---
-
-function dbListenFirestore() {
-  const uid = auth.currentUser?.uid;
-  if (!uid) return;
-
-  const q = query(
-    collection(db, "transacoes"),
-    where("userId", "==", uid),
-    orderBy("createdAt", "desc")
-  );
-
-  onSnapshot(q, (snapshot) => {
-    // 2. Use sempre o window. para garantir a atualização
-    window.transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    renderCategoriasGrafico(window.transactions);
-    if (grafico) atualizarGrafico(grafico, window.transactions);
-    atualizarDashboard();
-  });
-}
-
-/**
- * Adiciona nova transação
- */
 async function dbAdd(transacao) {
   try {
     const docRef = await addDoc(collection(db, "transacoes"), transacao);
@@ -84,9 +59,6 @@ async function dbAdd(transacao) {
   }
 }
 
-/**
- * Remove transação
- */
 async function dbRemoveFirestore(id) {
   try {
     await deleteDoc(doc(db, "transacoes", id));
@@ -433,6 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 6. FORMULÁRIO DE ENVIO (SUBMIT)
   const form = document.getElementById('form-transacao');
+  
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -451,8 +424,6 @@ document.addEventListener('DOMContentLoaded', () => {
       window.fecharModal();
     }
   });
-
-  dbListenFirestore();
 });
 
 // --- FUNÇÃO AUXILIAR (Fora do DOM, mas chamada por ele) ---
