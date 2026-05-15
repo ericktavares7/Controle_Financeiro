@@ -386,6 +386,14 @@ function atualizarGrafico(chart, todasTransactions) {
   chart.update();
 }
 
+function atualizarGrafico(labels, dadosReceitas, dadosDespesas) {
+  if (grafico) {
+    grafico.data.labels = labels;
+    grafico.data.datasets[0].data = dadosReceitas;
+    grafico.data.datasets[1].data = dadosDespesas;
+    grafico.update();
+  }
+}
 // --- INICIALIZAÇÃO ---
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -428,7 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn = document.querySelector(`[data-tab="${nomeAba}"]`);
     if (btn) btn.click();
   }
-  
+
   // 1. POPULAR O SELECT DE MESES (Primeira tarefa: preparar o filtro)
   popularSelectMeses();
 

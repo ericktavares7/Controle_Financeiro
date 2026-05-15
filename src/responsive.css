@@ -1,165 +1,125 @@
-:root {
-  font-size: 14px;
-}
-
-/* Trava de scroll apenas no login */
-body:not(.logged-in) {
-  overflow: hidden !important;
-  height: 100vh;
-}
-
-body.logged-in {
-  overflow-y: auto !important;
+/* --- RESET DE COMPORTAMENTO --- */
+body {
+  background-color: #0B0B15;
+  /* Cor de fundo das suas imagens */
+  color: #FFFFFF;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
   height: auto !important;
+  /* Resolve o bloco preto: permite que o site cresça */
 }
 
-/* --- CONTAINERS E GRIDS --- */
-.container,
-.tab-section,
-.dashboard-grid,
-.transactions-container {
-  width: 94%;
-  margin: 0 auto;
-  padding: 10px 0;
-  box-sizing: border-box;
-}
-
-/* --- CARDS --- */
-.card,
-.balance-card,
-.card-summary {
+/* --- BLOCO PRETO FIX: Garante que o conteúdo suba --- */
+.dashboard-container {
+  display: block !important;
+  /* Remove o flex centralizado que empurra tudo para baixo */
   width: 100%;
-  margin-bottom: 15px;
   padding: 20px;
-  background: #161626;
-  border-radius: 18px;
-  border: 1px solid #252540;
   box-sizing: border-box;
 }
 
-.auth-card {
-  width: 90%;
-  max-width: 400px;
-  padding: 30px 20px;
-  border-radius: 20px;
-  background: #161626;
-  border: 1px solid #252540;
-}
-
-/* --- ABA TRANSAÇÕES (FIX DO BLOCO PRETO) --- */
-#aba-transacoes,
-.tab-section[data-tab="transacoes"] {
-  height: auto !important;
-  min-height: auto !important;
-  padding-top: 0 !important;
-  margin-top: 0 !important;
-}
-
-.controls-row {
+/* --- ESTILO DOS CARDS COM EFEITO NEON (IGUAL ÀS IMAGENS) --- */
+.action-card {
+  width: 100%;
+  background: #0f172a;
+  border-radius: 16px;
+  border: 1px solid #1e2d40;
+  padding: 15px;
+  margin-bottom: 15px;
   display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+/* Cores das bordas neon de baixo */
+.btn-income {
+  border-bottom: 3px solid #00FFB2 !important;
+  box-shadow: 0 4px 15px rgba(0, 255, 178, 0.2);
+}
+
+.btn-expense {
+  border-bottom: 3px solid #FF6B35 !important;
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+}
+
+.btn-caixinha {
+  border-bottom: 3px solid #00d2ff !important;
+  box-shadow: 0 4px 15px rgba(0, 210, 255, 0.2);
+}
+
+/* --- CARDS DE RESUMO (REGRA 70/20/10 E POUPANÇA) --- */
+.summary-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card {
+  background: #0f172a;
+  border: 1px solid #1e2d40;
+  border-radius: 20px;
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.card header {
+  display: flex;
+  align-items: center;
   gap: 10px;
   margin-bottom: 15px;
+}
+
+.card header h3 {
+  font-size: 0.85rem;
+  color: #4a6080;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.card .value {
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+/* --- GRÁFICOS E CATEGORIAS --- */
+.chart-card {
+  background: #0f172a;
+  border: 1px solid #1e2d40;
+  border-radius: 20px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.canvas-wrapper {
   width: 100%;
+  height: 300px;
+  /* Altura necessária para o gráfico aparecer */
+  position: relative;
 }
 
-#filtro-mes {
-  flex: 1;
-  height: 48px;
-  background: #161626;
-  color: white;
-  border: 1px solid #252540;
-  border-radius: 12px;
-  padding: 0 15px;
-}
-
-#btn-ordem {
-  width: 48px;
-  height: 48px;
-  background: #161626;
-  border: 1px solid #252540;
-  border-radius: 12px;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* --- LISTA DE ITENS --- */
-.tx-item {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 14px;
-  margin-bottom: 10px;
-}
-
-/* --- SUMÁRIO (REGRA 70/20/10) --- */
-.summary-grid {
-  display: flex !important;
-  flex-direction: column;
-  gap: 16px;
-  width: 100%;
-  margin-bottom: 20px;
-}
-
-/* --- HEADER E INFOS --- */
-header {
-  padding: 15px 4%;
-  justify-content: space-between;
-  align-items: center;
-  background: #0B0B15;
-}
-
-.user-info span {
-  display: none;
-}
-
-/* Mobile mode */
-
-/* --- PROGRESS BARS --- */
-.progress-bar {
-  background: rgba(255, 255, 255, 0.05);
-  height: 10px;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.progress-bar div {
-  height: 100%;
-  transition: 0.8s ease;
-  border-radius: 10px;
-}
-
-/* --- DESKTOP ADAPTATIONS --- */
+/* --- AJUSTES PARA DESKTOP (TELAS GRANDES) --- */
 @media (min-width: 1024px) {
   .top-actions-grid {
+    display: grid;
     grid-template-columns: repeat(3, 1fr);
+    /* Botões lado a lado */
     gap: 20px;
   }
 
   .summary-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.5fr 1fr;
+    /* Regra maior que poupança */
     gap: 20px;
-  }
-
-  .user-info span {
-    display: inline;
-    margin-left: 8px;
-  }
-
-  .dashboard-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px 40px;
   }
 
   .dashboard-header {
     flex-direction: row;
     justify-content: space-between;
-    align-items: center;
   }
 }

@@ -1,100 +1,58 @@
-* {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-  -webkit-font-smoothing: antialiased;
-}
-
 :root {
   --bg-color: #070d1a;
-  --cards: #161626;
-  --txt_principal: #e2e8f0;
-  --txt_secondario: #4a6080;
-  --bordas: #1e2d40;
-  --entradas: #00FFB2;
-  --saidas: #FF6B35;
-  --acao: #00FFB2;
+  --card-bg: #0f172a;
+  --border-color: #1e2d40;
+  --txt-principal: #e2e8f0;
+  --receita: #00FFB2;
+  --despesa: #FF6B35;
+  --caixinha: #00d2ff;
 }
 
-html,
 body {
-  width: 100%;
-  background-color: #0B0B15;
-  color: #FFFFFF;
-  font-family: "Manrope", sans-serif;
+  background-color: var(--bg-color);
+  color: var(--txt-principal);
+  font-family: 'Manrope', sans-serif;
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
 }
 
-.dashboard-container {
-  display: block !important; 
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+/* --- EFEITOS NEON DOS BOTÕES DE TOPO --- */
+.action-card {
+  background: #0f172a;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
   padding: 20px;
-}
-
-/* Reset de botões e inputs */
-button,
-input,
-select,
-textarea {
-  font-family: 'Manrope', sans-serif;
-}
-
-/* Scrollbar fina */
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-color);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--bordas);
-  border-radius: 10px;
-}
-
-/* --- LOGIN OVERLAY --- */
-.auth-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: #0B0B15;
-  z-index: 9999;
-  display: flex; /* Aqui o flex é necessário para centralizar o login */
+  display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+  position: relative;
+  overflow: hidden;
 }
 
-/* --- ESTADOS DE VISIBILIDADE --- */
-header,
-main,
-.tab-section {
-  display: none;
+.btn-income { border-bottom: 3px solid var(--receita); box-shadow: 0 4px 15px rgba(0, 255, 178, 0.1); }
+.btn-expense { border-bottom: 3px solid var(--despesa); box-shadow: 0 4px 15px rgba(255, 107, 53, 0.1); }
+.btn-caixinha { border-bottom: 3px solid var(--caixinha); box-shadow: 0 4px 15px rgba(0, 210, 255, 0.1); }
+
+/* --- CARDS DE RESUMO (IGUAL À FOTO) --- */
+.card {
+  background: #0f172a;
+  border: 1px solid #1e2d40;
+  border-radius: 20px;
+  padding: 24px;
 }
 
-body.logged-in .auth-overlay {
-  display: none !important;
-}
-/* Quando logado pelo JS, libera o app */
-body.logged-in header {
-  display: flex !important;
-}
-
-body.logged-in main {
-  display: block !important;
+.card header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-h1,
-h2,
-h3 {
-  font-weight: 700;
-  color: var(--txt_principal);
-}
-
-a {
-  text-decoration: none;
+.card .value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -1px;
 }
