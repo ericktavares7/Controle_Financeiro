@@ -26,7 +26,7 @@
   <div id="auth-container" class="auth-overlay">
     <div class="auth-card">
       <div class="auth-header">
-        <img src="/logo_finance.png" alt="Finance Simplefy" width="50">
+        <img src="../public/logo_finance.png" alt="Finance Simplefy" width="50">
         <h2 id="auth-title">Bem-vindo de volta</h2>
         <p id="auth-subtitle">Acesse sua conta para gerenciar suas finanças</p>
       </div>
@@ -216,32 +216,33 @@
         </div>
 
         <!-- KPIs do mês -->
-        <section id="tab-overview" class="tab-section active">
+        <div>
+          <article class="card income" id="card-receita">
+            <header>
+              <span class="icon">↑</span>
+              <h3>Receita</h3>
+            </header>
+            <p class="value" id="mes-receita">R$ 0,00</p>
+            <p id="mes-receita-delta"></p>
+          </article>
 
-          <select id="filtro-mes"></select>
+          <article class="card expense" id="card-despesa">
+            <header>
+              <span class="icon">↓</span>
+              <h3>Despesas</h3>
+            </header>
+            <p class="value" id="mes-despesa">R$ 0,00</p>
+            <p id="mes-despesa-delta"></p>
+          </article>
 
-          <div class="top-cards-container">
-            <div class="card-valor btn-receita" id="dash-card-receita">
-              <p>↑ RECEITA</p>
-              <h2 id="mes-receita">R$ 0,00</h2>
-            </div>
-            <div class="card-valor btn-despesa" id="dash-card-despesa">
-              <p>↓ DESPESAS</p>
-              <h2 id="mes-despesa">R$ 0,00</h2>
-            </div>
-            <div class="card-valor">
-              <p>◆ SALDO</p>
-              <h2 id="mes-saldo">R$ 0,00</h2>
-            </div>
-          </div>
-
-          <div id="card-categoria-dashboard">
-            <h3>POR CATEGORIA <button id="btn-ordem" onclick="window.alternarOrdemFiltro()">▼</button></h3>
-            <div id="categoryList">
-            </div>
-          </div>
-
-        </section>
+          <article class="card balance">
+            <header>
+              <span class="icon">◈</span>
+              <h3>Saldo</h3>
+            </header>
+            <p class="value" id="mes-saldo">R$ 0,00</p>
+          </article>
+        </div>
 
         <!-- Barras por categoria do mês -->
         <div class="chart-card categories">

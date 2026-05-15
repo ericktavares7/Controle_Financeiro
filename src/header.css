@@ -206,11 +206,7 @@
   margin-bottom: 30px;
 }
 
-.auth-header img {
-  display: block;
-  margin: 0 auto 15px auto;
-  object-fit: contain;
-}
+
 
 .auth-header h2 {
   font-size: 1.8rem;
