@@ -339,61 +339,55 @@ function renderListaTransacoes(listaFiltrada) {
   containerReceitas.innerHTML = receitas.length ? receitas.map(criarTemplate).join('') : '<p class="empty-msg" style="text-align:center; opacity:0.5; padding:20px;">Nenhuma receita encontrada.</p>';
   containerDespesas.innerHTML = despesas.length ? despesas.map(criarTemplate).join('') : '<p class="empty-msg" style="text-align:center; opacity:0.5; padding:20px;">Nenhuma despesa encontrada.</p>';
 }
+
 function atualizarGrafico(chart, todasTransactions) {
-  if (!chart || !todasTransactions.length) return;
+  if (!chart || !todasTransactions || todasTransactions.length === 0) return;
 
   const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
-  // 1. Descobre quais meses e anos existem nos dados
+  // 1. Descobre quais meses e anos existem nos dados e ordena
   const mesesPresentes = [...new Set(todasTransactions.map(t => {
     const d = new Date(t.createdAt?.seconds ? t.createdAt.seconds * 1000 : t.createdAt);
-    return `${d.getFullYear()}-${d.getMonth()}`; // Formato "2026-4"
+    return `${d.getFullYear()}-${d.getMonth()}`;
   }))].sort((a, b) => {
-    // Ordena cronologicamente
     const [anoA, mesA] = a.split('-').map(Number);
     const [anoB, mesB] = b.split('-').map(Number);
     return anoA !== anoB ? anoA - anoB : mesA - mesB;
   });
-
-  // 2. Prepara os dados para esses meses específicos
-  const labelsDinâmicas = [];
-  const ganhos = [];
-  const gastos = [];
-
-  mesesPresentes.forEach(chave => {
-    const [ano, mes] = chave.split('-').map(Number);
-    labelsDinâmicas.push(`${mesesNomes[mes]}/${ano.toString().slice(-2)}`);
-
-    // Soma o que for daquele mês/ano específico
-    const somaMes = todasTransactions.reduce((acc, t) => {
-      const d = new Date(t.createdAt?.seconds ? t.createdAt.seconds * 1000 : t.createdAt);
-      if (d.getFullYear() === ano && d.getMonth() === mes) {
-        if (t.type === 'income') acc.ganhos += t.val;
-        if (t.type === 'expense') acc.gastos += t.val;
-      }
-      return acc;
-    }, { ganhos: 0, gastos: 0 });
-
-    ganhos.push(somaMes.ganhos);
-    gastos.push(somaMes.gastos);
-  });
-
-  // 3. Alimenta o gráfico com a nova estrutura
-  chart.data.labels = labelsDinâmicas;
-  chart.data.datasets[0].data = ganhos;
-  chart.data.datasets[1].data = gastos;
-
-  chart.update();
 }
+const labelsDinâmicas = [];
+const ganhos = [];
+const gastos = [];
 
-function atualizarGrafico(labels, dadosReceitas, dadosDespesas) {
-  if (grafico) {
-    grafico.data.labels = labels;
-    grafico.data.datasets[0].data = dadosReceitas;
-    grafico.data.datasets[1].data = dadosDespesas;
-    grafico.update();
-  }
-}
+mesesPresentes.forEach(chave => {
+  const [ano, mes] = chave.split('-').map(Number);
+  labelsDinâmicas.push(`${mesesNomes[mes]}/${ano.toString().slice(-2)}`);
+
+  // Soma o que for daquele mês/ano específico
+  const somaMes = todasTransactions.reduce((acc, t) => {
+    const d = new Date(t.createdAt?.seconds ? t.createdAt.seconds * 1000 : t.createdAt);
+
+    if (d.getFullYear() === ano && d.getMonth() === mes) {
+      // ATENÇÃO: Verifique se no seu banco é 'tipo' ou 'type' / 'valor' ou 'val'
+      const valorNumerico = Number(t.valor || t.val || 0);
+      const tipoTransacao = t.tipo || t.type;
+
+      if (tipoTransacao === 'income') acc.ganhos += valorNumerico;
+      if (tipoTransacao === 'expense') acc.gastos += valorNumerico;
+    }
+    return acc;
+  }, { ganhos: 0, gastos: 0 });
+
+  ganhos.push(somaMes.ganhos);
+  gastos.push(somaMes.gastos);
+});
+
+// 3. Alimenta o gráfico com a nova estrutura
+chart.data.labels = labelsDinâmicas;
+chart.data.datasets[0].data = ganhos;
+chart.data.datasets[1].data = gastos;
+
+chart.update(); // Agora a linha vai subir!
 // --- INICIALIZAÇÃO ---
 
 document.addEventListener('DOMContentLoaded', () => {
