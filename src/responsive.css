@@ -158,6 +158,10 @@ body {
     padding-top: 80px;
   }
 
+  .top-actions-grid {
+    margin-top: 140px;
+  }
+
   .dashboard-header {
     height: auto;
     padding: 15px 0;
