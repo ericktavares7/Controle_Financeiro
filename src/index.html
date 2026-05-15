@@ -245,17 +245,14 @@
         </div>
 
         <!-- Barras por categoria do mês -->
-        <div class="chart-card categories">
-          <div class="card-header-flex">
-            <header>
-              <h3>Por Categoria</h3>
-
-              <button id="btn-ordem" onclick="window.alternarOrdemFiltro()">▼</button>
-              <span id="sort-icon">⇅</span>
-              </button>
-          </div>
-          </header>
-          <div class="category-bars" id="mes-categorias"></div>
+        <div class="card-header-flex">
+          <h3>Histórico</h3>
+          <button id="btn-ordem" class="btn-filter-icon" onclick="window.alternarOrdemFiltro()">
+            <span id="sort-icon">⇅</span>
+          </button>
+        </div>
+        
+        <div class="category-bars" id="mes-categorias"></div>
         </div>
 
         <!-- Lista de transações do mês -->

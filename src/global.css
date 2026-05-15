@@ -1,8 +1,9 @@
 :root {
-  --bg-color: #070d1a;
+  --bg-color: #050810;
   --card-bg: #0f172a;
   --border-color: #1e2d40;
-  --txt-principal: #e2e8f0;
+  --txt-principal: #ffffff;
+  --txt-secundario: #94a3b8;
   --receita: #00FFB2;
   --despesa: #FF6B35;
   --caixinha: #00d2ff;
@@ -16,6 +17,19 @@ body {
   padding: 0;
   overflow-x: hidden;
 }
+
+.tab-section {
+    display: none;
+    padding: 20px 0;
+    width: 100%;
+}
+
+.tab-section.active { display: block; animation: fadeIn 0.3s ease; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+h1, h2, h3 { color: #fff; letter-spacing: -0.5px; }
+.tx-meta, .current-date { color: var(--txt-secundario) !important; font-size: 13px; }
 
 /* --- EFEITOS NEON DOS BOTÕES DE TOPO --- */
 .action-card {
@@ -32,9 +46,20 @@ body {
   overflow: hidden;
 }
 
-.btn-income { border-bottom: 3px solid var(--receita); box-shadow: 0 4px 15px rgba(0, 255, 178, 0.1); }
-.btn-expense { border-bottom: 3px solid var(--despesa); box-shadow: 0 4px 15px rgba(255, 107, 53, 0.1); }
-.btn-caixinha { border-bottom: 3px solid var(--caixinha); box-shadow: 0 4px 15px rgba(0, 210, 255, 0.1); }
+.btn-income {
+  border-bottom: 3px solid var(--receita);
+  box-shadow: 0 4px 15px rgba(0, 255, 178, 0.1);
+}
+
+.btn-expense {
+  border-bottom: 3px solid var(--despesa);
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.1);
+}
+
+.btn-caixinha {
+  border-bottom: 3px solid var(--caixinha);
+  box-shadow: 0 4px 15px rgba(0, 210, 255, 0.1);
+}
 
 /* --- CARDS DE RESUMO (IGUAL À FOTO) --- */
 .card {

@@ -152,6 +152,65 @@ body {
   position: relative;
 }
 
+@media (max-width: 850px) {
+
+  /* Passo 5: Header em coluna para não quebrar nomes */
+  .dashboard-header {
+    grid-template-columns: 1fr;
+    /* Empilha tudo */
+    gap: 15px;
+    padding: 15px;
+    text-align: center;
+  }
+
+  .brand-group {
+    justify-content: center;
+  }
+
+  .status-badge {
+    justify-self: center;
+    /* Centraliza o "Ao Vivo" */
+  }
+
+  /* Passo 2: Evita o conteúdo ser jogado para baixo no mobile */
+  .top-cards-container {
+    grid-template-columns: 1fr;
+    /* Um card embaixo do outro */
+    gap: 12px;
+  }
+
+  /* Passo 1: Ajusta a altura do gráfico para telas pequenas */
+  .canvas-wrapper {
+    height: 220px;
+  }
+
+  /* Passo 3: Melhora a leitura no celular */
+  .card .value {
+    font-size: 1.6rem;
+  }
+
+  /* Ajuste da Aba Transações */
+  #categoryList {
+    grid-template-columns: 1fr;
+    /* Barra de categoria ocupa a largura toda */
+  }
+
+  /* Modal no Mobile: Ocupa mais espaço para facilitar o toque */
+  #modal-registro .modal-content {
+    width: 90%;
+    padding: 20px;
+    border-radius: 20px;
+  }
+
+  .main-nav ul {
+    gap: 15px;
+    overflow-x: auto;
+    /* Permite scroll horizontal se os nomes forem longos */
+    padding-bottom: 10px;
+    justify-content: flex-start;
+  }
+}
+
 /* --- AJUSTES PARA DESKTOP (TELAS GRANDES) --- */
 @media (min-width: 1024px) {
   .top-actions-grid {

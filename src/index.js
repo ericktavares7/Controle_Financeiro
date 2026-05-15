@@ -22,27 +22,48 @@ window.abrirModal = (tipo) => {
   const selectCat = document.getElementById('input-cat');
   const modalContent = modal?.querySelector('.modal-content');
 
-  if (modal && inputTipo && selectCat) {
-    inputTipo.value = tipo;
-    if (modalContent) {
-      modalContent.classList.remove('borda-receita', 'borda-despesa', 'borda-caixinha');
-      if (tipo === 'income') modalContent.classList.add('borda-receita');
-      else if (tipo === 'expense') modalContent.classList.add('borda-despesa');
-      else if (tipo === 'goal') modalContent.classList.add('borda-caixinha');
-    }
-    selectCat.innerHTML = '';
-    const lista = categoriasPorTipo[tipo] || [];
-    lista.forEach(cat => {
-      const option = document.createElement('option');
-      option.value = cat;
-      option.textContent = cat;
-      selectCat.appendChild(option);
-    });
-    modal.classList.add('active');
+  if (!modal || !inputTipo || !selectCat) return;
+
+  // 1. Trava o scroll do fundo para evitar o bug de mexer a página atrás
+  document.body.style.overflow = 'hidden';
+
+  // 2. Define o tipo no input hidden
+  inputTipo.value = tipo;
+
+  // 3. Gerencia as cores da borda (Removendo o que existia e colocando a nova)
+  if (modalContent) {
+    modalContent.classList.remove('borda-receita', 'borda-despesa', 'borda-caixinha');
+    const classeBorda = tipo === 'income' ? 'borda-receita' : (tipo === 'expense' ? 'borda-despesa' : 'borda-caixinha');
+    modalContent.classList.add(classeBorda);
   }
+
+  // 4. Limpa e Popula o Select de Categorias (Lógica vital que você já tinha)
+  selectCat.innerHTML = '';
+  const lista = categoriasPorTipo[tipo] || [];
+  lista.forEach(cat => {
+    const option = document.createElement('option');
+    option.value = cat;
+    option.textContent = cat;
+    selectCat.appendChild(option);
+  });
+
+  // 5. Abre o modal
+  modal.classList.add('active');
 };
 
-window.fecharModal = () => document.getElementById('modal-registro')?.classList.remove('active');
+window.fecharModal = () => {
+  const modal = document.getElementById('modal-registro');
+  document.body.style.overflow = 'auto'; // Libera o scroll
+  modal.classList.remove('active');
+};
+
+// FECHAR AO CLICAR NO FUNDO ESCURO
+document.addEventListener('click', (e) => {
+  const modal = document.getElementById('modal-registro');
+  if (e.target === modal) {
+    window.fecharModal();
+  }
+});
 
 window.deletarTransacao = async (id) => {
   if (confirm('Deseja realmente excluir?')) {
@@ -151,7 +172,7 @@ function renderCategoriasGrafico(lista) {
   container.innerHTML = categoriasArray.map(([cat, info]) => {
     const porc = maiorValor > 0 ? (info.valor / maiorValor) * 100 : 0;
     const cor = info.tipo === 'income' ? '#00FFB2' : '#FF6B35';
-    
+
     return `
       <div class="category-bar-item" onclick="window.destacarCategoria('${cat}')" style="cursor: pointer;">
         <div class="bar-info">
@@ -259,11 +280,37 @@ document.addEventListener('DOMContentLoaded', () => {
       data: {
         labels: [],
         datasets: [
-          { label: 'Receitas', data: [], borderColor: '#00FFB2', backgroundColor: 'rgba(0, 255, 178, 0.1)', fill: true, tension: 0.4 },
-          { label: 'Despesas', data: [], borderColor: '#FF6B35', backgroundColor: 'rgba(255, 107, 53, 0.1)', fill: true, tension: 0.4 }
+          {
+            label: 'Receitas',
+            data: [],
+            borderColor: '#00FFB2',
+            backgroundColor: 'rgba(0, 255, 178, 0.1)',
+            fill: true,
+            tension: 0.4, // Isso cria a onda
+            borderWidth: 3,
+            pointRadius: 0 // Deixa a linha limpa
+          },
+          {
+            label: 'Despesas',
+            data: [],
+            borderColor: '#FF6B35',
+            backgroundColor: 'rgba(255, 107, 53, 0.1)',
+            fill: true,
+            tension: 0.4, // Isso cria a onda
+            borderWidth: 3,
+            pointRadius: 0
+          }
         ]
       },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+        }
+      }
     });
   }
 
@@ -290,6 +337,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.fecharModal();
   });
 });
+
+
 
 function popularSelectMeses() {
   const select = document.getElementById('filtro-mes');
