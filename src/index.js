@@ -11,7 +11,7 @@ import { collection, query, orderBy, deleteDoc, doc } from "firebase/firestore";
 
 const categoriasPorTipo = {
   income: ["Salário", "Freelance", "Investimentos", "Presente", "Venda", "Outros"],
-  expense: ["Alimentação", "Transporte", "Aluguel", "Lazer", "Saúde", "Educação", "Cartão de Crédito", "Outros"],
+  expense: ["Alimentação", "Transporte", "Moradia", "Lazer", "Saúde", "Educação", "Cartão de Crédito", "Outros"],
   goal: ["Reserva de Emergência", "Meta de Compra", "Aposentadoria", "Viagem"]
 };
 
@@ -113,20 +113,37 @@ window.atualizarDashboard = () => {
   atualizarMetasIA(rec, des, res);
 };
 
-function atualizarMetasIA(receita, despesa, reserva) {
+function atualizarMetasIA(receita, despesa, reserva, lazer) {
   const container = document.getElementById('metas-container');
   if (!container || receita === 0) return;
+
   const pEssencial = ((despesa / receita) * 100).toFixed(1);
   const pReserva = ((reserva / receita) * 100).toFixed(1);
+  const pLazer = ((lazer / receita) * 100).toFixed(1);
 
   container.innerHTML = `
     <div class="meta-item">
-      <div class="meta-header"><span>Essencial (70%)</span><span style="color:${pEssencial > 70 ? '#FF6B35' : '#00FFB2'}">${pEssencial}%</span></div>
+      <div class="meta-header">
+        <span>Essencial (70%)</span>
+        <span style="color:${pEssencial > 70 ? '#FF6B35' : '#00FFB2'}">${pEssencial}%</span>
+      </div>
       <div class="progress-bar"><div style="width:${Math.min(pEssencial, 100)}%; background:${pEssencial > 70 ? '#FF6B35' : '#00FFB2'}"></div></div>
     </div>
+    
     <div class="meta-item">
-      <div class="meta-header"><span>Reserva (20%)</span><span style="color:#00D1FF">${pReserva}%</span></div>
+      <div class="meta-header">
+        <span>Reserva (20%)</span>
+        <span style="color:#00D1FF">${pReserva}%</span>
+      </div>
       <div class="progress-bar"><div style="width:${Math.min(pReserva, 100)}%; background:#00D1FF"></div></div>
+    </div>
+
+    <div class="meta-item">
+      <div class="meta-header">
+        <span>Lazer (10%)</span>
+        <span style="color:#FFD700">${pLazer}%</span>
+      </div>
+      <div class="progress-bar"><div style="width:${Math.min(pLazer, 100)}%; background:#FFD700"></div></div>
     </div>
   `;
 }
@@ -216,7 +233,7 @@ function renderListaTransacoes(lista) {
 
 window.atualizarGrafico = (chart, todasTransactions) => {
   if (!chart || !todasTransactions || todasTransactions.length === 0) return;
-  
+
   const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
   // 1. Extrai meses únicos e ordena
@@ -231,7 +248,7 @@ window.atualizarGrafico = (chart, todasTransactions) => {
   mesesChaves.forEach(chave => {
     const [ano, mes] = chave.split('-').map(Number);
     labels.push(`${mesesNomes[mes]}/${ano.toString().slice(-2)}`);
-    
+
     const soma = todasTransactions.reduce((acc, t) => {
       const d = t.createdAt?.toDate ? t.createdAt.toDate() : (t.createdAt instanceof Date ? t.createdAt : null);
       if (d && d.getFullYear() === ano && d.getMonth() === mes) {
@@ -241,11 +258,11 @@ window.atualizarGrafico = (chart, todasTransactions) => {
       return acc;
     }, { i: 0, e: 0 });
 
-    ganhos.push(soma.i); 
+    ganhos.push(soma.i);
     gastos.push(soma.e);
   });
 
-  chart.data.labels = labels; 
+  chart.data.labels = labels;
   chart.data.datasets[0].data = ganhos;
   chart.data.datasets[1].data = gastos;
 
