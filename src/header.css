@@ -27,9 +27,10 @@
 .header-container {
   width: 100%;
   max-width: 1400px;
-  padding: 0 24px;
+  margin: 0 auto;
+  padding: 0 20px;
   display: grid;
-  /* Cria 3 colunas: Esquerda (Logo), Centro (Menu), Direita (Ações) */
+  /* Mantém as 3 colunas, mas garante que não cresçam na vertical */
   grid-template-columns: 1fr auto 1fr; 
   align-items: center;
 }
@@ -47,10 +48,9 @@
   gap: 12px;
 }
 
-.brand-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.brand-info h1 {
+    font-size: 1.1rem; /* Título um pouco menor */
+    margin: 0;
 }
 
 .brand-info h1 {
@@ -63,12 +63,9 @@
 }
 
 .current-date {
-  font-size: 13px;
-  color: #64748b;
-  /* Um cinza azulado bem elegante */
-  font-weight: 400;
+    font-size: 0.75rem; /* Data mais discreta */
+    margin: 0;
 }
-
 /* Badge "ao vivo" na direita */
 .status-badge {
   border: 1px solid #1e293b;
@@ -138,8 +135,8 @@
   color: #94a3b8;
   font-weight: 500;
   cursor: pointer;
-  padding: 8px 16px;
-  transition: all 0.2s;
+  padding: 6px 12px;
+  font-size: 0.9rem;
 }
 
 .tab-btn.active {
@@ -301,6 +298,11 @@
   font-weight: 600;
 }
 
+.logo-img {
+    height: 35px; /* Ajuste o tamanho da sua logo se necessário */
+    width: auto;
+}
+
 .btn-logout {
   background: transparent;
   color: #ff4b4b;
@@ -331,12 +333,14 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 70px; /* Altura fixa para controle */
+  /* Reduzimos a altura total */
+  min-height: 60px; 
   background: #0f172a;
   border-bottom: 1px solid #1e2d40;
   z-index: 9999;
   display: flex;
-  justify-content: center;
+  align-items: center;
+  padding: 5px 0; /* Padding vertical bem pequeno */
 }
 
 .auth-header h2 {
