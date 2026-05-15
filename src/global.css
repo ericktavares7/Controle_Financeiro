@@ -55,11 +55,6 @@ textarea {
   border-radius: 10px;
 }
 
-body:has(#auth-container[style*="display: flex"]) {
-  overflow: hidden !important;
-  height: 100vh;
-}
-
 .auth-overlay {
   position: fixed;
   top: 0;
@@ -75,9 +70,33 @@ body:has(#auth-container[style*="display: flex"]) {
 
 }
 
-body:has(.auth-overlay) main,
-body:has(.auth-overlay) header {
-  display: none !important;
+body {
+  background-color: #0B0B15;
+  color: #FFFFFF;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 2. Trava de Segurança: SÓ funciona quando o login (auth-overlay) existe */
+body:has(.auth-overlay) {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+
+#aba-transacoes {
+  display: none;
+  width: 100%;
+  height: auto !important;
+  min-height: auto !important;
+  margin-top: 0;
+}
+
+body.logged-in .tab-section.active {
+  display: block !important;
+  height: auto !important;
 }
 
 #auth-container {

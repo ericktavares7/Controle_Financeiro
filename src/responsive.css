@@ -58,8 +58,7 @@ body.logged-in .dashboard-grid {
 
 /* --- CARDS E LOGIN --- */
 .card,
-.balance-card,
-.card-summary {
+.balance-card {
   width: 100%;
   margin-bottom: 15px;
   padding: 20px;
@@ -67,6 +66,19 @@ body.logged-in .dashboard-grid {
   border-radius: 18px;
   border: 1px solid #252540;
   box-sizing: border-box;
+}
+
+.card-summary {
+  width: 100%;
+  min-height: 120px;
+  padding: 18px;
+  background: #161626;
+  border-radius: 18px;
+  border: 1px solid #252540;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .auth-overlay {
@@ -97,6 +109,32 @@ body.logged-in .dashboard-grid {
   gap: 10px;
   margin-bottom: 15px;
   width: 100%;
+}
+
+#aba-transacoes,
+.tab-section[data-tab="transacoes"] {
+  min-height: auto !important;
+  height: auto !important;
+  padding-top: 10px !important;
+  /* Ajuste conforme a altura do seu header */
+  margin-top: 0 !important;
+}
+
+/* Garante que o container de transações não tenha margens loucas */
+.transactions-container {
+  display: flex;
+  flex-direction: column;
+  width: 94%;
+  margin: 0 auto;
+  padding-top: 0;
+  /* Zera o topo para subir o conteúdo */
+}
+
+/* Se houver algum overlay de carregamento ou filtro bugado, a gente reseta aqui */
+.filtro-container,
+.controls-row {
+  margin-top: 5px;
+  margin-bottom: 15px;
 }
 
 #filtro-mes {
@@ -201,6 +239,21 @@ header {
   height: 100%;
   transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 10px;
+}
+
+.summary-grid {
+  display: flex !important;
+  flex-direction: column;
+  /* Força um embaixo do outro no mobile */
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 480px) {
+  .summary-grid {
+    flex-direction: row;
+  }
 }
 
 /* --- DESKTOP (TELAS GRANDES) --- */
