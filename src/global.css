@@ -26,10 +26,6 @@ body {
   width: 100%;
 }
 
-.tab-section#tab-transacoes {
-    margin-top: 0 !important; 
-    padding-top: 10px; 
-}
 #tab-transacoes, 
 #tab-transacoes .transacoes-container {
     border: none;
