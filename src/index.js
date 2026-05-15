@@ -152,8 +152,6 @@ function renderListaTransacoes(lista) {
   if (!cRec || !cDes) return;
 
   const template = (t) => {
-    // 1. Criamos um ID único para cada linha e uma classe baseada na categoria
-    // O replace limpa espaços (ex: "Cartão de Crédito" vira "Cartão-de-Crédito")
     const categoriaClasse = `cat-${(t.cat || 'Geral').replace(/\s+/g, '-')}`;
     const corValor = t.type === 'income' ? '#00FFB2' : '#FF6B35';
     const sinal = t.type === 'income' ? '+' : '-';
