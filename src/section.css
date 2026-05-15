@@ -44,30 +44,49 @@
 }
 
 .dashboard-top-cards {
-    display: flex;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-    width: 100%;
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
 }
 
-/* Os 3 cards menores lado a lado */
-.top-card {
-    flex: 1; /* Faz os 3 terem o mesmo tamanho */
-    min-width: 200px;
-    padding: 1.5rem;
-    background-color: var(--cards);
-    border-radius: 1rem;
-    border: 1px solid var(--bordas);
+#tab-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-/* O Card de Categoria (O "Pai" do gráfico) */
-.category-card-large {
-    width: 100%; /* Ocupa a largura toda */
-    min-height: 400px; /* Mais altura para o gráfico respirar */
-    background-color: var(--cards);
-    border-radius: 1rem;
-    border: 1px solid var(--bordas);
-    padding: 2rem;
+/* Criamos um container para os cards de valor ficarem lado a lado */
+.top-cards-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  width: 100%;
+}
+
+/* Ajustamos os cards individuais (Receita, Despesa, Saldo) */
+/* Use a classe que você já tem neles, aqui chamei de .card-valor */
+.card-valor {
+  flex: 1;
+  /* Faz os 3 ocuparem o mesmo espaço na linha */
+  min-width: 0;
+  /* Evita que o card estoure o container */
+  padding: 20px;
+  height: auto;
+}
+
+/* O card de categoria agora ganha espaço total */
+#card-categoria-dashboard {
+  width: 100%;
+  min-height: 350px;
+  /* Aumentamos a altura para o gráfico de barras */
+  padding: 25px;
+}
+
+/* Ajuste nas barras de categoria para ficarem mais robustas */
+.category-bar-item {
+  margin-bottom: 20px;
+  /* Mais espaço entre uma categoria e outra */
 }
 
 .clickable {
@@ -694,6 +713,7 @@ select option {
   opacity: 0;
   transition: opacity 0.4s ease-in-out;
 }
+
 #tab-transacoes {
   height: auto !important;
   padding-top: 0;

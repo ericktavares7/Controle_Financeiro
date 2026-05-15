@@ -218,23 +218,31 @@
         <!-- KPIs do mês -->
         <section id="tab-overview" class="tab-section active">
 
-          <div class="dashboard-top-cards">
-            <div class="top-card borda-receita">
+          <div class="top-cards-container">
+            <div class="card-valor">
               <p>↑ RECEITA</p>
               <h2 id="mes-receita">R$ 0,00</h2>
             </div>
-            <div class="top-card borda-despesa">
+            <div class="card-valor">
               <p>↓ DESPESAS</p>
               <h2 id="mes-despesa">R$ 0,00</h2>
             </div>
-            <div class="top-card">
+            <div class="card-valor">
               <p>◆ SALDO</p>
               <h2 id="mes-saldo">R$ 0,00</h2>
             </div>
           </div>
 
-          <div class="category-card-large">
-            <h3>Distribuição por Categoria</h3>
+          <div class="card-grafico-onda" style="width: 100%; height: 300px;">
+            <h3>EVOLUÇÃO MENSAL</h3>
+            <canvas id="mainEvolutionChart"></canvas>
+          </div>
+
+          <div id="card-categoria-dashboard">
+            <h3>POR CATEGORIA</h3>
+            <div id="btn-ordem-container">
+              <button id="btn-ordem" onclick="window.alternarOrdemFiltro()">▼</button>
+            </div>
             <div id="categoryList">
             </div>
           </div>
