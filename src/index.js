@@ -6,7 +6,7 @@ import './chat.css';
 import './transactions.css';
 import './responsive.css';
 import Chart from 'chart.js/auto';
-import { db, auth, addTransaction} from './firebase.js';
+import { db, auth, addTransaction } from './firebase.js';
 import { collection, addDoc, query, orderBy, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 
 const categoriasPorTipo = {
@@ -340,21 +340,49 @@ function renderListaTransacoes(listaFiltrada) {
   containerDespesas.innerHTML = despesas.length ? despesas.map(criarTemplate).join('') : '<p class="empty-msg" style="text-align:center; opacity:0.5; padding:20px;">Nenhuma despesa encontrada.</p>';
 }
 function atualizarGrafico(chart, todasTransactions) {
-  const mesesLabels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
-  const ganhos = new Array(6).fill(0);
-  const gastos = new Array(6).fill(0);
+  if (!chart || !todasTransactions.length) return;
 
-  todasTransactions.forEach(t => {
+  const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+  // 1. Descobre quais meses e anos existem nos dados
+  const mesesPresentes = [...new Set(todasTransactions.map(t => {
     const d = new Date(t.createdAt?.seconds ? t.createdAt.seconds * 1000 : t.createdAt);
-    const mesIdx = d.getMonth();
-    if (mesIdx < 6) {
-      if (t.type === 'income') ganhos[mesIdx] += t.val;
-      else if (t.type === 'expense') gastos[mesIdx] += t.val;
-    }
+    return `${d.getFullYear()}-${d.getMonth()}`; // Formato "2026-4"
+  }))].sort((a, b) => {
+    // Ordena cronologicamente
+    const [anoA, mesA] = a.split('-').map(Number);
+    const [anoB, mesB] = b.split('-').map(Number);
+    return anoA !== anoB ? anoA - anoB : mesA - mesB;
   });
 
+  // 2. Prepara os dados para esses meses específicos
+  const labelsDinâmicas = [];
+  const ganhos = [];
+  const gastos = [];
+
+  mesesPresentes.forEach(chave => {
+    const [ano, mes] = chave.split('-').map(Number);
+    labelsDinâmicas.push(`${mesesNomes[mes]}/${ano.toString().slice(-2)}`);
+
+    // Soma o que for daquele mês/ano específico
+    const somaMes = todasTransactions.reduce((acc, t) => {
+      const d = new Date(t.createdAt?.seconds ? t.createdAt.seconds * 1000 : t.createdAt);
+      if (d.getFullYear() === ano && d.getMonth() === mes) {
+        if (t.type === 'income') acc.ganhos += t.val;
+        if (t.type === 'expense') acc.gastos += t.val;
+      }
+      return acc;
+    }, { ganhos: 0, gastos: 0 });
+
+    ganhos.push(somaMes.ganhos);
+    gastos.push(somaMes.gastos);
+  });
+
+  // 3. Alimenta o gráfico com a nova estrutura
+  chart.data.labels = labelsDinâmicas;
   chart.data.datasets[0].data = ganhos;
   chart.data.datasets[1].data = gastos;
+
   chart.update();
 }
 
@@ -386,10 +414,10 @@ document.addEventListener('DOMContentLoaded', () => {
     grafico = new Chart(ctx.getContext('2d'), {
       type: 'line',
       data: {
-        labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+        labels: [],
         datasets: [
-          { label: 'Receitas', data: [], borderColor: '#00FFB2', backgroundColor: 'rgba(0, 255, 178, 0.1)', fill: true, tension: 0.4 },
-          { label: 'Despesas', data: [], borderColor: '#FF6B35', backgroundColor: 'rgba(255, 107, 53, 0.1)', fill: true, tension: 0.4 }
+          { label: 'Receitas', data: [], borderColor: '#00FFB2', tension: 0.4 },
+          { label: 'Despesas', data: [], borderColor: '#FF6B35', tension: 0.4 }
         ]
       },
       options: {
@@ -428,10 +456,10 @@ document.addEventListener('DOMContentLoaded', () => {
       createdAt: new Date()
     };
     const salvo = await addTransaction(nova);
-    if (salvo !== null) { 
+    if (salvo !== null) {
       form.reset();
       window.fecharModal();
-     
+
     }
   });
 });
