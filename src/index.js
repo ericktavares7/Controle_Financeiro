@@ -160,17 +160,31 @@ function renderListaTransacoes(lista) {
   const cDes = document.getElementById('lista-despesas-historico');
   if (!cRec || !cDes) return;
 
-  const template = (t) => `
-    <div class="tx-item">
-      <div class="tx-info"><span class="tx-desc">${t.desc}</span><span class="tx-meta">${t.cat} · ${formatDate(t.createdAt)}</span></div>
-      <div class="tx-right">
-        <span class="tx-val ${t.type === 'income' ? 'tx-val--income' : 'tx-val--expense'}">${t.type === 'income' ? '+' : '-'}${formatBRL(t.val)}</span>
-        <button class="tx-delete" onclick="window.deletarTransacao('${t.id}')">✕</button>
-      </div>
-    </div>`;
+  const template = (t) => {
+    // Define a cor baseada no tipo: income = verde, expense/goal = vermelho
+    const corValor = t.type === 'income' ? '#00FFB2' : '#FF6B35';
+    const sinal = t.type === 'income' ? '+' : '-';
 
-  cRec.innerHTML = lista.filter(t => t.type === 'income').map(template).join('') || '<p>Sem receitas</p>';
-  cDes.innerHTML = lista.filter(t => t.type === 'expense').map(template).join('') || '<p>Sem despesas</p>';
+    return `
+        <div class="tx-item">
+          <div class="tx-info">
+            <span class="tx-desc">${t.desc}</span>
+            <span class="tx-meta" style="color: rgba(255,255,255,0.4)">${t.cat || 'Geral'} · ${formatDate(t.createdAt)}</span>
+          </div>
+          <div class="tx-right">
+            <span class="tx-val" style="color: ${corValor}; font-weight: bold;">
+              ${sinal} ${formatBRL(t.val)}
+            </span>
+            <button class="tx-delete" onclick="window.deletarTransacao('${t.id}')">✕</button>
+          </div>
+        </div>`;
+  };
+
+  const receitas = lista.filter(t => t.type === 'income');
+  const despesas = lista.filter(t => t.type !== 'income');
+
+  cRec.innerHTML = receitas.map(template).join('') || '<p class="empty">Sem receitas este mês.</p>';
+  cDes.innerHTML = despesas.map(template).join('') || '<p class="empty">Sem despesas este mês.</p>';
 }
 
 window.atualizarGrafico = (chart, todasTransactions) => {
@@ -224,11 +238,37 @@ document.addEventListener('DOMContentLoaded', () => {
       data: {
         labels: [],
         datasets: [
-          { label: 'Receitas', data: [], borderColor: '#00FFB2', backgroundColor: 'rgba(0, 255, 178, 0.1)', fill: true, tension: 0.4 },
-          { label: 'Despesas', data: [], borderColor: '#FF6B35', backgroundColor: 'rgba(255, 107, 53, 0.1)', fill: true, tension: 0.4 }
+          {
+            label: 'Receitas',
+            data: [],
+            borderColor: '#00FFB2',
+            backgroundColor: 'rgba(0, 255, 178, 0.2)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            pointBackgroundColor: '#00FFB2'
+          },
+          {
+            label: 'Despesas',
+            data: [],
+            borderColor: '#FF6B35',
+            backgroundColor: 'rgba(255, 107, 53, 0.2)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            pointBackgroundColor: '#FF6B35'
+          }
         ]
       },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+          x: { grid: { display: false } }
+        }
+      }
     });
   }
 

@@ -19,11 +19,19 @@ body {
   position: relative;
 }
 
+.progress-bar {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 10px;
+  height: 10px !important;
+  overflow: visible !important;
+  /* Para o brilho sair para fora */
+}
+
 .progress-bar div {
   height: 100%;
   border-radius: 10px;
-  transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  position: relative;
+  transition: width 1s ease-in-out;
+  filter: drop-shadow(0 0 5px inherit);
 }
 
 .progress-bar div::after {
