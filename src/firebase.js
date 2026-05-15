@@ -123,18 +123,15 @@ document.getElementById('auth-form')?.addEventListener('submit', async (e) => {
  * Adiciona uma nova transação vinculada ao ID do usuário atual
  */
 export async function addTransaction(data) {
-  if (!userLogado) {
-    console.error("Nenhum utilizador logado para salvar!");
-    return;
-  }
+  if (!auth.currentUser) return;
 
   try {
     await addDoc(collection(db, "transacoes"), {
       ...data,
-      userId: userLogado.uid,
+      userId: auth.currentUser.uid, // Verifique se esta linha existe!
       createdAt: serverTimestamp()
     });
-    console.log("Gravado com sucesso para o utilizador:", userLogado.uid);
+    console.log("Transação enviada com sucesso!");
   } catch (e) {
     console.error("Erro ao salvar:", e);
   }
@@ -165,5 +162,5 @@ function dbListenFirestore(userId) {
       alert("O Firebase ainda está bloqueando o acesso. Verifique as 'Rules' no console!");
     }
   }
-);
+  );
 }

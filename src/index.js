@@ -11,10 +11,9 @@ import { collection, addDoc, query, orderBy, deleteDoc, doc, onSnapshot } from "
 
 // --- VARIÁVEIS GLOBAIS ---
 
-let transactions = [];
 let grafico;
 let ordemCrescente = false;
-
+window.transactions = [];
 window.atualizarDashboard = atualizarDashboard;
 
 window.alternarOrdemFiltro = () => {
