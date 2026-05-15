@@ -70,6 +70,14 @@ window.atualizarDashboard = () => {
     return d.getFullYear() === anoFiltro && d.getMonth() === mesFiltro;
   });
 
+  dadosExibicao.sort((a, b) => {
+    return ordemCrescente ? a.val - b.val : b.val - a.val;
+  });
+
+  renderListaTransacoes(dadosExibicao);
+  renderCategoriasGrafico(dadosExibicao);
+
+  // (Certifique-se de que os IDs abaixo existem no seu HTML)
   let rec = 0, des = 0, res = 0;
   dadosExibicao.forEach(t => {
     if (t.type === 'income') rec += t.val;
@@ -81,8 +89,6 @@ window.atualizarDashboard = () => {
   document.getElementById('mes-despesa').textContent = formatBRL(des);
   document.getElementById('mes-saldo').textContent = formatBRL(rec - des - res);
 
-  renderListaTransacoes(dadosExibicao);
-  renderCategoriasGrafico(dadosExibicao);
   atualizarMetasIA(rec, des, res);
 };
 
@@ -178,6 +184,19 @@ window.atualizarGrafico = (chart, todasTransactions) => {
   chart.data.datasets[0].data = ganhos;
   chart.data.datasets[1].data = gastos;
   chart.update();
+};
+
+let ordemCrescente = false;
+
+window.alternarOrdemFiltro = () => {
+  ordemCrescente = !ordemCrescente;
+  const btn = document.getElementById('btn-ordem');
+
+  // Muda o ícone do botão para dar feedback visual
+  if (btn) btn.innerHTML = ordemCrescente ? '▲' : '▼';
+
+  // Chama a atualização do dashboard que agora vai usar essa ordem
+  window.atualizarDashboard();
 };
 
 document.addEventListener('DOMContentLoaded', () => {
