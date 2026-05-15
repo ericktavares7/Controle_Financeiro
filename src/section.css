@@ -714,7 +714,7 @@ select option {
 
 #tab-transacoes {
   /* Reduza o valor que estava antes para algo mais próximo da altura do header */
-  padding-top: 20px;
+  padding-top: 80px;
   display: flex;
   flex-direction: column;
   gap: 20px;
