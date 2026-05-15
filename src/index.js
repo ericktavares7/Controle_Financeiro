@@ -15,6 +15,7 @@ let transactions = [];
 let grafico;
 let ordemCrescente = false;
 
+window.atualizarDashboard = atualizarDashboard;
 
 window.alternarOrdemFiltro = () => {
   ordemCrescente = !ordemCrescente;
@@ -183,15 +184,21 @@ function atualizarDashboard() {
   const select = document.getElementById('filtro-mes');
   if (!select) return;
 
-  // 1. Pega o mês e ano selecionados no Select
+  // 1. Pega o mês e ano do Select
   const [anoFiltro, mesFiltro] = select.value.split('-').map(Number);
 
-  // 2. Filtra as transações baseadas na escolha do usuário
-  const dadosExibicao = transactions.filter(t => {
-    // Tratativa para datas do Firestore (Timestamp) ou datas normais
-    const d = new Date(t.createdAt?.seconds ? t.createdAt.seconds * 1000 : t.createdAt);
-    return d.getFullYear() === anoFiltro && d.getMonth() === mesFiltro;
+  console.log("Dados globais:", window.transactions);
+
+  // 2. Filtra usando window.transactions e tratando a data do Firestore
+  const dadosExibicao = (window.transactions || []).filter(t => {
+    
+    const timestamp = t.createdAt?.seconds ? t.createdAt.seconds * 1000 : (t.date || Date.now());
+    const d = new Date(timestamp);
+
+    return d.getFullYear() === anoFiltro && d.getMonth() === (mesFiltro - 1);
   });
+
+  console.log("Dados após filtro:", dadosExibicao);
 
   // 3. Inicializa os contadores para os cálculos
   let receitaTotal = 0;
@@ -262,7 +269,7 @@ function atualizarMetasIA(receita, despesa, reserva) {
   const pReserva = ((reserva / receita) * 100).toFixed(1);
 
   const valorLazer = receita * 0.10;
-  const pLazer = 10.0; 
+  const pLazer = 10.0;
 
   container.innerHTML = `
     <div class="meta-item">
