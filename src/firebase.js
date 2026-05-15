@@ -34,7 +34,7 @@ export const auth = getAuth(app);
 
 // Variável de controle local para o usuário logado
 let userLogado = null;
-
+let unsubscribe = null;
 // --- MONITOR DE ESTADO DE LOGIN ---
 
 onAuthStateChanged(auth, (user) => {
@@ -42,7 +42,7 @@ onAuthStateChanged(auth, (user) => {
 
   if (user) {
     // 1. Se já houver um escuta ativo de outra conta, desliga-o primeiro
-    if (unsubscribe) unsubscribe();
+    if (unsubscribe && typeof unsubscribe === "function") unsubscribe();
 
     userLogado = user;
     if (authContainer) authContainer.style.display = 'none';
@@ -50,7 +50,10 @@ onAuthStateChanged(auth, (user) => {
     // 2. Guarda o novo "interruptor"
     unsubscribe = dbListenFirestore(user.uid);
   } else {
-    if (unsubscribe) unsubscribe(); // Desliga ao sair
+    if (unsubscribe && typeof unsubscribe === "function") {
+      unsubscribe();
+      unsubscribe = null;
+    }
     userLogado = null;
     if (authContainer) authContainer.style.display = 'flex';
   }
@@ -144,8 +147,7 @@ function dbListenFirestore(userId) {
   );
 
   // Fica observando mudanças (adicionar, remover, editar)
-  onSnapshot(q, (snapshot) => {
-    // Mapeia os documentos e salva na variável global window.transactions
+  return onSnapshot(q, (snapshot) => {
     window.transactions = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
