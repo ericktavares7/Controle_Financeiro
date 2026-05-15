@@ -160,6 +160,10 @@ function dbListenFirestore(userId) {
       window.atualizarDashboard();
     }
   }, (error) => {
-    console.error("Erro no filtro do Firestore:", error);
-  });
+    console.error("ERRO DETALHADO:", error.code, error.message);
+    if (error.code === 'permission-denied') {
+      alert("O Firebase ainda está bloqueando o acesso. Verifique as 'Rules' no console!");
+    }
+  }
+);
 }
