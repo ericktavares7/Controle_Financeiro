@@ -18,6 +18,7 @@
   min-width: 0;
   overflow: hidden;
   box-sizing: border-box;
+  margin-top: 0;
 }
 
 .canvas-wrapper {
@@ -107,4 +108,12 @@
   border-radius: 10px;
   transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
   /* Animação suave ao carregar */
+}
+
+.tab-section {
+    display: none !important;
+}
+
+.tab-section.active {
+    display: flex !important; /* ou block */
 }
