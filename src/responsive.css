@@ -1,51 +1,19 @@
 :root {
   font-size: 14px;
-  font-family: 'Manrope', sans-serif;
 }
 
-body {
-  background-color: #0B0B15;
-  color: #FFFFFF;
-  -webkit-font-smoothing: antialiased;
-  padding: 0;
-  margin: 0;
-  overflow-x: hidden;
+/* Trava de scroll apenas no login */
+body:not(.logged-in) {
+  overflow: hidden !important;
   height: 100vh;
-  /* Trava altura inicial para o login */
-  overflow-y: hidden;
-  /* Trava scroll inicial */
 }
 
-/* --- LOGICA DE VISIBILIDADE (Abertura da Cortina) --- */
-
-/* Esconde tudo por padrão */
-header,
-main,
-.tab-section,
-.dashboard-grid {
-  display: none;
-}
-
-/* Quando logado, libera o scroll e mostra o conteúdo */
 body.logged-in {
-  height: auto !important;
   overflow-y: auto !important;
+  height: auto !important;
 }
 
-body.logged-in header {
-  display: flex !important;
-}
-
-body.logged-in main,
-body.logged-in .tab-section {
-  display: block !important;
-}
-
-body.logged-in .dashboard-grid {
-  display: grid !important;
-}
-
-/* --- CONTAINERS GLOBAIS --- */
+/* --- CONTAINERS E GRIDS --- */
 .container,
 .tab-section,
 .dashboard-grid,
@@ -56,9 +24,10 @@ body.logged-in .dashboard-grid {
   box-sizing: border-box;
 }
 
-/* --- CARDS E LOGIN --- */
+/* --- CARDS --- */
 .card,
-.balance-card {
+.balance-card,
+.card-summary {
   width: 100%;
   margin-bottom: 15px;
   padding: 20px;
@@ -66,32 +35,6 @@ body.logged-in .dashboard-grid {
   border-radius: 18px;
   border: 1px solid #252540;
   box-sizing: border-box;
-}
-
-.card-summary {
-  width: 100%;
-  min-height: 120px;
-  padding: 18px;
-  background: #161626;
-  border-radius: 18px;
-  border: 1px solid #252540;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.auth-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: #0B0B15;
-  z-index: 99999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .auth-card {
@@ -103,38 +46,20 @@ body.logged-in .dashboard-grid {
   border: 1px solid #252540;
 }
 
-/* --- ABA DE TRANSAÇÕES (MOBILE) --- */
+/* --- ABA TRANSAÇÕES (FIX DO BLOCO PRETO) --- */
+#aba-transacoes,
+.tab-section[data-tab="transacoes"] {
+  height: auto !important;
+  min-height: auto !important;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
 .controls-row {
   display: flex;
   gap: 10px;
   margin-bottom: 15px;
   width: 100%;
-}
-
-#aba-transacoes,
-.tab-section[data-tab="transacoes"] {
-  min-height: auto !important;
-  height: auto !important;
-  padding-top: 10px !important;
-  /* Ajuste conforme a altura do seu header */
-  margin-top: 0 !important;
-}
-
-/* Garante que o container de transações não tenha margens loucas */
-.transactions-container {
-  display: flex;
-  flex-direction: column;
-  width: 94%;
-  margin: 0 auto;
-  padding-top: 0;
-  /* Zera o topo para subir o conteúdo */
-}
-
-/* Se houver algum overlay de carregamento ou filtro bugado, a gente reseta aqui */
-.filtro-container,
-.controls-row {
-  margin-top: 5px;
-  margin-bottom: 15px;
 }
 
 #filtro-mes {
@@ -145,7 +70,6 @@ body.logged-in .dashboard-grid {
   border: 1px solid #252540;
   border-radius: 12px;
   padding: 0 15px;
-  font-size: 1rem;
 }
 
 #btn-ordem {
@@ -160,7 +84,7 @@ body.logged-in .dashboard-grid {
   justify-content: center;
 }
 
-/* --- ITENS DA LISTA --- */
+/* --- LISTA DE ITENS --- */
 .tx-item {
   width: 100%;
   display: flex;
@@ -170,53 +94,20 @@ body.logged-in .dashboard-grid {
   background: rgba(255, 255, 255, 0.03);
   border-radius: 14px;
   margin-bottom: 10px;
-  box-sizing: border-box;
 }
 
-.tx-info {
-  display: flex;
+/* --- SUMÁRIO (REGRA 70/20/10) --- */
+.summary-grid {
+  display: flex !important;
   flex-direction: column;
-  gap: 4px;
-}
-
-.tx-desc {
-  font-weight: 600;
-  font-size: 1rem;
-}
-
-.tx-meta {
-  font-size: 0.8rem;
-  color: #888;
-}
-
-.tx-val {
-  font-weight: bold;
-  font-size: 1rem;
-}
-
-/* --- MODAL, HEADER E PROGRESS --- */
-.modal-content {
-  width: 92%;
-  max-width: 400px;
-  padding: 25px;
-  border-radius: 24px;
-  background: #161626;
-}
-
-.top-actions-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 16px;
+  width: 100%;
   margin-bottom: 20px;
 }
 
-#dash-card-caixinhas {
-  grid-column: span 2;
-}
-
+/* --- HEADER E INFOS --- */
 header {
   padding: 15px 4%;
-  display: flex;
   justify-content: space-between;
   align-items: center;
   background: #0B0B15;
@@ -224,66 +115,51 @@ header {
 
 .user-info span {
   display: none;
-  /* Mobile mode */
 }
 
+/* Mobile mode */
+
+/* --- PROGRESS BARS --- */
 .progress-bar {
   background: rgba(255, 255, 255, 0.05);
   height: 10px;
   border-radius: 10px;
   overflow: hidden;
-  margin-top: 6px;
 }
 
 .progress-bar div {
   height: 100%;
-  transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: 0.8s ease;
   border-radius: 10px;
 }
 
-.summary-grid {
-  display: flex !important;
-  flex-direction: column;
-  /* Força um embaixo do outro no mobile */
-  gap: 16px;
-  width: 100%;
-  margin-bottom: 20px;
-}
-
-@media (min-width: 480px) {
-  .summary-grid {
-    flex-direction: row;
-  }
-}
-
-/* --- DESKTOP (TELAS GRANDES) --- */
+/* --- DESKTOP ADAPTATIONS --- */
 @media (min-width: 1024px) {
-
-  /* Volta para 3 colunas no topo */
   .top-actions-grid {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
 
-  #dash-card-caixinhas {
-    grid-column: span 1;
-  }
-
-  /* Volta para lado a lado nos stats */
   .summary-grid {
-    display: grid !important;
-    grid-template-columns: 1.5fr 1fr;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 20px;
   }
 
-  #app {
+  .user-info span {
+    display: inline;
+    margin-left: 8px;
+  }
+
+  .dashboard-container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 40px;
+    padding: 20px 40px;
   }
 
-  .meta-item {
-    margin-bottom: 15px;
+  .dashboard-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
   }
 }

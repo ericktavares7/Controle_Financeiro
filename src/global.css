@@ -5,18 +5,9 @@
   -webkit-font-smoothing: antialiased;
 }
 
-html,
-body {
-  width: 100%;
-  overflow-x: hidden;
-  /* Remove o scroll lateral teimoso */
-}
-
 :root {
-  /*Cores*/
-
   --bg-color: #070d1a;
-  --cards: #0f172a;
+  --cards: #161626;
   --txt_principal: #e2e8f0;
   --txt_secondario: #4a6080;
   --bordas: #1e2d40;
@@ -25,16 +16,24 @@ body {
   --acao: #00FFB2;
 }
 
+html,
 body {
+  width: 100%;
+  background-color: #0B0B15;
+  color: #FFFFFF;
   font-family: "Manrope", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--bg-color);
-  color: var(--txt_principal);
-  margin: 0;
-  padding: 24px;
+  overflow-x: hidden;
 }
 
+.dashboard-container {
+  display: block !important; 
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Reset de botões e inputs */
 button,
 input,
 select,
@@ -42,6 +41,7 @@ textarea {
   font-family: 'Manrope', sans-serif;
 }
 
+/* Scrollbar fina */
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -55,51 +55,8 @@ textarea {
   border-radius: 10px;
 }
 
+/* --- LOGIN OVERLAY --- */
 .auth-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: #0B0B15;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-
-}
-
-body {
-  background-color: #0B0B15;
-  color: #FFFFFF;
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* 2. Trava de Segurança: SÓ funciona quando o login (auth-overlay) existe */
-body:has(.auth-overlay) {
-  overflow: hidden !important;
-  height: 100vh !important;
-}
-
-#aba-transacoes {
-  display: none;
-  width: 100%;
-  height: auto !important;
-  min-height: auto !important;
-  margin-top: 0;
-}
-
-body.logged-in .tab-section.active {
-  display: block !important;
-  height: auto !important;
-}
-
-#auth-container {
   position: fixed;
   top: 0;
   left: 0;
@@ -107,20 +64,28 @@ body.logged-in .tab-section.active {
   height: 100%;
   background-color: #0B0B15;
   z-index: 9999;
-  display: flex;
+  display: flex; /* Aqui o flex é necessário para centralizar o login */
   align-items: center;
   justify-content: center;
 }
 
-main,
+/* --- ESTADOS DE VISIBILIDADE --- */
 header,
+main,
 .tab-section {
   display: none;
 }
 
-.logged-in main,
-.logged-in header {
-  display: block;
+body.logged-in .auth-overlay {
+  display: none !important;
+}
+/* Quando logado pelo JS, libera o app */
+body.logged-in header {
+  display: flex !important;
+}
+
+body.logged-in main {
+  display: block !important;
 }
 
 h1,
@@ -132,18 +97,4 @@ h3 {
 
 a {
   text-decoration: none;
-  transition: all 0.2s ease-in-out;
-}
-
-.dashboard-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.dashboard-header {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: flex-start;
 }

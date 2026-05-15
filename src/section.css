@@ -1,46 +1,46 @@
 /* Grid Principal */
 .summary-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  width: 100%;
-  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
 }
 
 .card {
-  background: var(--cards);
-  border: 1px solid var(--bordas);
-  border-radius: 12px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  /* Alinha o conteúdo à esquerda */
-  min-width: 0;
-  /* Evita que o card estoure o grid */
+  background-color: #161626;
+  /* Cor suave interna */
+  border: 1px solid #252540;
+  /* Borda discreta */
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.card-historico {
+  background: #161626;
+  border-radius: 16px;
+  padding: 15px;
+  margin-bottom: 15px;
 }
 
 .card header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-bottom: 15px;
 }
 
-.card h3 {
-  font-size: 11px;
+.card header h3 {
+  font-size: 0.9rem;
+  color: #888;
+  /* Texto mais suave para o título */
   text-transform: uppercase;
-  color: var(--txt_secondario);
-  white-space: nowrap;
-  /* Impede o título de quebrar linha */
 }
 
+/* Valores principais */
 .card .value {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--txt_principal);
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 10px 0;
 }
 
 .clickable {
@@ -663,14 +663,18 @@ select option {
 }
 
 .tab-section {
-    display: none;
-    opacity: 0;
-    transition: opacity 0.4s ease-in-out;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+}
+#tab-transacoes {
+  height: auto !important;
+  padding-top: 0;
 }
 
 .tab-section.active {
-    display: block;
-    opacity: 1;
+  display: block;
+  opacity: 1;
 }
 
 .tx-highlight {
