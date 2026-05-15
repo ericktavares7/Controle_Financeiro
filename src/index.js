@@ -7,7 +7,7 @@ import './transactions.css';
 import './responsive.css';
 import Chart from 'chart.js/auto';
 import { db, auth, addTransaction } from './firebase.js';
-import { collection, addDoc, query, orderBy, deleteDoc, doc, onSnapshot } from "firebase/firestore";
+import { collection, query, orderBy, deleteDoc, doc } from "firebase/firestore";
 
 const categoriasPorTipo = {
   income: ["Salário", "Freelance", "Investimentos", "Presente", "Venda", "Outros"],
@@ -39,36 +39,22 @@ window.abrirModal = (tipo) => {
       selectCat.appendChild(option);
     });
     modal.classList.add('active');
-    setTimeout(() => document.getElementById('input-desc')?.focus(), 100);
   }
 };
 
 window.fecharModal = () => document.getElementById('modal-registro')?.classList.remove('active');
 
 window.deletarTransacao = async (id) => {
-  if (confirm('Deseja realmente excluir esta transação?')) {
-    try {
-      await deleteDoc(doc(db, "transacoes", id));
-    } catch (e) { console.error("Erro ao deletar:", e); }
+  if (confirm('Deseja realmente excluir?')) {
+    try { await deleteDoc(doc(db, "transacoes", id)); }
+    catch (e) { console.error("Erro:", e); }
   }
 };
 
-// --- VARIÁVEIS DE ESTADO ---
-let ordemCrescente = false;
-window.transactions = [];
-
-window.alternarOrdemFiltro = () => {
-  ordemCrescente = !ordemCrescente;
-  const btn = document.getElementById('btn-ordem');
-  if (btn) btn.innerHTML = ordemCrescente ? '▲' : '▼';
-  atualizarDashboard();
-};
-
-// --- UTILITÁRIOS ---
 const formatBRL = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const formatDate = (date) => {
   if (!date) return "--/--/--";
-  const d = date.toDate ? date.toDate() : new Date(date);
+  const d = date.toDate ? date.toDate() : (date instanceof Date ? date : new Date(date));
   return d.toLocaleDateString('pt-BR');
 };
 
@@ -79,54 +65,41 @@ window.atualizarDashboard = () => {
 
   const [anoFiltro, mesFiltro] = select.value.split('-').map(Number);
 
-  // 1. Filtra os dados garantindo que reconheça Abril, Maio, etc.
   const dadosExibicao = (window.transactions || []).filter(t => {
-    // Converte a data do Firebase (Timestamp) para Data do JS
-    const d = t.createdAt?.toDate ? t.createdAt.toDate() : new Date(t.createdAt || Date.now());
+    const d = t.createdAt?.toDate ? t.createdAt.toDate() : (t.createdAt instanceof Date ? t.createdAt : new Date(t.createdAt));
     return d.getFullYear() === anoFiltro && d.getMonth() === mesFiltro;
   });
 
-  // 2. Calcula os totais para o mês filtrado
-  let receitaTotal = 0, despesaTotal = 0, reservaTotal = 0;
+  let rec = 0, des = 0, res = 0;
   dadosExibicao.forEach(t => {
-    if (t.type === 'income') receitaTotal += t.val;
-    else if (t.type === 'expense') despesaTotal += t.val;
-    else if (t.type === 'goal') reservaTotal += t.val;
+    if (t.type === 'income') rec += t.val;
+    else if (t.type === 'expense') des += t.val;
+    else if (t.type === 'goal') res += t.val;
   });
 
-  // 3. Atualiza os textos da interface
-  const elMesReceita = document.getElementById('mes-receita');
-  const elMesDespesa = document.getElementById('mes-despesa');
-  const elMesSaldo = document.getElementById('mes-saldo');
-
-  if (elMesReceita) elMesReceita.textContent = formatBRL(receitaTotal);
-  if (elMesDespesa) elMesDespesa.textContent = formatBRL(despesaTotal);
-  if (elMesSaldo) elMesSaldo.textContent = formatBRL(receitaTotal - despesaTotal - reservaTotal);
+  document.getElementById('mes-receita').textContent = formatBRL(rec);
+  document.getElementById('mes-despesa').textContent = formatBRL(des);
+  document.getElementById('mes-saldo').textContent = formatBRL(rec - des - res);
 
   renderListaTransacoes(dadosExibicao);
   renderCategoriasGrafico(dadosExibicao);
-  atualizarMetasIA(receitaTotal, despesaTotal, reservaTotal);
+  atualizarMetasIA(rec, des, res);
 };
 
 function atualizarMetasIA(receita, despesa, reserva) {
   const container = document.getElementById('metas-container');
   if (!container || receita === 0) return;
-
   const pEssencial = ((despesa / receita) * 100).toFixed(1);
   const pReserva = ((reserva / receita) * 100).toFixed(1);
 
   container.innerHTML = `
     <div class="meta-item">
-      <div class="meta-header"><span>Essencial (Meta 70%)</span><span style="color:${pEssencial > 70 ? '#FF6B35' : '#00FFB2'}">${pEssencial}%</span></div>
-      <div class="progress-bar"><div style="width:${Math.min(pEssencial, 100)}%; background:${pEssencial > 70 ? '#FF6B35' : '#00FFB2'}; box-shadow: 0 0 12px ${pEssencial > 70 ? '#FF6B35' : '#00FFB2'}88;"></div></div>
+      <div class="meta-header"><span>Essencial (70%)</span><span style="color:${pEssencial > 70 ? '#FF6B35' : '#00FFB2'}">${pEssencial}%</span></div>
+      <div class="progress-bar"><div style="width:${Math.min(pEssencial, 100)}%; background:${pEssencial > 70 ? '#FF6B35' : '#00FFB2'}"></div></div>
     </div>
     <div class="meta-item">
-      <div class="meta-header"><span>Reserva (Meta 20%)</span><span style="color:#00D1FF">${pReserva}%</span></div>
-      <div class="progress-bar"><div style="width:${Math.min(pReserva, 100)}%; background:#00D1FF; box-shadow: 0 0 12px #00D1FF88;"></div></div>
-    </div>
-    <div class="meta-item">
-      <div class="meta-header"><span>Estilo de Vida (Meta 10%)</span><span style="color:#FFD700">10%</span></div>
-      <div class="progress-bar"><div style="width:10%; background:#FFD700; box-shadow: 0 0 12px #FFD70088;"></div></div>
+      <div class="meta-header"><span>Reserva (20%)</span><span style="color:#00D1FF">${pReserva}%</span></div>
+      <div class="progress-bar"><div style="width:${Math.min(pReserva, 100)}%; background:#00D1FF"></div></div>
     </div>
   `;
 }
@@ -148,7 +121,7 @@ function renderCategoriasGrafico(lista) {
     return `
       <div class="category-bar-item">
         <div class="bar-info"><span>${cat}</span><b>${formatBRL(info.valor)}</b></div>
-        <div class="bar-bg"><div class="bar-fill" style="width:${porc}%; background:${cor}; box-shadow: 0 0 8px ${cor}66;"></div></div>
+        <div class="bar-bg"><div class="bar-fill" style="width:${porc}%; background:${cor}"></div></div>
       </div>`;
   }).join('');
 }
@@ -158,50 +131,43 @@ function renderListaTransacoes(lista) {
   const cDes = document.getElementById('lista-despesas-historico');
   if (!cRec || !cDes) return;
 
-  const template = (t) => {
-    // Define a cor baseada no tipo: income = verde, expense/goal = vermelho
-    const corValor = t.type === 'income' ? '#00FFB2' : '#FF6B35';
-    const sinal = t.type === 'income' ? '+' : '-';
+  const template = (t) => `
+    <div class="tx-item">
+      <div class="tx-info">
+        <span class="tx-desc">${t.desc}</span>
+        <span class="tx-meta" style="color:rgba(255,255,255,0.4)">${t.cat || 'Geral'} · ${formatDate(t.createdAt)}</span>
+      </div>
+      <div class="tx-right">
+        <span class="tx-val" style="color:${t.type === 'income' ? '#00FFB2' : '#FF6B35'}">
+          ${t.type === 'income' ? '+' : '-'}${formatBRL(t.val)}
+        </span>
+        <button class="tx-delete" onclick="window.deletarTransacao('${t.id}')">✕</button>
+      </div>
+    </div>`;
 
-    return `
-        <div class="tx-item">
-          <div class="tx-info">
-            <span class="tx-desc">${t.desc}</span>
-            <span class="tx-meta" style="color: rgba(255,255,255,0.4)">${t.cat || 'Geral'} · ${formatDate(t.createdAt)}</span>
-          </div>
-          <div class="tx-right">
-            <span class="tx-val" style="color: ${corValor}; font-weight: bold;">
-              ${sinal} ${formatBRL(t.val)}
-            </span>
-            <button class="tx-delete" onclick="window.deletarTransacao('${t.id}')">✕</button>
-          </div>
-        </div>`;
-  };
-
-  const receitas = lista.filter(t => t.type === 'income');
-  const despesas = lista.filter(t => t.type !== 'income');
-
-  cRec.innerHTML = receitas.map(template).join('') || '<p class="empty">Sem receitas este mês.</p>';
-  cDes.innerHTML = despesas.map(template).join('') || '<p class="empty">Sem despesas este mês.</p>';
+  cRec.innerHTML = lista.filter(t => t.type === 'income').map(template).join('') || '<p>Sem receitas</p>';
+  cDes.innerHTML = lista.filter(t => t.type !== 'income').map(template).join('') || '<p>Sem despesas</p>';
 }
 
 window.atualizarGrafico = (chart, todasTransactions) => {
   if (!chart || !todasTransactions.length) return;
   const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+  // Extrai meses únicos ordenados
   const mesesChaves = [...new Set(todasTransactions.map(t => {
-    const d = t.createdAt?.toDate ? t.createdAt.toDate() : new Date();
-    return `${d.getFullYear()}-${d.getMonth()}`;
-  }))].sort();
+    const d = t.createdAt?.toDate ? t.createdAt.toDate() : (t.createdAt instanceof Date ? t.createdAt : null);
+    return d ? `${d.getFullYear()}-${d.getMonth()}` : null;
+  }))].filter(Boolean).sort();
 
   const labels = [], ganhos = [], gastos = [];
   mesesChaves.forEach(chave => {
     const [ano, mes] = chave.split('-').map(Number);
     labels.push(`${mesesNomes[mes]}/${ano.toString().slice(-2)}`);
     const soma = todasTransactions.reduce((acc, t) => {
-      const d = t.createdAt?.toDate ? t.createdAt.toDate() : new Date();
-      if (d.getFullYear() === ano && d.getMonth() === mes) {
+      const d = t.createdAt?.toDate ? t.createdAt.toDate() : (t.createdAt instanceof Date ? t.createdAt : null);
+      if (d && d.getFullYear() === ano && d.getMonth() === mes) {
         if (t.type === 'income') acc.i += Number(t.val);
-        if (t.type === 'expense') acc.e += Number(t.val);
+        else if (t.type === 'expense') acc.e += Number(t.val);
       }
       return acc;
     }, { i: 0, e: 0 });
@@ -214,7 +180,6 @@ window.atualizarGrafico = (chart, todasTransactions) => {
   chart.update();
 };
 
-// --- INICIALIZAÇÃO ---
 document.addEventListener('DOMContentLoaded', () => {
   popularSelectMeses();
 
@@ -228,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Gráfico
+  // Gráfico de Linha (Ondas)
   const ctx = document.getElementById('mainEvolutionChart');
   if (ctx) {
     window.meuGrafico = new Chart(ctx, {
@@ -236,37 +201,11 @@ document.addEventListener('DOMContentLoaded', () => {
       data: {
         labels: [],
         datasets: [
-          {
-            label: 'Receitas',
-            data: [],
-            borderColor: '#00FFB2',
-            backgroundColor: 'rgba(0, 255, 178, 0.2)',
-            fill: true,
-            tension: 0.4,
-            pointRadius: 4,
-            pointBackgroundColor: '#00FFB2'
-          },
-          {
-            label: 'Despesas',
-            data: [],
-            borderColor: '#FF6B35',
-            backgroundColor: 'rgba(255, 107, 53, 0.2)',
-            fill: true,
-            tension: 0.4,
-            pointRadius: 4,
-            pointBackgroundColor: '#FF6B35'
-          }
+          { label: 'Receitas', data: [], borderColor: '#00FFB2', backgroundColor: 'rgba(0, 255, 178, 0.1)', fill: true, tension: 0.4 },
+          { label: 'Despesas', data: [], borderColor: '#FF6B35', backgroundColor: 'rgba(255, 107, 53, 0.1)', fill: true, tension: 0.4 }
         ]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
-          x: { grid: { display: false } }
-        }
-      }
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
   }
 
@@ -274,11 +213,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('form-transacao')?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const inputDataStr = document.getElementById('input-data')?.value;
+    let dataFinal = new Date();
+    if (inputDataStr) {
+      const [ano, mes, dia] = inputDataStr.split('-').map(Number);
+      dataFinal = new Date(ano, mes - 1, dia);
+    }
+
     const nova = {
       desc: document.getElementById('input-desc').value,
       val: parseFloat(document.getElementById('input-val').value),
       type: document.getElementById('input-tipo').value,
       cat: document.getElementById('input-cat').value,
+      createdAt: dataFinal
     };
     await addTransaction(nova);
     e.target.reset();

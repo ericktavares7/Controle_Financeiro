@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, query, where, onSnapshot, orderBy, serverTimestamp } from "firebase/firestore";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
+import { getFirestore, collection, addDoc, query, where, onSnapshot, orderBy } from "firebase/firestore";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD5rfL-blONmlS8eIu2N4Z4JNlpEUYOhRA",
@@ -15,17 +15,11 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 
-let unsubscribe = null;
-
 onAuthStateChanged(auth, (user) => {
-  const authContainer = document.getElementById('auth-container');
   if (user) {
-    if (authContainer) authContainer.style.display = 'none';
     document.body.classList.add('logged-in');
-    unsubscribe = dbListenFirestore(user.uid);
+    dbListenFirestore(user.uid);
   } else {
-    if (unsubscribe) unsubscribe();
-    if (authContainer) authContainer.style.display = 'flex';
     document.body.classList.remove('logged-in');
   }
 });
@@ -35,14 +29,12 @@ export async function addTransaction(data) {
   try {
     await addDoc(collection(db, "transacoes"), {
       ...data,
-      userId: auth.currentUser.uid,
-      createdAt: serverTimestamp()
+      userId: auth.currentUser.uid
     });
   } catch (e) { console.error(e); }
 }
 
 export function dbListenFirestore(uid) {
-  // ATENÇÃO: Verifique se você criou o ÍNDICE no Firebase console para o orderBy
   const q = query(
     collection(db, "transacoes"),
     where("userId", "==", uid),
@@ -52,15 +44,8 @@ export function dbListenFirestore(uid) {
   return onSnapshot(q, (snapshot) => {
     const txs = [];
     snapshot.forEach(doc => txs.push({ id: doc.id, ...doc.data() }));
-
     window.transactions = txs;
-
-    if (typeof window.atualizarDashboard === "function") window.atualizarDashboard();
-    if (window.meuGrafico && typeof window.atualizarGrafico === "function") {
-      window.atualizarGrafico(window.meuGrafico, txs);
-    }
+    if (window.atualizarDashboard) window.atualizarDashboard();
+    if (window.meuGrafico && window.atualizarGrafico) window.atualizarGrafico(window.meuGrafico, txs);
   });
 }
-
-// Auth UI Logic
-window.logOut = () => signOut(auth);
