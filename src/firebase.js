@@ -39,6 +39,7 @@ let unsubscribe = null;
 
 onAuthStateChanged(auth, (user) => {
   const authContainer = document.getElementById('auth-container');
+  const body = document.body;
 
   if (user) {
     // 1. Se já houver um escuta ativo de outra conta, desliga-o primeiro
@@ -46,6 +47,7 @@ onAuthStateChanged(auth, (user) => {
 
     userLogado = user;
     if (authContainer) authContainer.style.display = 'none';
+    body.classList.add('logged-in');
 
     // 2. Guarda o novo "interruptor"
     unsubscribe = dbListenFirestore(user.uid);
@@ -56,6 +58,7 @@ onAuthStateChanged(auth, (user) => {
     }
     userLogado = null;
     if (authContainer) authContainer.style.display = 'flex';
+    body.classList.remove('logged-in');
   }
 });
 

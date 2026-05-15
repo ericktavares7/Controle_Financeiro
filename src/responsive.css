@@ -36,6 +36,12 @@ body {
   box-sizing: border-box;
 }
 
+.auth-card {
+  width: 90%;
+  padding: 30px 20px;
+  border-radius: 20px;
+}
+
 /* --- ABA DE TRANSAÇÕES (AJUSTE MOBILE) --- */
 .controls-row {
   display: flex;

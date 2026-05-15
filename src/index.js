@@ -389,6 +389,46 @@ function atualizarGrafico(chart, todasTransactions) {
 // --- INICIALIZAÇÃO ---
 
 document.addEventListener('DOMContentLoaded', () => {
+
+  let touchstartX = 0;
+  let touchendX = 0;
+  document.addEventListener('touchstart', e => {
+    touchstartX = e.changedTouches[0].screenX;
+  }, false);
+
+  // Registra onde o dedo saiu e calcula a direção
+  document.addEventListener('touchend', e => {
+    touchendX = e.changedTouches[0].screenX;
+    handleGesture();
+  }, false);
+
+  function handleGesture() {
+    const threshold = 70; // Sensibilidade do deslize (em pixels)
+    const abas = ['dashboard', 'transacoes']; // IDs das suas abas (conforme seu data-tab)
+    const abaAtual = document.querySelector('.tab-btn.active').dataset.tab;
+    const indexAtual = abas.indexOf(abaAtual);
+
+    // Deslizar para a ESQUERDA (Dedo vai p/ esquerda -> Próxima aba)
+    if (touchendX < touchstartX - threshold) {
+      if (indexAtual < abas.length - 1) {
+        mudarAba(abas[indexAtual + 1]);
+      }
+    }
+
+    // Deslizar para a DIREITA (Dedo vai p/ direita -> Aba anterior)
+    if (touchendX > touchstartX + threshold) {
+      if (indexAtual > 0) {
+        mudarAba(abas[indexAtual - 1]);
+      }
+    }
+  }
+
+  // Função auxiliar para simular o clique na aba
+  function mudarAba(nomeAba) {
+    const btn = document.querySelector(`[data-tab="${nomeAba}"]`);
+    if (btn) btn.click();
+  }
+  
   // 1. POPULAR O SELECT DE MESES (Primeira tarefa: preparar o filtro)
   popularSelectMeses();
 
