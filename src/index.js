@@ -113,7 +113,7 @@ window.atualizarDashboard = () => {
   atualizarMetasIA(rec, des, res);
 };
 
-ffunction atualizarMetasIA(receita, despesa = 0, reserva = 0, lazer = 0) {
+function atualizarMetasIA(receita, despesa = 0, reserva = 0, lazer = 0) {
   const container = document.getElementById('metas-container');
 
   receita = Number(receita) || 0;
