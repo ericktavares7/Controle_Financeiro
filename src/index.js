@@ -155,9 +155,9 @@ window.destacarCategoria = (nomeCat) => {
 
 // AJUSTE NA RENDERIZAÇÃO: Adicione o onclick na barra
 function renderCategoriasGrafico(lista) {
-  // 1. Aqui a gente define quem é o 'container'
-  const container = document.getElementById('categoryList');
-  if (!container) return; // Se não achar o ID no HTML, ele para aqui e não dá erro
+  // Tenta encontrar o container da aba transações OU o da visão geral
+  const container = document.getElementById('mes-categorias') || document.getElementById('categoryList');
+  if (!container) return;
 
   const totais = {};
   lista.forEach(t => {
@@ -168,21 +168,20 @@ function renderCategoriasGrafico(lista) {
   const categoriasArray = Object.entries(totais).sort((a, b) => b[1].valor - a[1].valor);
   const maiorValor = Math.max(...categoriasArray.map(c => c[1].valor), 0);
 
-  // 2. Agora o 'container' existe e podemos usar o innerHTML
   container.innerHTML = categoriasArray.map(([cat, info]) => {
     const porc = maiorValor > 0 ? (info.valor / maiorValor) * 100 : 0;
     const cor = info.tipo === 'income' ? '#00FFB2' : '#FF6B35';
 
     return `
-      <div class="category-bar-item" onclick="window.destacarCategoria('${cat}')" style="cursor: pointer;">
-        <div class="bar-info">
-          <span>${cat}</span>
-          <b>${formatBRL(info.valor)}</b>
-        </div>
-        <div class="bar-bg">
-          <div class="bar-fill" style="width:${porc}%; background:${cor}"></div>
-        </div>
-      </div>`;
+            <div class="category-bar-item" onclick="window.destacarCategoria('${cat}')" style="cursor: pointer; margin-bottom: 15px;">
+                <div class="bar-info" style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span style="font-size: 14px; font-weight: 600;">${cat}</span>
+                    <b style="color: #fff;">${formatBRL(info.valor)}</b>
+                </div>
+                <div class="bar-bg" style="background: rgba(255,255,255,0.05); height: 8px; border-radius: 10px; overflow: hidden;">
+                    <div class="bar-fill" style="width:${porc}%; background:${cor}; height: 100%; transition: width 0.5s ease;"></div>
+                </div>
+            </div>`;
   }).join('');
 }
 
@@ -216,19 +215,23 @@ function renderListaTransacoes(lista) {
 }
 
 window.atualizarGrafico = (chart, todasTransactions) => {
-  if (!chart || !todasTransactions.length) return;
+  if (!chart || !todasTransactions || todasTransactions.length === 0) return;
+  
   const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
-  // Extrai meses únicos ordenados
+  // 1. Extrai meses únicos e ordena
   const mesesChaves = [...new Set(todasTransactions.map(t => {
     const d = t.createdAt?.toDate ? t.createdAt.toDate() : (t.createdAt instanceof Date ? t.createdAt : null);
     return d ? `${d.getFullYear()}-${d.getMonth()}` : null;
   }))].filter(Boolean).sort();
 
   const labels = [], ganhos = [], gastos = [];
+
+  // 2. Calcula os totais por mês
   mesesChaves.forEach(chave => {
     const [ano, mes] = chave.split('-').map(Number);
     labels.push(`${mesesNomes[mes]}/${ano.toString().slice(-2)}`);
+    
     const soma = todasTransactions.reduce((acc, t) => {
       const d = t.createdAt?.toDate ? t.createdAt.toDate() : (t.createdAt instanceof Date ? t.createdAt : null);
       if (d && d.getFullYear() === ano && d.getMonth() === mes) {
@@ -237,15 +240,26 @@ window.atualizarGrafico = (chart, todasTransactions) => {
       }
       return acc;
     }, { i: 0, e: 0 });
-    ganhos.push(soma.i); gastos.push(soma.e);
+
+    ganhos.push(soma.i); 
+    gastos.push(soma.e);
   });
 
-  chart.data.labels = labels;
+  chart.data.labels = labels; 
   chart.data.datasets[0].data = ganhos;
   chart.data.datasets[1].data = gastos;
+
+  // 3. Estilo de Ondas e Cores (Garantia)
+  chart.data.datasets[0].tension = 0.4;
+  chart.data.datasets[1].tension = 0.4;
+  chart.data.datasets[0].borderColor = '#00FFB2';
+  chart.data.datasets[1].borderColor = '#FF6B35';
+  chart.data.datasets[0].fill = true;
+  chart.data.datasets[1].fill = true;
+
+  // 4. Renderiza as mudanças
   chart.update();
 };
-
 let ordemCrescente = false;
 
 window.alternarOrdemFiltro = () => {

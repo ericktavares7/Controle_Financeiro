@@ -196,66 +196,40 @@
         </form>
       </div>
     </div>
-
-    <!--
-      <section class="add-transaction-section">
-        <h3>Histórico Recente</h3>
-        <div id="transaction-list"></div>
-      </section>
-      -->
-
     </section>
 
     <section class="tab-section" id="tab-transacoes">
-      <section class="add-transaction-section">
-        <!-- Seletor de mês -->
-        <div>
+      <div class="transacoes-container">
+        <header class="section-header">
           <h3>Histórico de Transações</h3>
-          <select aria-label="FILTRAR O MÊS" id="filtro-mes" class="select-type">
-          </select>
-        </div>
+          <select aria-label="FILTRAR O MÊS" id="filtro-mes" class="select-moderno"></select>
+        </header>
 
-        <!-- KPIs do mês -->
-        <div>
-          <article class="card income" id="card-receita">
-            <header>
-              <span class="icon">↑</span>
-              <h3>Receita</h3>
-            </header>
-            <p class="value" id="mes-receita">R$ 0,00</p>
-            <p id="mes-receita-delta"></p>
+        <div class="top-cards-container">
+          <article class="card-valor btn-receita">
+            <p>↑ Receita</p>
+            <h2 id="mes-receita">R$ 0,00</h2>
           </article>
 
-          <article class="card expense" id="card-despesa">
-            <header>
-              <span class="icon">↓</span>
-              <h3>Despesas</h3>
-            </header>
-            <p class="value" id="mes-despesa">R$ 0,00</p>
-            <p id="mes-despesa-delta"></p>
+          <article class="card-valor btn-despesa">
+            <p>↓ Despesas</p>
+            <h2 id="mes-despesa">R$ 0,00</h2>
           </article>
 
-          <article class="card balance">
-            <header>
-              <span class="icon">◈</span>
-              <h3>Saldo</h3>
-            </header>
-            <p class="value" id="mes-saldo">R$ 0,00</p>
+          <article class="card-valor">
+            <p>◈ Saldo</p>
+            <h2 id="mes-saldo">R$ 0,00</h2>
           </article>
         </div>
 
-        <!-- Barras por categoria do mês -->
         <div class="card-header-flex">
-          <h3>Histórico</h3>
+          <h3>Distribuição</h3>
           <button id="btn-ordem" class="btn-filter-icon" onclick="window.alternarOrdemFiltro()">
             <span id="sort-icon">⇅</span>
           </button>
         </div>
-        
         <div class="category-bars" id="mes-categorias"></div>
-        </div>
 
-        <!-- Lista de transações do mês -->
         <div class="historico-segmentado">
           <div class="card-historico">
             <h4 class="titulo-receitas">💰 Receitas</h4>
@@ -267,7 +241,7 @@
             <div id="lista-despesas-historico"></div>
           </div>
         </div>
-      </section>
+      </div>
     </section>
 
     <section class="tab-section" id="tab-ia">

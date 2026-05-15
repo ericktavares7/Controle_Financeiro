@@ -7,6 +7,57 @@
   overflow-y: auto;
 }
 
+
+/* Container que segura tudo no lugar */
+.transacoes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  width: 100%;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* Fix das Cores e Letras (Passo 3) */
+.tx-desc {
+  font-size: 15px; /* Maior para desktop */
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.tx-meta {
+  color: #94a3b8; /* Cinza claro acessível */
+  font-size: 12px;
+}
+
+.tx-icon--income { background: rgba(0, 255, 178, 0.1); color: var(--receita); }
+.tx-icon--expense { background: rgba(255, 107, 53, 0.1); color: var(--despesa); }
+.tx-val--income { color: var(--receita); }
+.tx-val--expense { color: var(--despesa); }
+
+/* Passo 2: Alinhamento das colunas de histórico */
+.historico-segmentado {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 850px) {
+  .historico-segmentado {
+    grid-template-columns: 1fr;
+  }
+  .section-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+
 .tx-item {
   display: flex;
   align-items: center;
@@ -33,15 +84,6 @@
   flex-shrink: 0;
 }
 
-.tx-icon--income {
-  background: rgba(0, 255, 178, 0.1);
-  color: var(--entradas);
-}
-
-.tx-icon--expense {
-  background: rgba(255, 107, 53, 0.1);
-  color: var(--saidas);
-}
 
 /* Descrição e meta */
 .tx-info {
@@ -53,19 +95,7 @@
   gap: 2px;
 }
 
-.tx-desc {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--txt_principal);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
-.tx-meta {
-  font-size: 11px;
-  color: var(--txt_secondario);
-}
 
 /* Valor + botão de deletar */
 .tx-right {
