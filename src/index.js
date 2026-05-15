@@ -113,8 +113,14 @@ window.atualizarDashboard = () => {
   atualizarMetasIA(rec, des, res);
 };
 
-function atualizarMetasIA(receita, despesa, reserva, lazer) {
+ffunction atualizarMetasIA(receita, despesa = 0, reserva = 0, lazer = 0) {
   const container = document.getElementById('metas-container');
+
+  receita = Number(receita) || 0;
+  despesa = Number(despesa) || 0;
+  reserva = Number(reserva) || 0;
+  lazer = Number(lazer) || 0;
+
   if (!container || receita === 0) return;
 
   const pEssencial = ((despesa / receita) * 100).toFixed(1);
@@ -127,15 +133,19 @@ function atualizarMetasIA(receita, despesa, reserva, lazer) {
         <span>Essencial (70%)</span>
         <span style="color:${pEssencial > 70 ? '#FF6B35' : '#00FFB2'}">${pEssencial}%</span>
       </div>
-      <div class="progress-bar"><div style="width:${Math.min(pEssencial, 100)}%; background:${pEssencial > 70 ? '#FF6B35' : '#00FFB2'}"></div></div>
+      <div class="progress-bar">
+        <div style="width:${Math.min(pEssencial, 100)}%; background:${pEssencial > 70 ? '#FF6B35' : '#00FFB2'}"></div>
+      </div>
     </div>
-    
+
     <div class="meta-item">
       <div class="meta-header">
         <span>Reserva (20%)</span>
         <span style="color:#00D1FF">${pReserva}%</span>
       </div>
-      <div class="progress-bar"><div style="width:${Math.min(pReserva, 100)}%; background:#00D1FF"></div></div>
+      <div class="progress-bar">
+        <div style="width:${Math.min(pReserva, 100)}%; background:#00D1FF"></div>
+      </div>
     </div>
 
     <div class="meta-item">
@@ -143,7 +153,9 @@ function atualizarMetasIA(receita, despesa, reserva, lazer) {
         <span>Lazer (10%)</span>
         <span style="color:#FFD700">${pLazer}%</span>
       </div>
-      <div class="progress-bar"><div style="width:${Math.min(pLazer, 100)}%; background:#FFD700"></div></div>
+      <div class="progress-bar">
+        <div style="width:${Math.min(pLazer, 100)}%; background:#FFD700"></div>
+      </div>
     </div>
   `;
 }
