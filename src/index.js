@@ -9,6 +9,48 @@ import Chart from 'chart.js/auto';
 import { db, auth } from './firebase.js';
 import { collection, addDoc, query, orderBy, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 
+const categoriasPorTipo = {
+  income: ["Salário", "Freelance", "Investimentos", "Presente", "Venda", "Outros"],
+  expense: ["Alimentação", "Transporte", "Aluguel", "Lazer", "Saúde", "Educação", "Cartão de Crédito", "Outros"],
+  goal: ["Reserva de Emergência", "Meta de Compra", "Aposentadoria", "Viagem"]
+};
+
+window.abrirModal = (tipo) => {
+  const modal = document.getElementById('modal-registro');
+  const inputTipo = document.getElementById('input-tipo');
+  const selectCat = document.getElementById('input-cat');
+  const modalContent = modal?.querySelector('.modal-content');
+
+  if (modal && inputTipo && selectCat) {
+    inputTipo.value = tipo;
+
+    // Ajusta a estilização visual (bordas coloridas)
+    if (modalContent) {
+      modalContent.classList.remove('borda-receita', 'borda-despesa', 'borda-caixinha');
+      if (tipo === 'income') modalContent.classList.add('borda-receita');
+      else if (tipo === 'expense') modalContent.classList.add('borda-despesa');
+      else if (tipo === 'goal') modalContent.classList.add('borda-caixinha');
+    }
+
+    // LIMPEZA E FILTRO: Remove categorias antigas e coloca as novas
+    selectCat.innerHTML = '';
+    const lista = categoriasPorTipo[tipo] || [];
+
+    lista.forEach(cat => {
+      const option = document.createElement('option');
+      option.value = cat;
+      option.textContent = cat;
+      selectCat.appendChild(option);
+    });
+
+    // Abre o modal
+    modal.classList.add('active');
+
+    // Foca no campo de descrição para facilitar a digitação
+    setTimeout(() => document.getElementById('input-desc')?.focus(), 100);
+  }
+};
+
 // --- VARIÁVEIS GLOBAIS ---
 
 let grafico;
@@ -27,16 +69,6 @@ window.alternarOrdemFiltro = () => {
 
   // RE-RENDERIZA o dashboard para aplicar a nova ordem
   atualizarDashboard();
-};
-
-window.abrirModal = (tipo) => {
-  const modal = document.getElementById('modal-registro');
-  const inputTipo = document.getElementById('input-tipo');
-  if (modal && inputTipo) {
-    inputTipo.value = tipo;
-    modal.classList.add('active');
-    document.getElementById('input-desc')?.focus();
-  }
 };
 
 window.fecharModal = () => {
@@ -171,7 +203,7 @@ function atualizarDashboard() {
   console.log("Dados globais:", window.transactions);
 
   // 2. Filtra usando window.transactions e tratando a data do Firestore
-const dadosExibicao = (window.transactions || []).filter(t => {
+  const dadosExibicao = (window.transactions || []).filter(t => {
     const timestamp = t.createdAt?.seconds ? t.createdAt.seconds * 1000 : (t.date || Date.now());
     const d = new Date(timestamp);
     return d.getFullYear() === anoFiltro && d.getMonth() === mesFiltro;
@@ -326,28 +358,6 @@ function atualizarGrafico(chart, todasTransactions) {
   chart.update();
 }
 
-// --- MODAL E EVENTOS ---
-
-window.abrirModal = (tipo) => {
-  const modal = document.getElementById('modal-registro');
-  const inputTipo = document.getElementById('input-tipo');
-  const modalContent = modal?.querySelector('.modal-content');
-
-  if (modal && inputTipo) {
-    inputTipo.value = tipo;
-
-    if (modalContent) {
-      modalContent.classList.remove('borda-receita', 'borda-despesa', 'borda-caixinha');
-      if (tipo === 'income') modalContent.classList.add('borda-receita');
-      else if (tipo === 'expense') modalContent.classList.add('borda-despesa');
-      else if (tipo === 'goal') modalContent.classList.add('borda-caixinha');
-    }
-
-    modal.classList.add('active');
-    setTimeout(() => document.getElementById('input-desc')?.focus(), 100);
-  }
-};
-
 // --- INICIALIZAÇÃO ---
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -405,7 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 6. FORMULÁRIO DE ENVIO (SUBMIT)
   const form = document.getElementById('form-transacao');
-  
+
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -417,11 +427,11 @@ document.addEventListener('DOMContentLoaded', () => {
       userId: auth.currentUser?.uid,
       createdAt: new Date()
     };
-
-    const salvo = await dbAdd(nova);
-    if (salvo) {
+    const salvo = await addTransaction(nova);
+    if (salvo !== null) { 
       form.reset();
       window.fecharModal();
+     
     }
   });
 });
