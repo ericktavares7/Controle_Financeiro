@@ -354,42 +354,42 @@ function atualizarGrafico(chart, todasTransactions) {
     const [anoB, mesB] = b.split('-').map(Number);
     return anoA !== anoB ? anoA - anoB : mesA - mesB;
   });
+
+  const labelsDinâmicas = [];
+  const ganhos = [];
+  const gastos = [];
+
+  mesesPresentes.forEach(chave => {
+    const [ano, mes] = chave.split('-').map(Number);
+    labelsDinâmicas.push(`${mesesNomes[mes]}/${ano.toString().slice(-2)}`);
+
+    // Soma o que for daquele mês/ano específico
+    const somaMes = todasTransactions.reduce((acc, t) => {
+      const d = new Date(t.createdAt?.seconds ? t.createdAt.seconds * 1000 : t.createdAt);
+
+      if (d.getFullYear() === ano && d.getMonth() === mes) {
+        // ATENÇÃO: Verifique se no seu banco é 'tipo' ou 'type' / 'valor' ou 'val'
+        const valorNumerico = Number(t.valor || t.val || 0);
+        const tipoTransacao = t.tipo || t.type;
+
+        if (tipoTransacao === 'income') acc.ganhos += valorNumerico;
+        if (tipoTransacao === 'expense') acc.gastos += valorNumerico;
+      }
+      return acc;
+    }, { ganhos: 0, gastos: 0 });
+
+    ganhos.push(somaMes.ganhos);
+    gastos.push(somaMes.gastos);
+  });
+
+  // 3. Alimenta o gráfico com a nova estrutura
+  chart.data.labels = labelsDinâmicas;
+  chart.data.datasets[0].data = ganhos;
+  chart.data.datasets[1].data = gastos;
+
+  chart.update(); // Agora a linha vai subir!
+  // --- INICIALIZAÇÃO ---
 }
-const labelsDinâmicas = [];
-const ganhos = [];
-const gastos = [];
-
-mesesPresentes.forEach(chave => {
-  const [ano, mes] = chave.split('-').map(Number);
-  labelsDinâmicas.push(`${mesesNomes[mes]}/${ano.toString().slice(-2)}`);
-
-  // Soma o que for daquele mês/ano específico
-  const somaMes = todasTransactions.reduce((acc, t) => {
-    const d = new Date(t.createdAt?.seconds ? t.createdAt.seconds * 1000 : t.createdAt);
-
-    if (d.getFullYear() === ano && d.getMonth() === mes) {
-      // ATENÇÃO: Verifique se no seu banco é 'tipo' ou 'type' / 'valor' ou 'val'
-      const valorNumerico = Number(t.valor || t.val || 0);
-      const tipoTransacao = t.tipo || t.type;
-
-      if (tipoTransacao === 'income') acc.ganhos += valorNumerico;
-      if (tipoTransacao === 'expense') acc.gastos += valorNumerico;
-    }
-    return acc;
-  }, { ganhos: 0, gastos: 0 });
-
-  ganhos.push(somaMes.ganhos);
-  gastos.push(somaMes.gastos);
-});
-
-// 3. Alimenta o gráfico com a nova estrutura
-chart.data.labels = labelsDinâmicas;
-chart.data.datasets[0].data = ganhos;
-chart.data.datasets[1].data = gastos;
-
-chart.update(); // Agora a linha vai subir!
-// --- INICIALIZAÇÃO ---
-
 document.addEventListener('DOMContentLoaded', () => {
 
   let touchstartX = 0;
