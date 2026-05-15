@@ -142,25 +142,22 @@ function dbListenFirestore(userId) {
     collection(db, "transacoes"),
     where("userId", "==", userId)
   );
-
-  // Fica observando mudanças (adicionar, remover, editar)
   return onSnapshot(q, (snapshot) => {
-    const novosDados = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const novosDados = snapshot.docs.map(doc => {
+      const d = doc.data();
+      return {
+        id: doc.id,
+        ...d,
+        createdAt: d.createdAt || { seconds: Date.now() / 1000 }
+      };
+    });
 
     window.transactions = novosDados;
 
-    // Se a função de atualizar o dashboard existir no seu index.js, ela é disparada
     if (typeof window.atualizarDashboard === "function") {
       window.atualizarDashboard();
     }
   }, (error) => {
-    console.error("ERRO DETALHADO:", error.code, error.message);
-    if (error.code === 'permission-denied') {
-      alert("O Firebase ainda está bloqueando o acesso. Verifique as 'Rules' no console!");
-    }
-  }
-  );
+    console.error("Erro no Firestore:", error.code);
+  });
 }

@@ -52,11 +52,21 @@ window.deletarTransacao = async (id) => {
 // --- FUNÇÕES DE BANCO DE DADOS ---
 
 function dbListenFirestore() {
-  const q = query(collection(db, "transacoes"), orderBy("createdAt", "desc"));
+  const uid = auth.currentUser?.uid;
+  if (!uid) return;
+
+  const q = query(
+    collection(db, "transacoes"),
+    where("userId", "==", uid),
+    orderBy("createdAt", "desc")
+  );
+
   onSnapshot(q, (snapshot) => {
-    transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    renderCategoriasGrafico(transactions);
-    if (grafico) atualizarGrafico(grafico, transactions);
+    // 2. Use sempre o window. para garantir a atualização
+    window.transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    renderCategoriasGrafico(window.transactions);
+    if (grafico) atualizarGrafico(grafico, window.transactions);
     atualizarDashboard();
   });
 }
@@ -189,20 +199,18 @@ function atualizarDashboard() {
   console.log("Dados globais:", window.transactions);
 
   // 2. Filtra usando window.transactions e tratando a data do Firestore
-  const dadosExibicao = (window.transactions || []).filter(t => {
-    
+const dadosExibicao = (window.transactions || []).filter(t => {
     const timestamp = t.createdAt?.seconds ? t.createdAt.seconds * 1000 : (t.date || Date.now());
     const d = new Date(timestamp);
-
-    return d.getFullYear() === anoFiltro && d.getMonth() === (mesFiltro - 1);
+    return d.getFullYear() === anoFiltro && d.getMonth() === mesFiltro;
   });
 
   console.log("Dados após filtro:", dadosExibicao);
 
   // 3. Inicializa os contadores para os cálculos
   let receitaTotal = 0;
-  let despesaEssencial = 0; // Gastos comuns
-  let reservaCaixinha = 0;  // Gastos marcados como 'goal'
+  let despesaEssencial = 0;
+  let reservaCaixinha = 0;
 
   dadosExibicao.forEach(t => {
     if (t.type === 'income') {
@@ -433,6 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
       val: parseFloat(document.getElementById('input-val').value),
       type: document.getElementById('input-tipo').value,
       cat: document.getElementById('input-cat').value,
+      userId: auth.currentUser?.uid,
       createdAt: new Date()
     };
 
