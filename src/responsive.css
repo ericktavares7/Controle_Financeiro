@@ -10,6 +10,41 @@ body {
   /* Resolve o bloco preto: permite que o site cresça */
 }
 
+.progress-bar-container {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  height: 8px;
+  overflow: visible;
+  /* Importante para o brilho aparecer */
+  position: relative;
+}
+
+/* A barra que preenche (Efeito Glow igual à foto) */
+.progress-fill.essencial {
+  background: linear-gradient(90deg, #FF6B35, #ff936e);
+  box-shadow: 0 0 15px rgba(255, 107, 53, 0.6);
+  /* Brilho laranja */
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease-in-out;
+}
+
+.progress-fill.reserva {
+  background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+  box-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
+  /* Brilho azul */
+  height: 100%;
+  border-radius: 10px;
+}
+
+.progress-fill.estilo {
+  background: linear-gradient(90deg, #FFD700, #ffec8b);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+  /* Brilho dourado */
+  height: 100%;
+  border-radius: 10px;
+}
+
 /* --- BLOCO PRETO FIX: Garante que o conteúdo suba --- */
 .dashboard-container {
   display: block !important;
