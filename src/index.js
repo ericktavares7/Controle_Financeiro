@@ -6,7 +6,7 @@ import './chat.css';
 import './transactions.css';
 import './responsive.css';
 import Chart from 'chart.js/auto';
-import { db, auth } from './firebase.js';
+import { db, auth, addTransaction} from './firebase.js';
 import { collection, addDoc, query, orderBy, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 
 const categoriasPorTipo = {
