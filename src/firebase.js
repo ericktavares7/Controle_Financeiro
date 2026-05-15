@@ -140,27 +140,19 @@ export async function addTransaction(data) {
   }
 }
 
-function dbListenFirestore(userId) {
-  const q = query(
-    collection(db, "transacoes"),
-    where("userId", "==", userId)
-  );
+export function dbListenFirestore(uid) {
+  const q = query(collection(db, "users", uid, "transactions"), orderBy("createdAt", "asc"));
+
   return onSnapshot(q, (snapshot) => {
-    const novosDados = snapshot.docs.map(doc => {
-      const d = doc.data();
-      return {
-        id: doc.id,
-        ...d,
-        createdAt: d.createdAt || { seconds: Date.now() / 1000 }
-      };
+    const todasTransactions = [];
+    snapshot.forEach((doc) => {
+      todasTransactions.push({ id: doc.id, ...doc.data() });
     });
 
-    window.transactions = novosDados;
+    atualizarInterface(todasTransactions);
 
-    if (typeof window.atualizarDashboard === "function") {
-      window.atualizarDashboard();
+    if (window.meuGrafico) {
+      atualizarGrafico(window.meuGrafico, todasTransactions);
     }
-  }, (error) => {
-    console.error("Erro no Firestore:", error.code);
   });
 }

@@ -453,24 +453,46 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. INICIALIZAR O GRÁFICO (Chart.js)
   const ctx = document.getElementById('mainEvolutionChart');
   if (ctx) {
-    grafico = new Chart(ctx.getContext('2d'), {
+    window.meuGrafico = new Chart(ctx.getContext('2d'), {
       type: 'line',
       data: {
         labels: [],
         datasets: [
-          { label: 'Receitas', data: [], borderColor: '#00FFB2', tension: 0.4 },
-          { label: 'Despesas', data: [], borderColor: '#FF6B35', tension: 0.4 }
+          {
+            label: 'Receitas',
+            data: [],
+            borderColor: '#00FFB2',
+            backgroundColor: 'rgba(0, 255, 178, 0.1)', // Um brilho suave
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: 'Despesas',
+            data: [],
+            borderColor: '#FF6B35',
+            backgroundColor: 'rgba(255, 107, 53, 0.1)', // Um brilho suave
+            tension: 0.4,
+            fill: true
+          }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
-        scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888' } }, x: { grid: { display: false }, ticks: { color: '#888' } } }
+        scales: {
+          y: {
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: { color: '#888' }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { color: '#888' }
+          }
+        }
       }
     });
   }
-
   // 4. ESCUTADOR DO SELECT DE MESES
   const selectMes = document.getElementById('filtro-mes');
   selectMes?.addEventListener('change', () => {
