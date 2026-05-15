@@ -16,10 +16,22 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 
 onAuthStateChanged(auth, (user) => {
+  const authContainer = document.getElementById('auth-container');
+
   if (user) {
+    console.log("Usuário logado:", user.email);
+    // Esconde o login e mostra o conteúdo
+    if (authContainer) {
+      authContainer.style.display = 'none';
+    }
     document.body.classList.add('logged-in');
     dbListenFirestore(user.uid);
   } else {
+    console.log("Nenhum usuário logado.");
+    // Mostra o login e remove o conteúdo
+    if (authContainer) {
+      authContainer.style.display = 'flex';
+    }
     document.body.classList.remove('logged-in');
   }
 });
