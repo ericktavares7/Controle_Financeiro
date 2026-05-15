@@ -152,62 +152,36 @@ body {
   position: relative;
 }
 
-@media (max-width: 850px) {
+@media (max-width: 900px) {
 
-  /* Passo 5: Header em coluna para não quebrar nomes */
+  body {
+        padding-top: 160px;
+    }
+
   .dashboard-header {
-    grid-template-columns: 1fr;
-    /* Empilha tudo */
+    height: auto;
+    padding: 15px 0;
+  }
+
+  .header-container {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
     gap: 15px;
-    padding: 15px;
-    text-align: center;
+  }
+
+  .main-nav {
+    grid-column: 1 / -1;
+    justify-self: center;
+    order: 3;
   }
 
   .brand-group {
-    justify-content: center;
+    grid-column: 1;
   }
 
-  .status-badge {
-    justify-self: center;
-    /* Centraliza o "Ao Vivo" */
-  }
-
-  /* Passo 2: Evita o conteúdo ser jogado para baixo no mobile */
-  .top-cards-container {
-    grid-template-columns: 1fr;
-    /* Um card embaixo do outro */
-    gap: 12px;
-  }
-
-  /* Passo 1: Ajusta a altura do gráfico para telas pequenas */
-  .canvas-wrapper {
-    height: 220px;
-  }
-
-  /* Passo 3: Melhora a leitura no celular */
-  .card .value {
-    font-size: 1.6rem;
-  }
-
-  /* Ajuste da Aba Transações */
-  #categoryList {
-    grid-template-columns: 1fr;
-    /* Barra de categoria ocupa a largura toda */
-  }
-
-  /* Modal no Mobile: Ocupa mais espaço para facilitar o toque */
-  #modal-registro .modal-content {
-    width: 90%;
-    padding: 20px;
-    border-radius: 20px;
-  }
-
-  .main-nav ul {
-    gap: 15px;
-    overflow-x: auto;
-    /* Permite scroll horizontal se os nomes forem longos */
-    padding-bottom: 10px;
-    justify-content: flex-start;
+  .header-actions {
+    grid-column: 2;
+    justify-self: end;
   }
 }
 
@@ -216,7 +190,6 @@ body {
   .top-actions-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    /* Botões lado a lado */
     gap: 20px;
   }
 
