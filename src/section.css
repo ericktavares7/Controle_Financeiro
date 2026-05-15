@@ -737,28 +737,6 @@ select option {
   transition: all 0.5s ease;
 }
 
-.tab-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--txt_secondario);
-  padding: 10px 0;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s;
-}
-
-.tab-btn.active {
-  color: var(--entradas);
-  border-bottom: 2px solid var(--entradas);
-}
-
-.tab-btn:hover:not(.active) {
-  color: var(--txt_principal);
-}
-
 .tx-icon--caixinha {
   background: rgba(255, 230, 109, 0.15);
   color: #FFE66D;

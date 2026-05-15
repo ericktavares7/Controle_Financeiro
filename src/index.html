@@ -52,32 +52,37 @@
 
   <main class="dashboard-container">
     <header class="dashboard-header">
-      <div class="brand-group">
-        <div class="logo">
-          <img src="/logo_finance.png" alt="Logo Finance" class="logo-img">
+      <div class="header-container">
+        <div class="brand-group">
+          <div class="logo">
+            <img src="/logo_finance.png" alt="Logo Finance" class="logo-img">
+          </div>
+          <div class="brand-info">
+            <h1>Finance Simplefy</h1>
+            <p class="current-date" id="header-date">maio 2026 • dashboard pessoal</p>
+          </div>
         </div>
 
-        <div class="brand-info">
-          <h1>Finance Simplefy</h1>
-          <p class="current-date" id="header-date">maio 2026 • dashboard pessoal</p>
-        </div>
-      </div>
+        <nav class="main-nav">
+          <ul>
+            <li><button class="tab-btn active" data-tab="overview">Visão Geral</button></li>
+            <li><button class="tab-btn" data-tab="transacoes">Transações</button></li>
+            <li><button class="tab-btn" data-tab="ia">IA Financeira</button></li>
+          </ul>
+        </nav>
 
-      <div class="status-badge">
-        <span>●</span> ao vivo
+        <div class="header-actions">
+          <div class="status-badge">
+            <span>●</span> ao vivo
+          </div>
+          <button onclick="logOut()" class="btn-logout">
+            <i class="ph ph-sign-out"></i> Sair
+          </button>
+        </div>
+
       </div>
-      <button onclick="logOut()" class="btn-logout">
-        <i class="ph ph-sign-out"></i> Sair
-      </button>
     </header>
 
-    <nav class="main-nav">
-      <ul>
-        <li><button class="tab-btn active" data-tab="overview">Visão Geral</button></li>
-        <li><button class="tab-btn" data-tab="transacoes">Transações</button></li>
-        <li><button class="tab-btn" data-tab="ia">IA Financeira</button></li>
-      </ul>
-    </nav>
 
     <section class="tab-section active" id="tab-overview">
 
