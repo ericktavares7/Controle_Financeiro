@@ -78,11 +78,15 @@ window.atualizarDashboard = () => {
   if (!select) return;
 
   const [anoFiltro, mesFiltro] = select.value.split('-').map(Number);
+
+  // 1. Filtra os dados garantindo que reconheça Abril, Maio, etc.
   const dadosExibicao = (window.transactions || []).filter(t => {
+    // Converte a data do Firebase (Timestamp) para Data do JS
     const d = t.createdAt?.toDate ? t.createdAt.toDate() : new Date(t.createdAt || Date.now());
     return d.getFullYear() === anoFiltro && d.getMonth() === mesFiltro;
   });
 
+  // 2. Calcula os totais para o mês filtrado
   let receitaTotal = 0, despesaTotal = 0, reservaTotal = 0;
   dadosExibicao.forEach(t => {
     if (t.type === 'income') receitaTotal += t.val;
@@ -90,24 +94,18 @@ window.atualizarDashboard = () => {
     else if (t.type === 'goal') reservaTotal += t.val;
   });
 
-  const saldoFinal = receitaTotal - despesaTotal - reservaTotal;
-  const taxaPoupanca = receitaTotal > 0 ? (((receitaTotal - despesaTotal) / receitaTotal) * 100).toFixed(1) : 0;
-
-  // Atualiza IDs da aba transações
+  // 3. Atualiza os textos da interface
   const elMesReceita = document.getElementById('mes-receita');
   const elMesDespesa = document.getElementById('mes-despesa');
   const elMesSaldo = document.getElementById('mes-saldo');
 
   if (elMesReceita) elMesReceita.textContent = formatBRL(receitaTotal);
   if (elMesDespesa) elMesDespesa.textContent = formatBRL(despesaTotal);
-  if (elMesSaldo) elMesSaldo.textContent = formatBRL(saldoFinal);
+  if (elMesSaldo) elMesSaldo.textContent = formatBRL(receitaTotal - despesaTotal - reservaTotal);
 
-  const displayPoupanca = document.getElementById('display-poupanca');
-  if (displayPoupanca) displayPoupanca.textContent = `${taxaPoupanca}%`;
-
-  atualizarMetasIA(receitaTotal, despesaTotal, reservaTotal);
   renderListaTransacoes(dadosExibicao);
   renderCategoriasGrafico(dadosExibicao);
+  atualizarMetasIA(receitaTotal, despesaTotal, reservaTotal);
 };
 
 function atualizarMetasIA(receita, despesa, reserva) {
