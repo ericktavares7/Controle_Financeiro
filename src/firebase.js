@@ -123,24 +123,24 @@ document.getElementById('auth-form')?.addEventListener('submit', async (e) => {
  * Adiciona uma nova transação vinculada ao ID do usuário atual
  */
 export async function addTransaction(data) {
-  if (!userLogado) return;
+  if (!userLogado) {
+    console.error("Nenhum utilizador logado para salvar!");
+    return;
+  }
 
   try {
-    await addDoc(collection(db, "transactions"), {
+    await addDoc(collection(db, "transacoes"), {
       ...data,
-      userId: userLogado.uid, // O "dono" do dado
-      createdAt: serverTimestamp() // Hora oficial do servidor Firebase
+      userId: userLogado.uid,
+      createdAt: serverTimestamp()
     });
+    console.log("Gravado com sucesso para o utilizador:", userLogado.uid);
   } catch (e) {
-    console.error("Erro ao salvar no banco:", e);
+    console.error("Erro ao salvar:", e);
   }
 }
 
-/**
- * Escuta em tempo real apenas as transações do usuário logado
- */
 function dbListenFirestore(userId) {
-  // Cria a consulta filtrando pelo userId
   const q = query(
     collection(db, "transactions"),
     where("userId", "==", userId)
@@ -148,14 +148,18 @@ function dbListenFirestore(userId) {
 
   // Fica observando mudanças (adicionar, remover, editar)
   return onSnapshot(q, (snapshot) => {
-    window.transactions = snapshot.docs.map(doc => ({
+    const novosDados = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
+
+    window.transactions = novosDados;
 
     // Se a função de atualizar o dashboard existir no seu index.js, ela é disparada
     if (typeof window.atualizarDashboard === "function") {
       window.atualizarDashboard();
     }
+  }, (error) => {
+    console.error("Erro no filtro do Firestore:", error);
   });
 }
