@@ -197,12 +197,14 @@ body {
   }
 }
 
+
 /* --- AJUSTES PARA DESKTOP (TELAS GRANDES) --- */
-@media (min-width: 1024px) {
+@media (min-width: 900px) {
   .top-actions-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
+    margin-top: 45px;
   }
 
   .summary-grid {
