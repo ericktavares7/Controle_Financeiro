@@ -17,6 +17,7 @@ const categoriasPorTipo = {
 
 // --- FUNÇÕES GLOBAIS ---
 window.abrirModal = (tipo) => {
+
   const modal = document.getElementById('modal-registro');
   const inputTipo = document.getElementById('input-tipo');
   const selectCat = document.getElementById('input-cat');
@@ -24,37 +25,61 @@ window.abrirModal = (tipo) => {
 
   if (!modal || !inputTipo || !selectCat) return;
 
-  // 1. Trava o scroll do fundo para evitar o bug de mexer a página atrás
+  /* TRAVA SCROLL */
   document.body.style.overflow = 'hidden';
 
-  // 2. Define o tipo no input hidden
+  /* DEFINE TIPO */
   inputTipo.value = tipo;
 
-  // 3. Gerencia as cores da borda (Removendo o que existia e colocando a nova)
+  /* REMOVE BORDAS */
   if (modalContent) {
-    modalContent.classList.remove('borda-receita', 'borda-despesa', 'borda-caixinha');
-    const classeBorda = tipo === 'income' ? 'borda-receita' : (tipo === 'expense' ? 'borda-despesa' : 'borda-caixinha');
+
+    modalContent.classList.remove(
+      'borda-receita',
+      'borda-despesa',
+      'borda-caixinha'
+    );
+
+    const classeBorda =
+      tipo === 'income'
+        ? 'borda-receita'
+        : tipo === 'expense'
+          ? 'borda-despesa'
+          : 'borda-caixinha';
+
     modalContent.classList.add(classeBorda);
   }
 
-  // 4. Limpa e Popula o Select de Categorias (Lógica vital que você já tinha)
+  /* POPULA CATEGORIAS */
   selectCat.innerHTML = '';
+
   const lista = categoriasPorTipo[tipo] || [];
+
   lista.forEach(cat => {
+
     const option = document.createElement('option');
+
     option.value = cat;
     option.textContent = cat;
+
     selectCat.appendChild(option);
+
   });
 
-  // 5. Abre o modal
+  /* ABRE MODAL */
   modal.classList.add('active');
 };
 
 window.fecharModal = () => {
+
   const modal = document.getElementById('modal-registro');
-  document.body.style.overflow = 'auto'; // Libera o scroll
+
+  if (!modal) return;
+
   modal.classList.remove('active');
+
+  /* LIBERA SCROLL */
+  document.body.style.overflow = '';
 };
 
 // FECHAR AO CLICAR NO FUNDO ESCURO
@@ -167,7 +192,7 @@ window.destacarCategoria = (nomeCat) => {
 
   // 2. Espera um pouquinho a aba carregar e procura os itens
   setTimeout(() => {
-    const classeBusca = `.category-${nomeCat.replace(/\s+/g, '-')}`;
+    const classeBusca = `.cat-${nomeCat.replace(/\s+/g, '-')}`;
     const itens = document.querySelectorAll(classeBusca);
 
     if (itens.length > 0) {
@@ -204,7 +229,7 @@ function renderCategoriasGrafico(lista) {
     return `
             <div class="category-bar-item" onclick="window.destacarCategoria('${cat}')" style="cursor: pointer; margin-bottom: 15px;">
                 <div class="bar-info" style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                    <span style="font-size: 14px; font-weight: 600;">${cat}</span>
+                   <span class="bar-label">${cat}</span>
                     <b style="color: #fff;">${formatBRL(info.valor)}</b>
                 </div>
                 <div class="bar-bg" style="background: rgba(255,255,255,0.05); height: 8px; border-radius: 10px; overflow: hidden;">
@@ -215,80 +240,165 @@ function renderCategoriasGrafico(lista) {
 }
 
 function renderListaTransacoes(lista) {
+
   const cRec = document.getElementById('lista-receitas-historico');
   const cDes = document.getElementById('lista-despesas-historico');
+
   if (!cRec || !cDes) return;
 
   const template = (t) => {
-    const categoriaClasse = `cat-${(t.cat || 'Geral').replace(/\s+/g, '-')}`;
-    const corValor = t.type === 'income' ? '#00FFB2' : '#FF6B35';
-    const sinal = t.type === 'income' ? '+' : '-';
+
+    const categoriaClasse =
+      `cat-${(t.cat || 'Geral').replace(/\s+/g, '-')}`;
+
+    const income = t.type === 'income';
 
     return `
-    <div class="tx-item ${categoriaClasse}" id="tx-${t.id}">
-      <div class="tx-info">
-        <span class="tx-desc">${t.desc}</span>
-        <span class="tx-meta" style="color:rgba(255,255,255,0.4)">${t.cat || 'Geral'} · ${formatDate(t.createdAt)}</span>
+      <div class="tx-item ${categoriaClasse}" id="tx-${t.id}">
+
+        <div class="tx-info">
+
+          <span class="tx-desc">
+            ${t.desc}
+          </span>
+
+          <span class="tx-meta">
+            ${t.cat || 'Geral'} • ${formatDate(t.createdAt)}
+          </span>
+
+        </div>
+
+        <div class="tx-right">
+
+          <span class="tx-val ${income ? 'tx-val--income' : 'tx-val--expense'}">
+
+            ${income ? '+' : '-'}
+            ${formatBRL(t.val)}
+
+          </span>
+
+          <button
+            class="tx-delete"
+            onclick="window.deletarTransacao('${t.id}')"
+          >
+            ✕
+          </button>
+
+        </div>
+
       </div>
-      <div class="tx-right">
-        <span class="tx-val" style="color: ${corValor}; font-weight: bold;">
-          ${sinal} ${formatBRL(t.val)}
-        </span>
-        <button class="tx-delete" onclick="window.deletarTransacao('${t.id}')">✕</button>
-      </div>
-    </div>`;
+    `;
   };
 
-  cRec.innerHTML = lista.filter(t => t.type === 'income').map(template).join('') || '<p>Sem receitas</p>';
-  cDes.innerHTML = lista.filter(t => t.type !== 'income').map(template).join('') || '<p>Sem despesas</p>';
+  const receitas = lista.filter(t => t.type === 'income');
+
+  const despesas = lista.filter(t => t.type !== 'income');
+
+  cRec.innerHTML =
+    receitas.length
+      ? receitas.map(template).join('')
+      : `<p class="msg-vazio">Sem receitas</p>`;
+
+  cDes.innerHTML =
+    despesas.length
+      ? despesas.map(template).join('')
+      : `<p class="msg-vazio">Sem despesas</p>`;
 }
 
 window.atualizarGrafico = (chart, todasTransactions) => {
-  if (!chart || !todasTransactions || todasTransactions.length === 0) return;
 
-  const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+  if (!chart) return;
 
-  // 1. Extrai meses únicos e ordena
-  const mesesChaves = [...new Set(todasTransactions.map(t => {
-    const d = t.createdAt?.toDate ? t.createdAt.toDate() : (t.createdAt instanceof Date ? t.createdAt : null);
-    return d ? `${d.getFullYear()}-${d.getMonth()}` : null;
-  }))].filter(Boolean).sort();
+  if (!todasTransactions || todasTransactions.length === 0) {
 
-  const labels = [], ganhos = [], gastos = [];
+    chart.data.labels = [];
+    chart.data.datasets[0].data = [];
+    chart.data.datasets[1].data = [];
 
-  // 2. Calcula os totais por mês
+    chart.update();
+
+    return;
+  }
+
+  const mesesNomes = [
+    'Jan',
+    'Fev',
+    'Mar',
+    'Abr',
+    'Mai',
+    'Jun',
+    'Jul',
+    'Ago',
+    'Set',
+    'Out',
+    'Nov',
+    'Dez'
+  ];
+
+  const mesesChaves = [
+    ...new Set(
+      todasTransactions.map(t => {
+
+        const d =
+          t.createdAt?.toDate
+            ? t.createdAt.toDate()
+            : new Date(t.createdAt);
+
+        return `${d.getFullYear()}-${d.getMonth()}`;
+      })
+    )
+  ].sort();
+
+  const labels = [];
+  const ganhos = [];
+  const gastos = [];
+
   mesesChaves.forEach(chave => {
+
     const [ano, mes] = chave.split('-').map(Number);
-    labels.push(`${mesesNomes[mes]}/${ano.toString().slice(-2)}`);
 
-    const soma = todasTransactions.reduce((acc, t) => {
-      const d = t.createdAt?.toDate ? t.createdAt.toDate() : (t.createdAt instanceof Date ? t.createdAt : null);
-      if (d && d.getFullYear() === ano && d.getMonth() === mes) {
-        if (t.type === 'income') acc.i += Number(t.val);
-        else if (t.type === 'expense') acc.e += Number(t.val);
+    labels.push(
+      `${mesesNomes[mes]}/${ano.toString().slice(-2)}`
+    );
+
+    let receitas = 0;
+    let despesas = 0;
+
+    todasTransactions.forEach(t => {
+
+      const d =
+        t.createdAt?.toDate
+          ? t.createdAt.toDate()
+          : new Date(t.createdAt);
+
+      if (
+        d.getFullYear() === ano &&
+        d.getMonth() === mes
+      ) {
+
+        if (t.type === 'income') {
+          receitas += Number(t.val);
+        }
+
+        if (t.type === 'expense') {
+          despesas += Number(t.val);
+        }
       }
-      return acc;
-    }, { i: 0, e: 0 });
+    });
 
-    ganhos.push(soma.i);
-    gastos.push(soma.e);
+    ganhos.push(receitas);
+    gastos.push(despesas);
+
   });
 
   chart.data.labels = labels;
+
   chart.data.datasets[0].data = ganhos;
   chart.data.datasets[1].data = gastos;
 
-  // 3. Estilo de Ondas e Cores (Garantia)
-  chart.data.datasets[0].tension = 0.4;
-  chart.data.datasets[1].tension = 0.4;
-  chart.data.datasets[0].borderColor = '#00FFB2';
-  chart.data.datasets[1].borderColor = '#FF6B35';
-  chart.data.datasets[0].fill = true;
-  chart.data.datasets[1].fill = true;
-
-  // 4. Renderiza as mudanças
   chart.update();
 };
+
 let ordemCrescente = false;
 
 window.alternarOrdemFiltro = () => {
@@ -298,8 +408,11 @@ window.alternarOrdemFiltro = () => {
   // Muda o ícone do botão para dar feedback visual
   if (btn) btn.innerHTML = ordemCrescente ? '▲' : '▼';
 
-  // Chama a atualização do dashboard que agora vai usar essa ordem
-  window.atualizarDashboard();
+  try {
+    atualizarDashboard();
+  } catch (e) {
+    console.error(e);
+  }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -373,11 +486,31 @@ document.addEventListener('DOMContentLoaded', () => {
       val: parseFloat(document.getElementById('input-val').value),
       type: document.getElementById('input-tipo').value,
       cat: document.getElementById('input-cat').value,
-      createdAt: dataFinal
+      createdAt: Timestamp.fromDate(dataFinal)
     };
     await addTransaction(nova);
     e.target.reset();
     window.fecharModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+
+    if (e.key === 'Escape') {
+
+      const modal = document.getElementById('modal-registro');
+
+      if (modal?.classList.contains('active')) {
+        window.fecharModal();
+      }
+    }
+  });
+
+  /* ========================================
+     PREVINE ZOOM IOS
+  ======================================== */
+
+  document.querySelectorAll('input, select').forEach(el => {
+    el.style.fontSize = '16px';
   });
 });
 

@@ -14,6 +14,10 @@
   padding-top: 70px;
 }
 
+.hidden {
+  display: none !important;
+}
+
 body {
   background-color: var(--bg-color);
   color: var(--txt-principal);

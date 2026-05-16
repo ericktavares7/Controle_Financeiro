@@ -7,6 +7,25 @@
 }
 
 /* =========================================
+   FIX GLOBAL
+========================================= */
+
+html {
+  overflow-x: hidden;
+
+  /* iOS Safari */
+  -webkit-text-size-adjust: 100%;
+
+  /* Navegadores modernos */
+  text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  min-height: 100dvh;
+}
+
+/* =========================================
    GRID PRINCIPAL
 ========================================= */
 
@@ -35,7 +54,7 @@
   border-radius: 20px;
   padding: 24px;
   width: 100%;
-  box-sizing: border-box;
+  min-width: 0;
 }
 
 .card header {
@@ -67,6 +86,8 @@
   border-radius: 16px;
   padding: 15px;
   margin-bottom: 15px;
+  width: 100%;
+  min-width: 0;
 }
 
 .card-header-flex {
@@ -86,6 +107,8 @@
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 22px;
+  width: 100%;
+  min-width: 0;
 }
 
 .card-kpi h3 {
@@ -185,20 +208,31 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 16px;
   padding: 16px;
+
   display: flex;
   align-items: center;
   gap: 15px;
+
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
+
   position: relative;
   overflow: hidden;
+
   width: 100%;
+  min-width: 0;
 }
 
 .action-card:hover {
   background: rgba(255, 255, 255, 0.08);
   transform: translateY(-4px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+
+  box-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .action-card:active {
@@ -208,19 +242,26 @@
 .action-icon {
   width: 40px;
   height: 40px;
+
   border-radius: 12px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   font-size: 20px;
   font-weight: bold;
+
   background: rgba(255, 255, 255, 0.03);
+
+  flex-shrink: 0;
 }
 
 .action-info {
   display: flex;
   flex-direction: column;
   text-align: left;
+  min-width: 0;
 }
 
 .action-info small {
@@ -277,6 +318,7 @@
 
 .form-group {
   margin-bottom: 16px;
+
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -306,14 +348,23 @@ input,
 select,
 textarea {
   width: 100%;
+  min-height: 48px;
+
   box-sizing: border-box;
+
   font-size: 16px;
   font-family: inherit;
+
   background: #0f172a;
+
   border: 1px solid var(--border-color);
+
   color: var(--txt-principal);
+
   padding: 12px;
+
   border-radius: 8px;
+
   outline: none;
 }
 
@@ -330,16 +381,27 @@ textarea:focus {
 .btn-add,
 .btn-save {
   width: 100%;
+  min-height: 52px;
+
   background: linear-gradient(135deg, #00FFB2, #00D192);
+
   border: none;
   border-radius: 12px;
+
   padding: 14px;
+
   color: #002219;
+
   font-weight: 700;
   text-transform: uppercase;
+
   cursor: pointer;
+
   margin-top: 10px;
-  transition: all 0.2s ease;
+
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
 }
 
 .btn-add:hover,
@@ -355,47 +417,72 @@ textarea:focus {
 #modal-registro {
   position: fixed;
   inset: 0;
+
   width: 100%;
-  height: 100dvh;
-  background: rgba(0, 0, 0, 0.7);
+  min-height: 100dvh;
 
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
 
-  opacity: 0;
-  visibility: hidden;
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.7);
+
+  /* Safari iOS */
+  -webkit-backdrop-filter: blur(8px);
+
+  /* Chrome / Edge */
+  backdrop-filter: blur(8px);
+
   z-index: 9999;
 
-  transition: all 0.3s ease;
-  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease;
 }
 
 #modal-registro.active {
-  display: flex;
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
+}
+
+body.modal-open {
+  overflow: hidden;
+  touch-action: none;
 }
 
 #modal-registro .modal-content {
-  background: var(--bg_cards);
   width: 100%;
-  max-width: 450px;
+  max-width: 460px;
+
   max-height: 90dvh;
   overflow-y: auto;
 
-  padding: 25px;
+  background: #0f172a;
+
   border-radius: 24px;
 
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 
-  transform: scale(0.9);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  padding: 24px;
+
+  transform: scale(0.96);
+
+  transition: transform 0.25s ease;
+
+  -webkit-overflow-scrolling: touch;
 
   box-sizing: border-box;
+}
+
+#modal-registro.active .modal-content {
+  transform: scale(1);
 }
 
 /* Mobile */
@@ -412,8 +499,14 @@ textarea:focus {
   }
 }
 
-#modal-registro.active .modal-content {
-  transform: scale(1);
+/* Scrollbar */
+#modal-registro .modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+#modal-registro .modal-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
 }
 
 /* =========================================
@@ -435,15 +528,34 @@ textarea:focus {
 }
 
 .tx-item {
+  width: 100%;
+  box-sizing: border-box;
   transition: all 0.5s ease;
 }
 
 .tx-item.destaque-categoria {
   border-left: 6px solid #00FFB2;
   background: rgba(0, 255, 178, 0.1);
+
   transform: scale(1.02);
-  box-shadow: 0 0 20px rgba(0, 255, 179, 0.185);
+
+  box-shadow:
+    0 0 20px rgba(0, 255, 179, 0.185);
+
   z-index: 10;
+}
+
+.tx-info {
+  min-width: 0;
+}
+
+.tx-desc {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.tx-right {
+  flex-shrink: 0;
 }
 
 /* =========================================
@@ -469,14 +581,19 @@ textarea:focus {
 .bar-track {
   width: 100%;
   height: 8px;
+
   background: rgba(255, 255, 255, 0.05);
+
   border-radius: 10px;
+
   overflow: hidden;
 }
 
 .category-bar-item {
   cursor: pointer;
-  transition: transform 0.2s, opacity 0.2s;
+  transition:
+    transform 0.2s,
+    opacity 0.2s;
 }
 
 .category-bar-item:hover {
@@ -505,4 +622,71 @@ textarea:focus {
 
 .poupanca-msg--critico {
   color: var(--saidas);
+}
+
+/* =========================================
+   RESPONSIVO GERAL
+========================================= */
+
+.card,
+.chart-card,
+.card-kpi,
+.card-historico,
+.action-card {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+
+  .summary-grid,
+  .dashboard-top-cards,
+  .top-cards-container,
+  .historico-segmentado,
+  .top-actions-grid,
+  .bottom-charts-grid {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dashboard-container {
+    padding: 14px;
+  }
+
+  .card,
+  .chart-card,
+  .card-kpi {
+    padding: 18px;
+  }
+
+  .tx-item {
+    align-items: flex-start;
+  }
+
+  .tx-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+
+  .tx-val {
+    font-size: 14px;
+  }
+}
+
+/* =========================================
+   SAFE AREA IOS
+========================================= */
+
+@supports (padding: max(0px)) {
+
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .dashboard-header {
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
 }
