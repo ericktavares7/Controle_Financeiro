@@ -32,16 +32,6 @@ const appFirebase = initializeApp(firebaseConfig);
 export const db = getFirestore(appFirebase);
 export const auth = getAuth(appFirebase);
 
-export async function login(email, senha) {
-
-  return await signInWithEmailAndPassword(
-    auth,
-    email,
-    senha
-  );
-
-}
-
 /* =========================================
    REGISTER
 ========================================= */
