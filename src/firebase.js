@@ -13,6 +13,7 @@ import {
   getAuth,
   onAuthStateChanged,
   signOut,
+  signInWithEmailAndPassword,
   browserLocalPersistence
 } from "firebase/auth";
 
@@ -36,6 +37,26 @@ export const auth = getAuth(appFirebase);
 
 let unsubscribeTransactions = null;
 
+export async function login(email, senha) {
+
+  try {
+
+    const credencial = await signInWithEmailAndPassword(
+      auth,
+      email,
+      senha
+    );
+
+    return credencial.user;
+
+  } catch (error) {
+
+    console.error("ERRO LOGIN:", error);
+
+    alert(error.message);
+  }
+}
+
 onAuthStateChanged(auth, (user) => {
 
   const authContainer = document.getElementById('auth-container');
@@ -45,15 +66,16 @@ onAuthStateChanged(auth, (user) => {
 
     console.log("Usuário logado:", user.email);
 
-    /* REMOVE LOGIN */
-    authContainer?.remove();
+    /* ESCONDE LOGIN */
+    if (authContainer) {
+      authContainer.style.display = 'none';
+    }
 
     /* MOSTRA APP */
     if (app) {
       app.style.display = 'block';
     }
 
-    /* BODY */
     document.body.classList.add('logged-in');
 
     /* REMOVE LISTENER ANTIGO */
@@ -68,25 +90,26 @@ onAuthStateChanged(auth, (user) => {
 
     console.log("Nenhum usuário logado.");
 
+    /* MOSTRA LOGIN */
+    if (authContainer) {
+      authContainer.style.display = 'flex';
+    }
+
     /* ESCONDE APP */
     if (app) {
       app.style.display = 'none';
     }
 
-    /* BODY */
     document.body.classList.remove('logged-in');
 
-    /* LIMPA DADOS */
     window.transactions = [];
 
-    /* REMOVE LISTENER */
     if (unsubscribeTransactions) {
       unsubscribeTransactions();
       unsubscribeTransactions = null;
     }
   }
 });
-
 /* ========================================
    ADD TRANSACTION
 ======================================== */

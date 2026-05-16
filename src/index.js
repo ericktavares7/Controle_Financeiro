@@ -6,7 +6,12 @@ import './chat.css';
 import './transactions.css';
 import './responsive.css';
 import Chart from 'chart.js/auto';
-import { db, auth, addTransaction } from './firebase.js';
+import {
+  db,
+  auth,
+  addTransaction,
+  login
+} from './firebase.js';
 import { collection, query, orderBy, deleteDoc, doc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 
@@ -426,6 +431,35 @@ window.alternarOrdemFiltro = () => {
 
 document.addEventListener('DOMContentLoaded', () => {
   popularSelectMeses();
+
+  /* ========================================
+     LOGIN
+  ======================================== */
+
+  const loginForm =
+    document.getElementById('login-form');
+
+  if (loginForm) {
+
+    loginForm.addEventListener(
+      'submit',
+      async (e) => {
+
+        e.preventDefault();
+
+        const email =
+          document.getElementById('login-email').value;
+
+        const senha =
+          document.getElementById('login-password').value;
+
+        console.log("Tentando login...");
+
+        await login(email, senha);
+
+      }
+    );
+  }
 
   // Tabs
   document.querySelectorAll('.tab-btn').forEach(btn => {
