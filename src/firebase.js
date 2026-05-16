@@ -69,7 +69,7 @@ onAuthStateChanged(auth, (user) => {
     /* ESCONDE LOGIN */
     if (authContainer) {
       authContainer?.classList.add('fade-out');
-      
+
       setTimeout(() => {
 
         authContainer.style.display = 'none';
@@ -96,8 +96,11 @@ onAuthStateChanged(auth, (user) => {
 
     console.log("Nenhum usuário logado.");
 
-    /* MOSTRA LOGIN */
+    /* REMOVE O FADE */
     if (authContainer) {
+
+      authContainer.classList.remove('fade-out');
+
       authContainer.style.display = 'flex';
     }
 
@@ -110,8 +113,11 @@ onAuthStateChanged(auth, (user) => {
 
     window.transactions = [];
 
+    /* REMOVE LISTENER */
     if (unsubscribeTransactions) {
+
       unsubscribeTransactions();
+
       unsubscribeTransactions = null;
     }
   }
