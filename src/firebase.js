@@ -17,21 +17,29 @@ export const auth = getAuth(app);
 
 onAuthStateChanged(auth, (user) => {
   const authContainer = document.getElementById('auth-container');
+  const app = document.getElementById('app');
 
   if (user) {
     console.log("Usuário logado:", user.email);
-    // Esconde o login e mostra o conteúdo
-    if (authContainer) {
-      authContainer.style.display = 'none';
+
+    authContainer?.remove();
+
+    if (app) {
+      app.style.display = 'block';
     }
+
     document.body.classList.add('logged-in');
+
     dbListenFirestore(user.uid);
-  } else {
+  }
+  else {
     console.log("Nenhum usuário logado.");
+
     // Mostra o login e remove o conteúdo
-    if (authContainer) {
-      authContainer.style.display = 'flex';
+    if (app) {
+      app.style.display = 'none';
     }
+
     document.body.classList.remove('logged-in');
   }
 });

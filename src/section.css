@@ -7,19 +7,12 @@
 }
 
 .card {
-  background-color: #161626;
-  /* Cor suave interna */
-  border: 1px solid #252540;
-  /* Borda discreta */
-  border-radius: 18px;
-  padding: 20px;
-}
-
-.card-historico {
-  background: #161626;
-  border-radius: 16px;
-  padding: 15px;
-  margin-bottom: 15px;
+  background: #0f172a;
+  border: 1px solid #1e2d40;
+  border-radius: 20px;
+  padding: 24px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .card header {
@@ -32,16 +25,50 @@
 .card header h3 {
   font-size: 0.9rem;
   color: #888;
-  /* Texto mais suave para o título */
   text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-/* Valores principais */
 .card .value {
   font-size: 2rem;
   font-weight: 800;
   margin: 10px 0;
 }
+
+.card-historico {
+  background: #161626;
+  border-radius: 16px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.card-kpi {
+  background: linear-gradient(135deg, #0f172a 0%, #0a1220 100%);
+  border: 1px solid var(--bordas);
+  border-radius: 16px;
+  padding: 22px;
+}
+
+.card-kpi h3 {
+  font-size: 11px;
+  color: var(--txt_secondario);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.card-kpi .value {
+  font-size: 22px;
+  font-weight: 600;
+}
+
 
 .dashboard-top-cards {
   display: flex;
@@ -64,15 +91,10 @@
   width: 100%;
 }
 
-/* Ajustamos os cards individuais (Receita, Despesa, Saldo) */
-/* Use a classe que você já tem neles, aqui chamei de .card-valor */
 .card-valor {
   flex: 1;
-  /* Faz os 3 ocuparem o mesmo espaço na linha */
   min-width: 0;
-  /* Evita que o card estoure o container */
   padding: 20px;
-  height: auto;
 }
 
 /* O card de categoria agora ganha espaço total */
@@ -83,11 +105,6 @@
   padding: 25px;
 }
 
-/* Ajuste nas barras de categoria para ficarem mais robustas */
-.category-bar-item {
-  margin-bottom: 20px;
-  /* Mais espaço entre uma categoria e outra */
-}
 
 .clickable {
   cursor: pointer;
@@ -109,7 +126,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   background: rgba(0, 0, 0, 0.7);
   -webkit-backdrop-filter: blur(8px);
@@ -129,7 +146,7 @@
 
 /* Quando o JS adiciona .active, ele aparece */
 #modal-registro.active {
-  display: flex !important;
+  display: flex;
   opacity: 1;
   visibility: visible;
 }
@@ -139,6 +156,8 @@
   background: var(--bg_cards);
   width: 95%;
   max-width: 450px;
+  max-height: 90dvh;
+  overflow-y: auto;
   padding: 25px;
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -202,7 +221,7 @@
 }
 
 .btn-caixinha {
-  border-bottom: 3px solid #00D1FF !important;
+  border-bottom: 3px solid #00D1FF;
 }
 
 .btn-caixinha .action-icon {
@@ -223,6 +242,12 @@
   color: var(--txt_secondario);
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+input,
+select,
+textarea {
+  font-size: 16px;
 }
 
 .form-group input,
@@ -274,18 +299,18 @@
 }
 
 .modal-content.borda-receita {
-  border-top: 4px solid #00FFB2 !important;
+  border-top: 4px solid #00FFB2;
   box-shadow: 0 -5px 15px rgba(0, 255, 178, 0.2);
   /* Brilho suave subindo */
 }
 
 .modal-content.borda-despesa {
-  border-top: 4px solid #FF6B35 !important;
+  border-top: 4px solid #FF6B35;
   box-shadow: 0 -5px 15px rgba(255, 107, 53, 0.2);
 }
 
 .modal-content.borda-caixinha {
-  border-top: 4px solid #00D1FF !important;
+  border-top: 4px solid #00D1FF;
   box-shadow: 0 -5px 15px rgba(0, 209, 255, 0.2);
 }
 
@@ -362,7 +387,7 @@
 }
 
 .top-actions-grid {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 /* Base do Botão Padronizada */
@@ -463,32 +488,6 @@
   font-weight: 600;
 }
 
-.charts-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  /* Empilha um embaixo do outro no mobile */
-  gap: 24px;
-  width: 100%;
-}
-
-.chart-card {
-  background: var(--cards);
-  border: 1px solid var(--bordas);
-  border-radius: 16px;
-  padding: 20px;
-  width: 100%;
-  box-sizing: border-box;
-  /* Fundamental para não vazar */
-}
-
-/* Wrapper para o Chart.js respirar */
-.canvas-wrapper {
-  position: relative;
-  height: 250px;
-  /* Altura fixa no mobile para não sumir */
-  width: 100%;
-}
-
 .category-item {
   margin-bottom: 20px;
 }
@@ -502,7 +501,7 @@
 .category-info span {
   font-size: 14px;
   font-weight: 600;
-  color: var(--txt_principal);
+  color: var(--txt-principal);
 }
 
 /* A pista da barra */
@@ -512,21 +511,6 @@
   background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
   overflow: hidden;
-}
-
-.bar-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67);
-
-  background: #FF6B35;
-}
-
-.category-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-top: 20px;
 }
 
 .category-bar-item {
@@ -539,29 +523,13 @@
   opacity: 0.9;
 }
 
-.bar-info {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 6px;
-  font-size: 0.85rem;
-  color: #a0a0b8;
-  /* Cor cinza clara para os textos */
-}
-
-.bar-bg {
-  background: rgba(255, 255, 255, 0.05);
-  height: 8px;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
 .tx-item {
   transition: all 0.5s ease;
 }
 
 .tx-item.destaque-categoria {
-  border-left: 6px solid #00FFB2 !important;
-  background: rgba(0, 255, 178, 0.1) !important;
+  border-left: 6px solid #00FFB2;
+  background: rgba(0, 255, 178, 0.1);
   transform: scale(1.02);
   box-shadow: 0 0 20px rgba(0, 255, 179, 0.185);
   z-index: 10;
@@ -582,31 +550,10 @@
   }
 }
 
-
-/* KPI Cards */
-.card-kpi {
-  background: linear-gradient(135deg, #0f172a 0%, #0a1220 100%);
-  border: 1px solid var(--bordas);
-  border-radius: 16px;
-  padding: 22px;
-}
-
-.card-kpi h3 {
-  font-size: 11px;
-  color: var(--txt_secondario);
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.card-kpi .value {
-  font-size: 22px;
-  font-weight: 600;
-}
-
 /* Card de Formulário (Nova Transação) */
 .add-transaction-section {
-  background: var(--cards);
-  border: 1px solid var(--bordas);
+  background: #0f172a;
+  border: 1px solid #1e2d40;
   border-radius: 16px;
   padding: 24px;
   margin-top: 24px;
@@ -636,7 +583,7 @@ select {
   font-family: inherit;
   background: #0f172a;
   border: 1px solid var(--bordas);
-  color: var(--txt_principal);
+  color: var(--txt-principal);
   padding: 12px;
   border-radius: 8px;
   outline: none;
@@ -666,9 +613,9 @@ input:focus {
 }
 
 #input-cat option {
-  background-color: #1a1a1a !important;
+  background-color: #1a1a1a;
   /* Fundo escuro */
-  color: #ffffff !important;
+  color: #ffffff;
   /* Letras brancas */
   padding: 8px;
 }
@@ -705,12 +652,6 @@ select option {
   width: 45%;
 }
 
-.tab-section {
-  display: none;
-  opacity: 0;
-  transition: opacity 0.4s ease-in-out;
-  margin-top: 10px;
-}
 
 #tab-transacoes {
   /* Reduza o valor que estava antes para algo mais próximo da altura do header */
@@ -720,14 +661,20 @@ select option {
   gap: 20px;
 }
 
+.tab-section {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+}
+
 .tab-section.active {
   display: block;
   opacity: 1;
 }
 
 .tx-highlight {
-  box-shadow: 0 0 20px var(--cor-destaque, #00FFB2) !important;
-  border: 1px solid var(--cor-destaque, #00FFB2) !important;
+  box-shadow: 0 0 20px var(--cor-destaque, #00FFB2);
+  border: 1px solid var(--cor-destaque, #00FFB2);
   transform: scale(1.02);
   transition: all 0.3s ease;
   z-index: 10;

@@ -35,7 +35,7 @@
 .msg-assistente {
   align-self: flex-start;
   background: #1a2235;
-  color: var(--txt_principal);
+  color: var(--txt-principal);
   border: 1px solid var(--bordas);
   border-bottom-left-radius: 4px;
 }
@@ -96,7 +96,7 @@
   border-radius: 12px;
   border: 1px solid var(--bordas);
   background: #0f172a;
-  color: var(--txt_principal);
+  color: var(--txt-principal);
   font-family: inherit;
   font-size: 13px;
   outline: none;

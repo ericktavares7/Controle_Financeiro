@@ -13,15 +13,15 @@
 }
 
 .dashboard-header {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    padding: 15px 40px;
-    background: var(--bg-color);
-    border-bottom: 1px solid var(--border-color);
-    position: sticky;
-    top: 0;
-    z-index: 100;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 15px 40px;
+  background: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .header-container {
@@ -31,7 +31,7 @@
   padding: 0 20px;
   display: grid;
   /* Mantém as 3 colunas, mas garante que não cresçam na vertical */
-  grid-template-columns: 1fr auto 1fr; 
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
 }
 
@@ -39,7 +39,7 @@
   display: flex;
   align-items: center;
   gap: 20px;
-  justify-self: end; 
+  justify-self: end;
 }
 
 .brand-group {
@@ -49,12 +49,13 @@
 }
 
 .brand-info h1 {
-    font-size: 1.1rem; /* Título um pouco menor */
-    margin: 0;
+  font-size: 1.1rem;
+  /* Título um pouco menor */
+  margin: 0;
 }
 
 .brand-info h1 {
-  color: var(--txt_principal);
+  color: var(--txt-principal);
   line-height: 1;
   font-weight: 900;
   /* Se quiser o estilo da imagem */
@@ -63,9 +64,11 @@
 }
 
 .current-date {
-    font-size: 0.75rem; /* Data mais discreta */
-    margin: 0;
+  font-size: 0.75rem;
+  /* Data mais discreta */
+  margin: 0;
 }
+
 /* Badge "ao vivo" na direita */
 .status-badge {
   border: 1px solid #1e293b;
@@ -97,22 +100,18 @@
   list-style: none;
 }
 
-.main-nav a { 
-    color: #64748b; 
-    font-size: 14px; 
-    font-weight: 600; 
-    text-decoration: none;
-    transition: 0.3s;
+.main-nav a {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.3s;
 }
 
-.main-nav a.active { color: var(--receita); border-bottom: 2px solid var(--receita); padding-bottom: 5px; }
-
-.card-header-flex {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  margin-bottom: 20px;
+.main-nav a.active {
+  color: var(--receita);
+  border-bottom: 2px solid var(--receita);
+  padding-bottom: 5px;
 }
 
 /* Estilo do botão para combinar com seu layout dark */
@@ -173,12 +172,6 @@
   margin-top: 20px;
 }
 
-.card-historico {
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 12px;
-  padding: 8px;
-}
-
 .titulo-receitas,
 .titulo-despesas {
   margin-bottom: 20px;
@@ -210,7 +203,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  min-height: 100dvh;
   background: #0B0B15;
   display: flex;
   align-items: center;
@@ -299,8 +292,9 @@
 }
 
 .logo-img {
-    height: 35px; /* Ajuste o tamanho da sua logo se necessário */
-    width: auto;
+  height: 35px;
+  /* Ajuste o tamanho da sua logo se necessário */
+  width: auto;
 }
 
 .btn-logout {
@@ -325,22 +319,6 @@
   border-color: #ff4b4b;
   box-shadow: 0 0 12px rgba(255, 75, 75, 0.2);
   transform: translateY(-1px);
-}
-
-/* Ajuste para o Header se você ainda não tiver */
-.dashboard-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  /* Reduzimos a altura total */
-  min-height: 60px; 
-  background: #0f172a;
-  border-bottom: 1px solid #1e2d40;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  padding: 5px 0; /* Padding vertical bem pequeno */
 }
 
 .auth-header h2 {
@@ -397,6 +375,13 @@
 }
 
 @media (max-width: 900px) {
-    .dashboard-header { grid-template-columns: 1fr auto; }
-    .main-nav { grid-row: 2; grid-column: 1 / span 2; margin-top: 15px; }
+  .dashboard-header {
+    grid-template-columns: 1fr auto;
+  }
+
+  .main-nav {
+    grid-row: 2;
+    grid-column: 1 / span 2;
+    margin-top: 15px;
+  }
 }

@@ -6,7 +6,6 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  height: auto !important;
   /* Resolve o bloco preto: permite que o site cresça */
 }
 
@@ -20,10 +19,10 @@ body {
 }
 
 .progress-bar {
-  background: rgba(255, 255, 255, 0.05) !important;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
-  height: 10px !important;
-  overflow: visible !important;
+  height: 10px;
+  overflow: visible;
   /* Para o brilho sair para fora */
 }
 
@@ -62,7 +61,7 @@ body {
 
 /* --- BLOCO PRETO FIX: Garante que o conteúdo suba --- */
 .dashboard-container {
-  display: block !important;
+  display: block;
   /* Remove o flex centralizado que empurra tudo para baixo */
   width: 100%;
   padding: 20px;
@@ -87,17 +86,17 @@ body {
 
 /* Cores das bordas neon de baixo */
 .btn-income {
-  border-bottom: 3px solid #00FFB2 !important;
+  border-bottom: 3px solid #00FFB2 ;
   box-shadow: 0 4px 15px rgba(0, 255, 178, 0.2);
 }
 
 .btn-expense {
-  border-bottom: 3px solid #FF6B35 !important;
+  border-bottom: 3px solid #FF6B35 ;
   box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
 }
 
 .btn-caixinha {
-  border-bottom: 3px solid #00d2ff !important;
+  border-bottom: 3px solid #00d2ff ;
   box-shadow: 0 4px 15px rgba(0, 210, 255, 0.2);
 }
 
@@ -108,49 +107,6 @@ body {
   gap: 20px;
 }
 
-.card {
-  background: #0f172a;
-  border: 1px solid #1e2d40;
-  border-radius: 20px;
-  padding: 20px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.card header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.card header h3 {
-  font-size: 0.85rem;
-  color: #4a6080;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.card .value {
-  font-size: 1.8rem;
-  font-weight: 800;
-}
-
-/* --- GRÁFICOS E CATEGORIAS --- */
-.chart-card {
-  background: #0f172a;
-  border: 1px solid #1e2d40;
-  border-radius: 20px;
-  padding: 20px;
-  margin-top: 20px;
-}
-
-.canvas-wrapper {
-  width: 100%;
-  height: 300px;
-  /* Altura necessária para o gráfico aparecer */
-  position: relative;
-}
 
 @media (max-width: 900px) {
 

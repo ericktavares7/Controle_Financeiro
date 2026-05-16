@@ -7,6 +7,12 @@
   --receita: #00FFB2;
   --despesa: #FF6B35;
   --caixinha: #00d2ff;
+  --bordas: #1e2d40;
+}
+
+#app {
+  display: none;
+  padding-top: 70px;
 }
 
 body {
@@ -16,15 +22,10 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  padding-top: 70px;
   transition: padding 0.3s ease;
 }
 
-.tab-section {
-  display: none;
-  padding: 20px 0;
-  width: 100%;
-}
+
 
 #tab-transacoes, 
 #tab-transacoes .transacoes-container {
@@ -32,10 +33,6 @@ body {
     box-shadow: none;
 }
 
-.tab-section.active {
-  display: block;
-  margin-top: 0;
-}
 
 h1,
 h2,
@@ -44,9 +41,16 @@ h3 {
   letter-spacing: -0.5px;
 }
 
+input,
+select,
+textarea,
+button {
+  font-size: 16px;
+}
+
 .tx-meta,
 .current-date {
-  color: var(--txt-secundario) !important;
+  color: var(--txt-secundario);
   font-size: 13px;
 }
 
@@ -80,23 +84,3 @@ h3 {
   box-shadow: 0 4px 15px rgba(0, 210, 255, 0.1);
 }
 
-/* --- CARDS DE RESUMO (IGUAL À FOTO) --- */
-.card {
-  background: #0f172a;
-  border: 1px solid #1e2d40;
-  border-radius: 20px;
-  padding: 24px;
-}
-
-.card header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.card .value {
-  font-size: 2.2rem;
-  font-weight: 800;
-  letter-spacing: -1px;
-}
