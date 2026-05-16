@@ -35,7 +35,6 @@ body {
 .top-actions-grid {
   display: grid;
   gap: 20px;
-  margin-top: 20px;
 }
 
 /* Desktop */
@@ -43,7 +42,6 @@ body {
 
   .top-actions-grid {
     grid-template-columns: repeat(3, 1fr);
-    margin-top: 45px;
   }
 }
 
@@ -192,14 +190,6 @@ body {
 ========================= */
 
 @media (max-width: 900px) {
-
-  body {
-    padding-top: 20px;
-  }
-
-  .top-actions-grid {
-    margin-top: 20px;
-  }
 
   .brand-info {
     display: block;

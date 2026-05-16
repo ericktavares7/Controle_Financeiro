@@ -230,3 +230,14 @@
     padding: 4px;
   }
 }
+
+.tx-highlight-soft {
+  background: rgba(0, 255, 178, 0.08);
+  border-color: rgba(0, 255, 178, 0.35);
+  box-shadow: 0 0 18px rgba(0, 255, 178, 0.12);
+  transform: scale(1.01);
+}
+
+.tx-val--goal {
+  color: #00D1FF;
+}

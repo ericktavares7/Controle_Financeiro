@@ -16,7 +16,8 @@
       {
         "ignore": [
           "-webkit-overflow-scrolling",
-          "text-size-adjust"
+          "text-size-adjust",
+          "min-height: auto"
         ]
       }
     ]

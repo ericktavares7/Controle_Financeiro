@@ -14,7 +14,7 @@ import {
   login,
   register
 } from './firebase.js';
-import { collection, query, orderBy, deleteDoc, doc } from "firebase/firestore";
+import { deleteDoc, doc, Timestamp } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 
 window.logOut = async () => {
@@ -32,6 +32,31 @@ const categoriasPorTipo = {
 };
 
 // --- FUNÇÕES GLOBAIS ---
+
+function showAuthMessage(message, type = 'error') {
+
+  const container =
+    document.getElementById('auth-message');
+
+  if (!container) return;
+
+  container.innerHTML = `
+  <div class="auth-message ${type}">
+    <span class="auth-message-icon">
+      ${type === 'error' ? '⚠' : '✓'}
+    </span>
+
+    <span>
+      ${message}
+    </span>
+  </div>
+`;
+
+  setTimeout(() => {
+    container.innerHTML = '';
+  }, 4000);
+}
+
 window.abrirModal = (tipo) => {
 
   const modal = document.getElementById('modal-registro');
@@ -120,12 +145,26 @@ const formatDate = (date) => {
   return d.toLocaleDateString('pt-BR');
 };
 
+function atualizarTextoMesSelecionado(ano, mes) {
+  const headerDate = document.getElementById('header-date');
+
+  if (!headerDate) return;
+
+  const meses = [
+    "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+    "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
+  ];
+
+  headerDate.textContent = `${meses[mes]} ${ano} • dashboard pessoal`;
+}
+
 // --- CORE: ATUALIZAÇÃO DO DASHBOARD ---
 window.atualizarDashboard = () => {
   const select = document.getElementById('filtro-mes');
   if (!select) return;
 
   const [anoFiltro, mesFiltro] = select.value.split('-').map(Number);
+  atualizarTextoMesSelecionado(anoFiltro, mesFiltro);
 
   const dadosExibicao = (window.transactions || []).filter(t => {
     const d = t.createdAt?.toDate ? t.createdAt.toDate() : (t.createdAt instanceof Date ? t.createdAt : new Date(t.createdAt));
@@ -147,9 +186,13 @@ window.atualizarDashboard = () => {
     else if (t.type === 'goal') res += t.val;
   });
 
-  document.getElementById('mes-receita').textContent = formatBRL(rec);
-  document.getElementById('mes-despesa').textContent = formatBRL(des);
-  document.getElementById('mes-saldo').textContent = formatBRL(rec - des - res);
+  const mesReceita = document.getElementById('mes-receita');
+  const mesDespesa = document.getElementById('mes-despesa');
+  const mesSaldo = document.getElementById('mes-saldo');
+
+  if (mesReceita) mesReceita.textContent = formatBRL(rec);
+  if (mesDespesa) mesDespesa.textContent = formatBRL(des);
+  if (mesSaldo) mesSaldo.textContent = formatBRL(rec - des - res);
 
   atualizarMetasIA(rec, des, res);
 };
@@ -162,7 +205,42 @@ function atualizarMetasIA(receita, despesa = 0, reserva = 0, lazer = 0) {
   reserva = Number(reserva) || 0;
   lazer = Number(lazer) || 0;
 
-  if (!container || receita === 0) return;
+  if (!container) return;
+
+  if (receita === 0) {
+    container.innerHTML = `
+      <div class="meta-item">
+        <div class="meta-header">
+          <span>Essencial (70%)</span>
+          <span style="color:#00FFB2">0.0%</span>
+        </div>
+        <div class="progress-bar">
+          <div style="width:0%; background:#00FFB2"></div>
+        </div>
+      </div>
+
+      <div class="meta-item">
+        <div class="meta-header">
+          <span>Reserva (20%)</span>
+          <span style="color:#00D1FF">0.0%</span>
+        </div>
+        <div class="progress-bar">
+          <div style="width:0%; background:#00D1FF"></div>
+        </div>
+      </div>
+
+      <div class="meta-item">
+        <div class="meta-header">
+          <span>Lazer (10%)</span>
+          <span style="color:#FFD700">0.0%</span>
+        </div>
+        <div class="progress-bar">
+          <div style="width:0%; background:#FFD700"></div>
+        </div>
+      </div>
+    `;
+    return;
+  }
 
   const pEssencial = ((despesa / receita) * 100).toFixed(1);
   const pReserva = ((reserva / receita) * 100).toFixed(1);
@@ -202,57 +280,99 @@ function atualizarMetasIA(receita, despesa = 0, reserva = 0, lazer = 0) {
 }
 
 window.destacarCategoria = (nomeCat) => {
-  // 1. Muda para a aba de transações automaticamente
-  const btnTransacoes = document.querySelector('[data-tab="transactions"]');
-  if (btnTransacoes) btnTransacoes.click();
+  const btnTransacoes =
+    document.querySelector('[data-tab="transacoes"]');
 
-  // 2. Espera um pouquinho a aba carregar e procura os itens
+  if (btnTransacoes) {
+    btnTransacoes.click();
+  }
+
   setTimeout(() => {
-    const classeBusca = `.cat-${nomeCat.replace(/\s+/g, '-')}`;
-    const itens = document.querySelectorAll(classeBusca);
+    const classeBusca =
+      `.cat-${nomeCat.replace(/\s+/g, '-')}`;
 
-    if (itens.length > 0) {
+    const itens =
+      document.querySelectorAll(classeBusca);
+
+    if (!itens.length) return;
+
+    itens.forEach(item => {
+      item.classList.add('tx-highlight-soft');
+    });
+
+    itens[0].scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    });
+
+    setTimeout(() => {
       itens.forEach(item => {
-        item.classList.add('destaque-temp'); // Adiciona o efeito
-        item.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Rola até o item
-
-        // Remove após 2 segundos
-        setTimeout(() => item.classList.remove('destaque-temp'), 2000);
+        item.classList.remove('tx-highlight-soft');
       });
-    }
-  }, 100);
-};
+    }, 2000);
 
+  }, 150);
+};
 // AJUSTE NA RENDERIZAÇÃO: Adicione o onclick na barra
 function renderCategoriasGrafico(lista) {
-  // Tenta encontrar o container da aba transações OU o da visão geral
-  const container = document.getElementById('mes-categorias') || document.getElementById('categoryList');
-  if (!container) return;
+  const containers = [
+    document.getElementById('categoryList'),
+    document.getElementById('mes-categorias')
+  ].filter(Boolean);
+
+  if (!containers.length) return;
 
   const totais = {};
+
   lista.forEach(t => {
-    if (!totais[t.cat]) totais[t.cat] = { valor: 0, tipo: t.type };
-    totais[t.cat].valor += t.val;
+    const cat = t.cat || 'Geral';
+
+    if (!totais[cat]) {
+      totais[cat] = {
+        valor: 0,
+        tipo: t.type
+      };
+    }
+
+    totais[cat].valor += Number(t.val) || 0;
   });
 
-  const categoriasArray = Object.entries(totais).sort((a, b) => b[1].valor - a[1].valor);
-  const maiorValor = Math.max(...categoriasArray.map(c => c[1].valor), 0);
+  const categoriasArray = Object.entries(totais)
+    .sort((a, b) => b[1].valor - a[1].valor);
 
-  container.innerHTML = categoriasArray.map(([cat, info]) => {
-    const porc = maiorValor > 0 ? (info.valor / maiorValor) * 100 : 0;
-    const cor = info.tipo === 'income' ? '#00FFB2' : '#FF6B35';
+  const maiorValor = Math.max(
+    ...categoriasArray.map(c => c[1].valor),
+    0
+  );
 
-    return `
-            <div class="category-bar-item" onclick="window.destacarCategoria('${cat}')" style="cursor: pointer; margin-bottom: 15px;">
-                <div class="bar-info" style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                   <span class="bar-label">${cat}</span>
-                    <b style="color: #fff;">${formatBRL(info.valor)}</b>
-                </div>
-                <div class="bar-bg" style="background: rgba(255,255,255,0.05); height: 8px; border-radius: 10px; overflow: hidden;">
-                    <div class="bar-fill" style="width:${porc}%; background:${cor}; height: 100%; transition: width 0.5s ease;"></div>
-                </div>
-            </div>`;
-  }).join('');
+  const html = categoriasArray.length
+    ? categoriasArray.map(([cat, info]) => {
+      const porc = maiorValor > 0 ? (info.valor / maiorValor) * 100 : 0;
+      const cor =
+        info.tipo === 'income'
+          ? '#00FFB2'
+          : info.tipo === 'goal'
+            ? '#00D1FF'
+            : '#FF6B35';
+
+      return `
+          <div class="category-bar-item" onclick="window.destacarCategoria('${cat}')">
+            <div class="bar-info">
+              <span>${cat}</span>
+              <b>${formatBRL(info.valor)}</b>
+            </div>
+
+            <div class="bar-bg">
+              <div class="bar-fill" style="width:${porc}%; background:${cor};"></div>
+            </div>
+          </div>
+        `;
+    }).join('')
+    : `<p class="msg-vazio">Nenhuma categoria registrada ainda.</p>`;
+
+  containers.forEach(container => {
+    container.innerHTML = html;
+  });
 }
 
 function renderListaTransacoes(lista) {
@@ -268,6 +388,7 @@ function renderListaTransacoes(lista) {
       `cat-${(t.cat || 'Geral').replace(/\s+/g, '-')}`;
 
     const income = t.type === 'income';
+    const goal = t.type === 'goal';
 
     return `
       <div class="tx-item ${categoriaClasse}" id="tx-${t.id}">
@@ -286,9 +407,9 @@ function renderListaTransacoes(lista) {
 
         <div class="tx-right">
 
-          <span class="tx-val ${income ? 'tx-val--income' : 'tx-val--expense'}">
+          <span class="tx-val ${income ? 'tx-val--income' : goal ? 'tx-val--goal' : 'tx-val--expense'}">
 
-            ${income ? '+' : '-'}
+            ${income ? '+' : goal ? '◆' : '-'}
             ${formatBRL(t.val)}
 
           </span>
@@ -368,6 +489,7 @@ window.atualizarGrafico = (chart, todasTransactions) => {
   const labels = [];
   const ganhos = [];
   const gastos = [];
+  const caixinhas = [];
 
   mesesChaves.forEach(chave => {
 
@@ -379,6 +501,7 @@ window.atualizarGrafico = (chart, todasTransactions) => {
 
     let receitas = 0;
     let despesas = 0;
+    let reservas = 0;
 
     todasTransactions.forEach(t => {
 
@@ -399,11 +522,15 @@ window.atualizarGrafico = (chart, todasTransactions) => {
         if (t.type === 'expense') {
           despesas += Number(t.val);
         }
+        if (t.type === 'goal') {
+          reservas += Number(t.val);
+        }
       }
     });
 
     ganhos.push(receitas);
     gastos.push(despesas);
+    caixinhas.push(reservas);
 
   });
 
@@ -411,6 +538,7 @@ window.atualizarGrafico = (chart, todasTransactions) => {
 
   chart.data.datasets[0].data = ganhos;
   chart.data.datasets[1].data = gastos;
+  chart.data.datasets[2].data = caixinhas;
 
   chart.update();
 };
@@ -430,6 +558,14 @@ window.alternarOrdemFiltro = () => {
     console.error(e);
   }
 };
+
+let isRegister = false
+
+const authTitle = document.getElementById('auth-title');
+const authSubtitle = document.getElementById('auth-subtitle');
+const toggleText = document.getElementById('toggle-auth-text');
+const authExtras = document.querySelectorAll('.auth-extra');
+const authButton = document.getElementById('btn-auth-primary');
 
 document.addEventListener('DOMContentLoaded', () => {
   popularSelectMeses();
@@ -497,9 +633,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
           console.error(err);
 
-          alert(err.message);
+          let msg = 'Erro ao autenticar.';
 
-        } finally {
+          switch (err.code) {
+
+            /* LOGIN */
+            case 'auth/invalid-credential':
+              msg = 'E-mail ou senha incorretos.';
+              break;
+
+            case 'auth/user-not-found':
+              msg = 'Usuário não encontrado.';
+              break;
+
+            case 'auth/wrong-password':
+              msg = 'Senha incorreta.';
+              break;
+
+            /* CADASTRO */
+            case 'auth/email-already-in-use':
+              msg = 'Esse e-mail já está cadastrado.';
+              break;
+
+            case 'auth/weak-password':
+              msg = 'A senha precisa ter no mínimo 6 caracteres.';
+              break;
+
+            /* GERAIS */
+            case 'auth/invalid-email':
+              msg = 'Digite um e-mail válido.';
+              break;
+
+            case 'auth/network-request-failed':
+              msg = 'Você está sem internet.';
+              break;
+
+            case 'auth/too-many-requests':
+              msg = 'Muitas tentativas. Aguarde alguns minutos.';
+              break;
+          }
+
+          showAuthMessage(msg, 'error');
+        }
+        finally {
 
           setTimeout(() => {
 
@@ -522,62 +698,84 @@ document.addEventListener('DOMContentLoaded', () => {
     TOGGLE LOGIN / CADASTRO
  ======================================== */
 
-  let modoCadastro = false;
+  function setAuthMode(registerMode, pushState = true) {
+    isRegister = registerMode;
 
-  const titulo =
-    document.getElementById('auth-title');
+    if (isRegister) {
+      authTitle.textContent = 'Criar conta';
+      authSubtitle.textContent = 'Comece agora a organizar sua vida financeira';
+      authButton.innerHTML = 'Criar Conta';
 
-  const subtitulo =
-    document.getElementById('auth-subtitle');
+      toggleText.innerHTML = `
+      Já possui uma conta?
+      <a href="#" id="toggle-auth-link">Voltar para login</a>
+    `;
 
-  const botao =
-    document.getElementById('btn-auth-primary');
+      authExtras.forEach(el => {
+        el.classList.remove('hidden');
+        el.classList.add('show');
+      });
 
-  const toggleText =
-    document.getElementById('toggle-auth-text');
-
-  const toggleLink =
-    document.getElementById('toggle-auth-link');
-
-  toggleLink?.addEventListener('click', (e) => {
-
-    e.preventDefault();
-
-    modoCadastro = !modoCadastro;
-
-    if (modoCadastro) {
-
-      titulo.textContent =
-        'Criar conta';
-
-      subtitulo.textContent =
-        'Comece a organizar sua vida financeira';
-
-      botao.textContent =
-        'Criar conta';
-
-      toggleText.innerHTML =
-        `Já possui conta?
-         <a href="#" id="toggle-auth-link">
-           Entrar
-         </a>`;
+      if (pushState) {
+        history.pushState({ authMode: 'register' }, '', '#cadastro');
+      }
 
     } else {
+      authTitle.textContent = 'Bem-vindo de volta';
+      authSubtitle.textContent = 'Acesse sua conta para gerenciar suas finanças';
+      authButton.innerHTML = 'Entrar';
 
-      titulo.textContent =
-        'Bem-vindo de volta';
+      toggleText.innerHTML = `
+      Não tem uma conta?
+      <a href="#" id="toggle-auth-link">Criar conta grátis</a>
+    `;
 
-      subtitulo.textContent =
-        'Acesse sua conta para gerenciar suas finanças';
+      authExtras.forEach(el => {
+        el.classList.remove('show');
+        el.classList.add('hidden');
+      });
 
-      botao.textContent =
-        'Entrar';
+      if (pushState) {
+        history.pushState({ authMode: 'login' }, '', '#login');
+      }
+    }
 
-      toggleText.innerHTML =
-        `Não tem uma conta?
-         <a href="#" id="toggle-auth-link">
-           Criar conta grátis
-         </a>`;
+    bindToggleAuthLink();
+  }
+
+  function bindToggleAuthLink() {
+    const link = document.getElementById('toggle-auth-link');
+
+    link?.addEventListener('click', (e) => {
+      e.preventDefault();
+      setAuthMode(!isRegister);
+    });
+  }
+
+  bindToggleAuthLink();
+
+  history.replaceState({ authMode: 'login' }, '', '#login');
+
+  window.addEventListener('popstate', async () => {
+    const authContainer = document.getElementById('auth-container');
+    const app = document.getElementById('app');
+
+    const estaNaTelaCadastro = isRegister;
+    const estaLogado = document.body.classList.contains('logged-in');
+
+    if (estaNaTelaCadastro && authContainer?.style.display !== 'none') {
+      setAuthMode(false, false);
+      return;
+    }
+
+    if (estaLogado && app?.style.display !== 'none') {
+      const confirmar = confirm('Deseja realmente sair da sua conta?');
+
+      if (confirmar) {
+        await window.logOut();
+      } else {
+        history.pushState({ app: true }, '', '#app');
+      }
     }
   });
 
@@ -595,39 +793,70 @@ document.addEventListener('DOMContentLoaded', () => {
   const ctx = document.getElementById('mainEvolutionChart');
   if (ctx) {
     window.meuGrafico = new Chart(ctx, {
-      type: 'line',
+      type: 'bar',
       data: {
         labels: [],
         datasets: [
           {
             label: 'Receitas',
             data: [],
+            backgroundColor: 'rgba(0, 255, 178, 0.65)',
             borderColor: '#00FFB2',
-            backgroundColor: 'rgba(0, 255, 178, 0.1)',
-            fill: true,
-            tension: 0.4, // Isso cria a onda
-            borderWidth: 3,
-            pointRadius: 0 // Deixa a linha limpa
+            borderWidth: 1,
+            borderRadius: 8,
+            maxBarThickness: 42
           },
           {
             label: 'Despesas',
             data: [],
+            backgroundColor: 'rgba(255, 107, 53, 0.65)',
             borderColor: '#FF6B35',
-            backgroundColor: 'rgba(255, 107, 53, 0.1)',
-            fill: true,
-            tension: 0.4, // Isso cria a onda
-            borderWidth: 3,
-            pointRadius: 0
+            borderWidth: 1,
+            borderRadius: 8,
+            maxBarThickness: 42
+          },
+          {
+            label: 'Caixinhas',
+            data: [],
+            backgroundColor: 'rgba(0, 209, 255, 0.65)',
+            borderColor: '#00D1FF',
+            borderWidth: 1,
+            borderRadius: 8,
+            maxBarThickness: 42
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              color: '#94a3b8',
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
+          }
+        },
         scales: {
-          x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
-          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#94a3b8'
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(255,255,255,0.05)'
+            },
+            ticks: {
+              color: '#94a3b8'
+            }
+          }
         }
       }
     });
@@ -686,90 +915,3 @@ function popularSelectMeses() {
   const d = new Date();
   select.innerHTML = meses.map((n, i) => `<option value="${d.getFullYear()}-${i}" ${i === d.getMonth() ? 'selected' : ''}>${n} ${d.getFullYear()}</option>`).join('');
 }
-
-/* =========================================
-   AUTH TOGGLE LOGIN / REGISTER
-========================================= */
-
-let isRegister = false;
-
-const authTitle =
-  document.getElementById('auth-title');
-
-const authSubtitle =
-  document.getElementById('auth-subtitle');
-
-const toggleLink =
-  document.getElementById('toggle-auth-link');
-
-const toggleText =
-  document.getElementById('toggle-auth-text');
-
-const authExtras =
-  document.querySelectorAll('.auth-extra');
-
-const authButton =
-  document.getElementById('btn-auth-primary');
-
-toggleLink?.addEventListener('click', (e) => {
-
-  e.preventDefault();
-
-  isRegister = !isRegister;
-
-  authTitle.classList.remove('auth-title-animate');
-  void authTitle.offsetWidth;
-  authTitle.classList.add('auth-title-animate');
-
-  authSubtitle.classList.remove('auth-title-animate');
-  void authSubtitle.offsetWidth;
-  authSubtitle.classList.add('auth-title-animate');
-
-  if (isRegister) {
-
-    authTitle.textContent =
-      'Criar conta';
-
-    authSubtitle.textContent =
-      'Comece agora a organizar sua vida financeira';
-
-    authButton.innerHTML =
-      'Criar Conta';
-
-    toggleText.innerHTML = `
-      Já possui uma conta?
-      <a href="#" id="toggle-auth-link">
-        Voltar para login
-      </a>
-    `;
-
-    authExtras.forEach(el => {
-      el.classList.remove('hidden');
-      el.classList.add('show');
-    });
-
-  } else {
-
-    authTitle.textContent =
-      'Bem-vindo de volta';
-
-    authSubtitle.textContent =
-      'Acesse sua conta para gerenciar suas finanças';
-
-    authButton.innerHTML =
-      'Entrar';
-
-    toggleText.innerHTML = `
-      Não tem uma conta?
-      <a href="#" id="toggle-auth-link">
-        Criar conta grátis
-      </a>
-    `;
-
-    authExtras.forEach(el => {
-      el.classList.remove('show');
-      el.classList.add('hidden');
-    });
-  }
-
-});

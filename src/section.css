@@ -22,7 +22,6 @@ html {
 
 body {
   overflow-x: hidden;
-  min-height: 100dvh;
 }
 
 /* =========================================
@@ -178,21 +177,38 @@ body {
 }
 
 .tab-section {
-  display: none;
+  display: none !important;
   opacity: 0;
-  transition: opacity 0.4s ease-in-out;
+  width: 100%;
 }
 
 .tab-section.active {
-  display: block;
+  display: flex !important;
+  flex-direction: column;
+  gap: 20px;
   opacity: 1;
+  width: 100%;
+  padding-top: 32px;
+}
+
+@media (max-width: 768px) {
+  .tab-section.active {
+    padding-top: 18px;
+  }
 }
 
 #tab-transacoes {
-  padding-top: 80px;
-  display: flex;
+  padding-top: 0;
+  margin-top: 0;
   flex-direction: column;
   gap: 20px;
+}
+
+#tab-overview.active,
+#tab-transacoes.active,
+#tab-ia.active {
+  display: flex;
+  flex-direction: column;
 }
 
 /* =========================================
@@ -204,11 +220,10 @@ body {
 }
 
 .action-card {
-  background: var(--bg_cards);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 16px;
   padding: 16px;
-
+  background: #0f172a;
   display: flex;
   align-items: center;
   gap: 15px;
@@ -265,7 +280,7 @@ body {
 }
 
 .action-info small {
-  color: var(--txt_secondario);
+  color: #94a3b8;
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 1.5px;
@@ -273,7 +288,7 @@ body {
 }
 
 .action-info strong {
-  color: #FFFFFF;
+  color: #ffffff;
   font-size: 14px;
   font-weight: 600;
 }
@@ -419,7 +434,6 @@ textarea:focus {
   inset: 0;
 
   width: 100%;
-  min-height: 100dvh;
 
   display: flex;
   align-items: center;
@@ -689,4 +703,34 @@ body.modal-open {
   .dashboard-header {
     padding-top: max(12px, env(safe-area-inset-top));
   }
+}
+
+/* Corrige espaço gigante na aba Transações */
+#tab-transacoes {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  min-height: auto !important;
+  height: auto !important;
+}
+
+#tab-transacoes .transacoes-container {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  min-height: auto !important;
+  height: auto !important;
+}
+
+.transacoes-container {
+  justify-content: flex-start !important;
+}
+
+
+#tab-transacoes.active .transacoes-container {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+#tab-transacoes.active .section-header {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }

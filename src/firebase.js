@@ -12,7 +12,6 @@ import {
 import {
   getAuth,
   onAuthStateChanged,
-  signOut,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile
@@ -80,23 +79,13 @@ export async function register(
 let unsubscribeTransactions = null;
 
 export async function login(email, senha) {
+  const credencial = await signInWithEmailAndPassword(
+    auth,
+    email,
+    senha
+  );
 
-  try {
-
-    const credencial = await signInWithEmailAndPassword(
-      auth,
-      email,
-      senha
-    );
-
-    return credencial.user;
-
-  } catch (error) {
-
-    console.error("ERRO LOGIN:", error);
-
-    alert(error.message);
-  }
+  return credencial.user
 }
 
 onAuthStateChanged(auth, (user) => {
@@ -125,6 +114,10 @@ onAuthStateChanged(auth, (user) => {
     }
 
     document.body.classList.add('logged-in');
+
+    if (location.hash !== '#app') {
+      history.pushState({ app: true }, '', '#app');
+    }
 
     /* REMOVE LISTENER ANTIGO */
     if (unsubscribeTransactions) {
