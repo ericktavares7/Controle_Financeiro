@@ -127,33 +127,42 @@
 
 .btn-neon {
   width: 100%;
-  height: 54px;
+  height: 52px;
 
   border: none;
   border-radius: 14px;
 
-  background:
-    linear-gradient(135deg,
-      #00FFB2,
-      #00d1ff);
+  background: linear-gradient(135deg, #00FFB2, #00D1FF);
 
-  color: #03130f;
-
+  color: #041018;
   font-size: 15px;
   font-weight: 700;
 
   cursor: pointer;
 
-  transition: .25s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 
-  margin-top: 8px;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    filter 0.2s ease;
 }
 
 .btn-neon:hover {
   transform: translateY(-2px);
+  filter: brightness(1.05);
+}
 
-  box-shadow:
-    0 10px 30px rgba(0, 255, 178, .25);
+.btn-neon:active {
+  transform: scale(0.98);
+}
+
+.btn-neon:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 /* =========================================
@@ -271,4 +280,70 @@
   transition:
     opacity .35s ease,
     visibility .35s ease;
+}
+
+.auth-loader {
+  width: 18px;
+  height: 18px;
+
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-top-color: #041018;
+
+  border-radius: 50%;
+
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========================================
+   CAMPOS EXTRAS
+======================================== */
+
+.auth-extra {
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    max-height 0.25s ease;
+
+  overflow: hidden;
+}
+
+.auth-extra.hidden {
+  opacity: 0;
+  transform: translateY(-8px);
+  max-height: 0;
+  margin: 0;
+  pointer-events: none;
+}
+
+.auth-extra.show {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 120px;
+}
+
+/* ========================================
+   TRANSIÇÃO TEXTOS
+======================================== */
+
+.auth-title-animate {
+  animation: fadeAuth 0.25s ease;
+}
+
+@keyframes fadeAuth {
+
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

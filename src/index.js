@@ -459,7 +459,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const btn =
           document.getElementById('btn-auth-primary');
 
-        btn.classList.add('loading');
+        btn.disabled = true;
+
+        btn.innerHTML = `
+        <span class="auth-loader"></span>
+      `;
 
         try {
 
@@ -468,7 +472,11 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
 
           setTimeout(() => {
-            btn.classList.remove('loading');
+
+            btn.disabled = false;
+
+            btn.innerHTML = 'Entrar';
+
           }, 700);
 
         }
@@ -645,3 +653,90 @@ function popularSelectMeses() {
   const d = new Date();
   select.innerHTML = meses.map((n, i) => `<option value="${d.getFullYear()}-${i}" ${i === d.getMonth() ? 'selected' : ''}>${n} ${d.getFullYear()}</option>`).join('');
 }
+
+/* =========================================
+   AUTH TOGGLE LOGIN / REGISTER
+========================================= */
+
+let isRegister = false;
+
+const authTitle =
+  document.getElementById('auth-title');
+
+const authSubtitle =
+  document.getElementById('auth-subtitle');
+
+const toggleLink =
+  document.getElementById('toggle-auth-link');
+
+const toggleText =
+  document.getElementById('toggle-auth-text');
+
+const authExtras =
+  document.querySelectorAll('.auth-extra');
+
+const authButton =
+  document.getElementById('btn-auth-primary');
+
+toggleLink?.addEventListener('click', (e) => {
+
+  e.preventDefault();
+
+  isRegister = !isRegister;
+
+  authTitle.classList.remove('auth-title-animate');
+  void authTitle.offsetWidth;
+  authTitle.classList.add('auth-title-animate');
+
+  authSubtitle.classList.remove('auth-title-animate');
+  void authSubtitle.offsetWidth;
+  authSubtitle.classList.add('auth-title-animate');
+
+  if (isRegister) {
+
+    authTitle.textContent =
+      'Criar conta';
+
+    authSubtitle.textContent =
+      'Comece agora a organizar sua vida financeira';
+
+    authButton.innerHTML =
+      'Criar Conta';
+
+    toggleText.innerHTML = `
+      Já possui uma conta?
+      <a href="#" id="toggle-auth-link">
+        Voltar para login
+      </a>
+    `;
+
+    authExtras.forEach(el => {
+      el.classList.remove('hidden');
+      el.classList.add('show');
+    });
+
+  } else {
+
+    authTitle.textContent =
+      'Bem-vindo de volta';
+
+    authSubtitle.textContent =
+      'Acesse sua conta para gerenciar suas finanças';
+
+    authButton.innerHTML =
+      'Entrar';
+
+    toggleText.innerHTML = `
+      Não tem uma conta?
+      <a href="#" id="toggle-auth-link">
+        Criar conta grátis
+      </a>
+    `;
+
+    authExtras.forEach(el => {
+      el.classList.remove('show');
+      el.classList.add('hidden');
+    });
+  }
+
+});

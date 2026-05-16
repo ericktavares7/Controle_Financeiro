@@ -24,39 +24,76 @@
 <body>
 
   <div id="auth-container" class="auth-overlay">
+
     <div class="auth-card">
+
       <div class="auth-header">
-        <img src="/logo_finance.png" alt="Finance Simplefy">
-        <h2 id="auth-title">Bem-vindo de volta</h2>
-        <p id="auth-subtitle">Acesse sua conta para gerenciar suas finanças</p>
+
+        <img src="/logo_finance.png" alt="Finance Simplefy" class="auth-logo">
+
+        <h2 id="auth-title">
+          Bem-vindo de volta
+        </h2>
+
+        <p id="auth-subtitle">
+          Acesse sua conta para gerenciar suas finanças
+        </p>
+
       </div>
 
-      <form id="login-form">
+      <form id="auth-form">
+
+        <!-- NOME -->
+        <div class="input-group auth-extra hidden">
+          <label>Nome</label>
+
+          <input type="text" id="auth-name" placeholder="Seu nome">
+        </div>
+
+        <!-- SOBRENOME -->
+        <div class="input-group auth-extra hidden">
+          <label>Sobrenome</label>
+
+          <input type="text" id="auth-lastname" placeholder="Seu sobrenome">
+        </div>
+
+        <!-- EMAIL -->
         <div class="input-group">
           <label>E-mail</label>
-          <input type="email" id="login-email" placeholder="seu@email.com" required>
+
+          <input type="email" id="auth-email" placeholder="seu@email.com" required>
         </div>
+
+        <!-- SENHA -->
         <div class="input-group">
           <label>Senha</label>
-          <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+
+          <input type="password" id="auth-password" placeholder="••••••••" required autocomplete="current-password">
         </div>
 
+        <!-- BOTÃO -->
         <button type="submit" id="btn-auth-primary" class="btn-neon">
-
-          <span class="btn-text">
-            Entrar
-          </span>
-
-          <span class="btn-loader"></span>
-
+          Entrar
         </button>
-        
+
       </form>
 
       <div class="auth-footer">
-        <p id="toggle-auth-text">Não tem uma conta? <a href="#" id="toggle-auth-link">Criar conta grátis</a></p>
+
+        <p id="toggle-auth-text">
+
+          Não tem uma conta?
+
+          <a href="#" id="toggle-auth-link">
+            Criar conta grátis
+          </a>
+
+        </p>
+
       </div>
+
     </div>
+
   </div>
 
   <main id="app" class="dashboard-container">
