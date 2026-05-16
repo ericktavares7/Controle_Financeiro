@@ -214,3 +214,61 @@
       translateY(0) scale(1);
   }
 }
+
+/* =========================================
+   BUTTON LOADING
+========================================= */
+
+.btn-neon {
+  position: relative;
+}
+
+.btn-loader {
+  width: 18px;
+  height: 18px;
+
+  border: 2px solid rgba(0, 0, 0, .15);
+  border-top-color: #03130f;
+
+  border-radius: 50%;
+
+  animation: spin .7s linear infinite;
+
+  display: none;
+}
+
+.btn-neon.loading {
+
+  pointer-events: none;
+  opacity: .85;
+}
+
+.btn-neon.loading .btn-text {
+  display: none;
+}
+
+.btn-neon.loading .btn-loader {
+  display: block;
+}
+
+@keyframes spin {
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================
+   FADE LOGIN
+========================================= */
+
+.auth-overlay.fade-out {
+
+  opacity: 0;
+
+  visibility: hidden;
+
+  transition:
+    opacity .35s ease,
+    visibility .35s ease;
+}

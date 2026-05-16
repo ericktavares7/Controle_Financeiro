@@ -68,7 +68,13 @@ onAuthStateChanged(auth, (user) => {
 
     /* ESCONDE LOGIN */
     if (authContainer) {
-      authContainer.style.display = 'none';
+      authContainer?.classList.add('fade-out');
+      
+      setTimeout(() => {
+
+        authContainer.style.display = 'none';
+
+      }, 300);
     }
 
     /* MOSTRA APP */

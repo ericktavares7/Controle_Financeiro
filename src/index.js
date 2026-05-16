@@ -456,7 +456,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         console.log("Tentando login...");
 
-        await login(email, senha);
+        const btn =
+          document.getElementById('btn-auth-primary');
+
+        btn.classList.add('loading');
+
+        try {
+
+          await login(email, senha);
+
+        } finally {
+
+          setTimeout(() => {
+            btn.classList.remove('loading');
+          }, 700);
+
+        }
 
       }
     );
