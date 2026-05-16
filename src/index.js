@@ -8,6 +8,15 @@ import './responsive.css';
 import Chart from 'chart.js/auto';
 import { db, auth, addTransaction } from './firebase.js';
 import { collection, query, orderBy, deleteDoc, doc } from "firebase/firestore";
+import { signOut } from "firebase/auth";
+
+window.logOut = async () => {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error("Erro ao sair:", error);
+  }
+};
 
 const categoriasPorTipo = {
   income: ["Salário", "Freelance", "Investimentos", "Presente", "Venda", "Outros"],

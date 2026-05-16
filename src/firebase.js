@@ -12,7 +12,8 @@ import {
 import {
   getAuth,
   onAuthStateChanged,
-  signOut
+  signOut,
+  browserLocalPersistence
 } from "firebase/auth";
 
 const firebaseConfig = {
@@ -151,22 +152,3 @@ export function dbListenFirestore(uid) {
 
   });
 }
-
-/* ========================================
-   LOGOUT
-======================================== */
-
-window.logout = async () => {
-
-  try {
-
-    await signOut(auth);
-
-    window.location.reload();
-
-  } catch (e) {
-
-    console.error("Erro logout:", e);
-
-  }
-};
