@@ -1,177 +1,226 @@
-/* --- RESET DE COMPORTAMENTO --- */
+/* =========================
+   RESET GLOBAL
+========================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   background-color: #0B0B15;
-  /* Cor de fundo das suas imagens */
   color: #FFFFFF;
+
   margin: 0;
   padding: 0;
+
   overflow-x: hidden;
-  /* Resolve o bloco preto: permite que o site cresça */
 }
 
-.progress-bar-container {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  height: 8px;
-  overflow: visible;
-  /* Importante para o brilho aparecer */
-  position: relative;
-}
+/* =========================
+   CONTAINER PRINCIPAL
+========================= */
 
-.progress-bar {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  height: 10px;
-  overflow: visible;
-  /* Para o brilho sair para fora */
-}
-
-.progress-bar div {
-  height: 100%;
-  border-radius: 10px;
-  transition: width 1s ease-in-out;
-  filter: drop-shadow(0 0 5px inherit);
-}
-
-/* A barra que preenche (Efeito Glow igual à foto) */
-.progress-fill.essencial {
-  background: linear-gradient(90deg, #FF6B35, #ff936e);
-  box-shadow: 0 0 15px rgba(255, 107, 53, 0.6);
-  /* Brilho laranja */
-  height: 100%;
-  border-radius: 10px;
-  transition: width 0.5s ease-in-out;
-}
-
-.progress-fill.reserva {
-  background: linear-gradient(90deg, #00d2ff, #3a7bd5);
-  box-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
-  /* Brilho azul */
-  height: 100%;
-  border-radius: 10px;
-}
-
-.progress-fill.estilo {
-  background: linear-gradient(90deg, #FFD700, #ffec8b);
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
-  /* Brilho dourado */
-  height: 100%;
-  border-radius: 10px;
-}
-
-/* --- BLOCO PRETO FIX: Garante que o conteúdo suba --- */
 .dashboard-container {
-  display: block;
-  /* Remove o flex centralizado que empurra tudo para baixo */
   width: 100%;
   padding: 20px;
   box-sizing: border-box;
 }
 
-/* --- ESTILO DOS CARDS COM EFEITO NEON (IGUAL ÀS IMAGENS) --- */
+/* =========================
+   GRID DE AÇÕES
+========================= */
+
+.top-actions-grid {
+  display: grid;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* Desktop */
+@media (min-width: 900px) {
+
+  .top-actions-grid {
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 45px;
+  }
+}
+
+/* =========================
+   CARDS DE AÇÃO
+========================= */
+
 .action-card {
   width: 100%;
+
   background: #0f172a;
+
   border-radius: 16px;
   border: 1px solid #1e2d40;
+
   padding: 15px;
   margin-bottom: 15px;
+
   display: flex;
   align-items: center;
   gap: 12px;
+
   text-align: left;
+
   cursor: pointer;
-  transition: transform 0.2s;
+
+  transition: transform 0.2s ease;
 }
 
-/* Cores das bordas neon de baixo */
+.action-card:hover {
+  transform: translateY(-2px);
+}
+
+/* =========================
+   BOTÕES COM GLOW
+========================= */
+
 .btn-income {
-  border-bottom: 3px solid #00FFB2 ;
+  border-bottom: 3px solid #00FFB2;
   box-shadow: 0 4px 15px rgba(0, 255, 178, 0.2);
 }
 
 .btn-expense {
-  border-bottom: 3px solid #FF6B35 ;
+  border-bottom: 3px solid #FF6B35;
   box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
 }
 
 .btn-caixinha {
-  border-bottom: 3px solid #00d2ff ;
+  border-bottom: 3px solid #00d2ff;
   box-shadow: 0 4px 15px rgba(0, 210, 255, 0.2);
 }
 
-/* --- CARDS DE RESUMO (REGRA 70/20/10 E POUPANÇA) --- */
+/* =========================
+   GRID RESUMO
+========================= */
+
 .summary-grid {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-
-@media (max-width: 900px) {
-
-  body {
-    padding-top: 80px;
-  }
-
-  .top-actions-grid {
-    margin-top: 80px;
-  }
-
-  .dashboard-header {
-    height: auto;
-    padding: 15px 0;
-  }
-
-  .brand-info {
-    display: none;
-  }
-
-  .main-nav ul {
-    gap: 8px;
-  }
-
-  .header-container {
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
-    gap: 10px;
-  }
-
-  .main-nav {
-    grid-column: 1 / -1;
-    justify-self: center;
-    order: 3;
-  }
-
-  .brand-group {
-    grid-column: 1;
-  }
-
-  .header-actions {
-    grid-column: 2;
-    justify-self: end;
-  }
-}
-
-
-/* --- AJUSTES PARA DESKTOP (TELAS GRANDES) --- */
+/* Desktop */
 @media (min-width: 900px) {
-  .top-actions-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-top: 45px;
-  }
 
   .summary-grid {
     display: grid;
     grid-template-columns: 1.5fr 1fr;
-    /* Regra maior que poupança */
     gap: 20px;
   }
+}
 
-  .dashboard-header {
-    flex-direction: row;
-    justify-content: space-between;
+/* =========================
+   BARRAS DE PROGRESSO
+========================= */
+
+.progress-bar-container {
+  background: rgba(255, 255, 255, 0.05);
+
+  border-radius: 10px;
+
+  height: 8px;
+
+  overflow: visible;
+
+  position: relative;
+}
+
+.progress-bar {
+  background: rgba(255, 255, 255, 0.05);
+
+  border-radius: 10px;
+
+  height: 10px;
+
+  overflow: visible;
+}
+
+.progress-bar div {
+  height: 100%;
+  border-radius: 10px;
+
+  transition: width 1s ease-in-out;
+
+  filter: drop-shadow(0 0 5px inherit);
+}
+
+/* =========================
+   FILLS DAS BARRAS
+========================= */
+
+/* Essencial */
+.progress-fill.essencial {
+  background: linear-gradient(90deg, #FF6B35, #ff936e);
+
+  box-shadow: 0 0 15px rgba(255, 107, 53, 0.6);
+
+  height: 100%;
+  border-radius: 10px;
+
+  transition: width 0.5s ease-in-out;
+}
+
+/* Reserva */
+.progress-fill.reserva {
+  background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+
+  box-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
+
+  height: 100%;
+  border-radius: 10px;
+}
+
+/* Estilo */
+.progress-fill.estilo {
+  background: linear-gradient(90deg, #FFD700, #ffec8b);
+
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+
+  height: 100%;
+  border-radius: 10px;
+}
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 900px) {
+
+  body {
+    padding-top: 20px;
+  }
+
+  .top-actions-grid {
+    margin-top: 20px;
+  }
+
+  .brand-info {
+    display: block;
+  }
+}
+
+/* =========================
+   TELAS MUITO PEQUENAS
+========================= */
+
+@media (max-width: 500px) {
+
+  .dashboard-container {
+    padding: 14px;
+  }
+
+  .action-card {
+    padding: 14px;
+  }
+
+  .summary-grid {
+    gap: 16px;
   }
 }

@@ -7,8 +7,7 @@
   overflow-y: auto;
 }
 
-
-/* Container que segura tudo no lugar */
+/* Container geral */
 .transacoes-container {
   display: flex;
   flex-direction: column;
@@ -16,31 +15,17 @@
   width: 100%;
 }
 
+/* Header da seção */
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
-/* Fix das Cores e Letras (Passo 3) */
-.tx-desc {
-  font-size: 15px; /* Maior para desktop */
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.tx-meta {
-  color: #94a3b8; /* Cinza claro acessível */
-  font-size: 12px;
-}
-
-.tx-icon--income { background: rgba(0, 255, 178, 0.1); color: var(--receita); }
-.tx-icon--expense { background: rgba(255, 107, 53, 0.1); color: var(--despesa); }
-.tx-val--income { color: var(--receita); }
-.tx-val--expense { color: var(--despesa); }
-
-/* Passo 2: Alinhamento das colunas de histórico */
+/* Histórico lado a lado */
 .historico-segmentado {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -48,66 +33,134 @@
   align-items: start;
 }
 
+/* MOBILE */
 @media (max-width: 850px) {
   .historico-segmentado {
     grid-template-columns: 1fr;
   }
+
   .section-header {
     flex-direction: column;
-    gap: 15px;
+    align-items: flex-start;
   }
 }
+
+/* =========================
+   ITEM DA TRANSAÇÃO
+========================= */
 
 .tx-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 4px;
-  border-bottom: 1px solid var(--bordas);
-  transition: background 0.15s;
-  border-radius: 8px;
+
+  padding: 12px;
+  border-radius: 12px;
+
+  border: 1px solid transparent;
+  border-bottom: 1px solid var(--border-color);
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.2s ease;
+
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .tx-item:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.03);
+  transform: translateX(2px);
 }
 
-/* Ícone redondo */
+/* Ícone */
 .tx-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+
+  border-radius: 12px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   font-size: 14px;
   flex-shrink: 0;
 }
 
+/* Cores */
+.tx-icon--income {
+  background: rgba(0, 255, 178, 0.1);
+  color: var(--receita);
+}
 
-/* Descrição e meta */
+.tx-icon--expense {
+  background: rgba(255, 107, 53, 0.1);
+  color: var(--despesa);
+}
+
+.tx-icon--caixinha {
+  background: rgba(255, 230, 109, 0.15);
+  color: #FFE66D;
+}
+
+.tx-icon--cartao {
+  background: rgba(78, 205, 196, 0.15);
+  color: #4ECDC4;
+}
+
+/* =========================
+   INFO
+========================= */
+
 .tx-info {
   flex: 1;
   min-width: 0;
-  /* impede overflow */
+
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
+/* Descrição */
+.tx-desc {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
 
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-/* Valor + botão de deletar */
+/* Meta */
+.tx-meta {
+  color: #94a3b8;
+  font-size: 12px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================
+   DIREITA
+========================= */
+
 .tx-right {
   display: flex;
   align-items: center;
   gap: 10px;
+
   flex-shrink: 0;
 }
 
+/* Valor */
 .tx-val {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .tx-val--income {
@@ -118,20 +171,62 @@
   color: var(--saidas);
 }
 
-/* Botão de deletar */
+/* Delete */
 .tx-delete {
   background: none;
   border: none;
+
   color: var(--txt_secondario);
+
   cursor: pointer;
+
   font-size: 11px;
-  padding: 4px 6px;
-  border-radius: 4px;
-  transition: all 0.15s;
+
+  padding: 6px;
+  border-radius: 6px;
+
+  transition: all 0.2s ease;
+
   line-height: 1;
+
+  flex-shrink: 0;
 }
 
 .tx-delete:hover {
   background: rgba(255, 107, 53, 0.15);
   color: var(--saidas);
+}
+
+/* =========================
+   MOBILE FINO
+========================= */
+
+@media (max-width: 480px) {
+
+  .tx-item {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .tx-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 13px;
+  }
+
+  .tx-desc {
+    font-size: 14px;
+  }
+
+  .tx-meta {
+    font-size: 11px;
+  }
+
+  .tx-val {
+    font-size: 13px;
+  }
+
+  .tx-delete {
+    padding: 4px;
+  }
 }

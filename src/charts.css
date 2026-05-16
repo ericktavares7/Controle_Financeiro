@@ -1,3 +1,7 @@
+/* =========================
+   CARD BASE DOS GRÁFICOS
+========================= */
+
 .bottom-charts-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -12,16 +16,13 @@
   }
 }
 
-/* =========================
-   CARD BASE DOS GRÁFICOS
-========================= */
-
 .chart-card {
   background: #0f172a;
   border: 1px solid #1e2d40;
   border-radius: 20px;
   padding: 24px;
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -37,6 +38,9 @@
 
 /* Header do card */
 .chart-card header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 20px;
 }
 
@@ -50,18 +54,22 @@
   height: 320px;
 }
 
-/* Mobile */
-@media (max-width: 768px) {
-  .canvas-wrapper {
-    height: 240px;
-  }
+.canvas-wrapper canvas {
+  display: block;
 }
 
-/* Canvas ChartJS */
-.canvas-wrapper canvas {
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
+/* Mobile */
+@media (max-width: 768px) {
+
+  .chart-card {
+    padding: 18px;
+  }
+
+  .bar-info span,
+  .bar-info b {
+    font-size: 13px;
+  }
+
 }
 
 /* =========================
@@ -115,4 +123,5 @@
   height: 100%;
   border-radius: 999px;
   transition: width 0.5s ease;
+  will-change: width;
 }
