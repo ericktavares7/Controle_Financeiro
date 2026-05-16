@@ -4,6 +4,7 @@ import './section.css';
 import './charts.css';
 import './chat.css';
 import './transactions.css';
+import './auth.css';
 import './responsive.css';
 import Chart from 'chart.js/auto';
 import {
@@ -460,6 +461,69 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     );
   }
+
+  /* ========================================
+    TOGGLE LOGIN / CADASTRO
+ ======================================== */
+
+  let modoCadastro = false;
+
+  const titulo =
+    document.getElementById('auth-title');
+
+  const subtitulo =
+    document.getElementById('auth-subtitle');
+
+  const botao =
+    document.getElementById('btn-auth-primary');
+
+  const toggleText =
+    document.getElementById('toggle-auth-text');
+
+  const toggleLink =
+    document.getElementById('toggle-auth-link');
+
+  toggleLink?.addEventListener('click', (e) => {
+
+    e.preventDefault();
+
+    modoCadastro = !modoCadastro;
+
+    if (modoCadastro) {
+
+      titulo.textContent =
+        'Criar conta';
+
+      subtitulo.textContent =
+        'Comece a organizar sua vida financeira';
+
+      botao.textContent =
+        'Criar conta';
+
+      toggleText.innerHTML =
+        `Já possui conta?
+         <a href="#" id="toggle-auth-link">
+           Entrar
+         </a>`;
+
+    } else {
+
+      titulo.textContent =
+        'Bem-vindo de volta';
+
+      subtitulo.textContent =
+        'Acesse sua conta para gerenciar suas finanças';
+
+      botao.textContent =
+        'Entrar';
+
+      toggleText.innerHTML =
+        `Não tem uma conta?
+         <a href="#" id="toggle-auth-link">
+           Criar conta grátis
+         </a>`;
+    }
+  });
 
   // Tabs
   document.querySelectorAll('.tab-btn').forEach(btn => {
