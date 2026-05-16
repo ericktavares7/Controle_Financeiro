@@ -438,8 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
      LOGIN
   ======================================== */
 
-  const loginForm =
-    document.getElementById('login-form');
+  const loginForm = document.getElementById('auth-form');
 
   if (loginForm) {
 
@@ -449,6 +448,8 @@ document.addEventListener('DOMContentLoaded', () => {
       async (e) => {
 
         e.preventDefault();
+
+        console.log("Criando conta...");
 
         const email =
           document.getElementById('auth-email').value;
