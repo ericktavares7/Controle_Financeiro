@@ -13,8 +13,9 @@ import {
   getAuth,
   onAuthStateChanged,
   signOut,
+  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  browserLocalPersistence
+  updateProfile
 } from "firebase/auth";
 
 const firebaseConfig = {
@@ -30,6 +31,57 @@ const appFirebase = initializeApp(firebaseConfig);
 
 export const db = getFirestore(appFirebase);
 export const auth = getAuth(appFirebase);
+
+export async function login(email, senha) {
+
+  return await signInWithEmailAndPassword(
+    auth,
+    email,
+    senha
+  );
+
+}
+
+/* =========================================
+   REGISTER
+========================================= */
+
+export async function register(
+  nome,
+  sobrenome,
+  email,
+  senha
+) {
+
+  const cred = await createUserWithEmailAndPassword(
+    auth,
+    email,
+    senha
+  );
+
+  /* NOME DO USUÁRIO */
+  await updateProfile(
+    cred.user,
+    {
+      displayName: `${nome} ${sobrenome}`
+    }
+  );
+
+  /* SALVA NO FIRESTORE */
+  await addDoc(
+    collection(db, "usuarios"),
+    {
+      uid: cred.user.uid,
+      nome,
+      sobrenome,
+      email,
+      createdAt: new Date()
+    }
+  );
+
+  return cred.user;
+
+}
 
 /* ========================================
    AUTH STATE

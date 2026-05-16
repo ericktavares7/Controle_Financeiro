@@ -11,7 +11,8 @@ import {
   db,
   auth,
   addTransaction,
-  login
+  login,
+  register
 } from './firebase.js';
 import { collection, query, orderBy, deleteDoc, doc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
@@ -442,6 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (loginForm) {
 
+
     loginForm.addEventListener(
       'submit',
       async (e) => {
@@ -449,12 +451,16 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         const email =
-          document.getElementById('login-email').value;
+          document.getElementById('auth-email').value;
 
         const senha =
-          document.getElementById('login-password').value;
+          document.getElementById('auth-password').value;
 
-        console.log("Tentando login...");
+        const nome =
+          document.getElementById('auth-name')?.value || '';
+
+        const sobrenome =
+          document.getElementById('auth-lastname')?.value || '';
 
         const btn =
           document.getElementById('btn-auth-primary');
@@ -467,7 +473,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
 
-          await login(email, senha);
+          /* REGISTER */
+          if (isRegister) {
+
+            await register(
+              nome,
+              sobrenome,
+              email,
+              senha
+            );
+
+          }
+
+          /* LOGIN */
+          else {
+
+            await login(email, senha);
+
+          }
+
+        } catch (err) {
+
+          console.error(err);
+
+          alert(err.message);
 
         } finally {
 
@@ -475,7 +504,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             btn.disabled = false;
 
-            btn.innerHTML = 'Entrar';
+            btn.innerHTML =
+              isRegister
+                ? 'Criar Conta'
+                : 'Entrar';
 
           }, 700);
 
