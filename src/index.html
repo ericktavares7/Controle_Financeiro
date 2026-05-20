@@ -210,55 +210,47 @@
           </ul>
         </nav>
 
-        <div class="month-picker-card">
+        <div class="header-actions">
 
-          <div class="month-picker-header">
-
-            <button type="button" id="prev-year" class="month-nav-btn">
-              <i class="ph ph-caret-left"></i>
+          <div class="month-picker-wrapper">
+            <button type="button" id="btn-open-month-picker" class="month-bubble">
+              Maio 2026
+              <i class="ph ph-caret-down"></i>
             </button>
 
-            <strong id="month-picker-year">2026</strong>
+            <div id="month-picker-modal" class="month-picker-modal">
+              <div class="month-picker-card">
 
-            <button type="button" id="next-year" class="month-nav-btn">
-              <i class="ph ph-caret-right"></i>
-            </button>
+                <div class="month-picker-header">
+                  <button type="button" id="prev-year" class="month-nav-btn">
+                    <i class="ph ph-caret-left"></i>
+                  </button>
 
+                  <strong id="month-picker-year">2026</strong>
+
+                  <button type="button" id="next-year" class="month-nav-btn">
+                    <i class="ph ph-caret-right"></i>
+                  </button>
+                </div>
+
+                <div id="months-grid" class="months-grid"></div>
+
+              </div>
+            </div>
           </div>
 
-          <button type="button" id="btn-open-month-picker" class="month-bubble">
-            Maio 2026
-            <i class="ph ph-caret-down"></i>
+          <div class="status-badge">
+            <span>●</span> ao vivo
+          </div>
+
+          <button onclick="logOut()" class="btn-logout">
+            <i class="ph ph-sign-out"></i> Sair
           </button>
 
-          <div id="months-grid" class="months-grid"></div>
         </div>
-      </div>
-
-      <div class="status-badge">
-        <span>●</span> ao vivo
-      </div>
-
-      <button onclick="logOut()" class="btn-logout">
-        <i class="ph ph-sign-out"></i> Sair
-      </button>
-
-      </div>
-
-      </div>
-
-      </div>
-      <div class="status-badge">
-        <span>●</span> ao vivo
-      </div>
-      <button onclick="logOut()" class="btn-logout">
-        <i class="ph ph-sign-out"></i> Sair
-      </button>
-      </div>
 
       </div>
     </header>
-
     <section class="tab-section active" id="tab-overview">
 
       <div class="summary-grid">
