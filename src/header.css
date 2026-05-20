@@ -23,6 +23,14 @@
   gap: 20px;
 }
 
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 24px;
+}
+
 /* =========================
    LOGO / BRAND
 ========================= */

@@ -16,7 +16,9 @@ import {
   login,
   register,
   addCreditCard,
-  listenCreditCards
+  listenCreditCards,
+  saveUserSettings,
+  getUserSettings
 } from './firebase.js';
 
 import { deleteDoc, doc, Timestamp } from "firebase/firestore";
@@ -323,18 +325,41 @@ function atualizarCartoesNaTela(cards) {
   window.cards = cards;
 
   const selectCard = document.getElementById('input-card');
+  const walletList = document.getElementById('wallet-cards-list');
 
-  if (!selectCard) return;
+  if (selectCard) {
+    selectCard.innerHTML = `
+      <option value="">Selecione um cartão</option>
 
-  selectCard.innerHTML = `
-    <option value="">Selecione um cartão</option>
+      ${cards.map(card => `
+        <option value="${card.id}">
+          ${card.name || 'Cartão sem nome'}
+        </option>
+      `).join('')}
+    `;
+  }
 
-    ${cards.map(card => `
-      <option value="${card.id}">
-        ${card.name || 'Cartão sem nome'}
-      </option>
-    `).join('')}
-  `;
+  if (walletList) {
+    walletList.innerHTML = cards.length
+      ? cards.map((card, index) => `
+        <div class="wallet-credit-card card-color-${index % 4}">
+          <div class="wallet-card-top">
+            <span>${card.name || 'Cartão sem nome'}</span>
+            <i class="ph ph-credit-card"></i>
+          </div>
+
+          <div class="wallet-card-number">
+            •••• ${String(card.id).slice(-4)}
+          </div>
+
+          <div class="wallet-card-footer">
+            <small>Fecha dia ${card.closingDay || '--'}</small>
+            <small>Vence dia ${card.dueDay || '--'}</small>
+          </div>
+        </div>
+      `).join('')
+      : `<p class="msg-vazio">Nenhum cartão cadastrado.</p>`;
+  }
 }
 
 window.initCardsListener = (uid) => {
@@ -471,83 +496,67 @@ function atualizarMetasIA(receita, despesa = 0, reserva = 0, lazer = 0) {
     lazer: 10
   };
 
-  if (receita === 0) {
-    container.innerHTML = `
-      <div class="meta-item">
-        <div class="meta-header">
-          <span>Essencial (${regra.essencial}%)</span>
-          <span style="color:#00FFB2">0.0%</span>
-        </div>
-        <div class="progress-bar">
-          <div style="width:0%; background:#00FFB2"></div>
-        </div>
-      </div>
+  const montarMeta = (nome, meta, atual, cor, alerta = false) => {
+    const largura = Math.min(atual, 100);
 
+    return `
       <div class="meta-item">
         <div class="meta-header">
-          <span>Reserva (${regra.reserva}%)</span>
-          <span style="color:#00D1FF">0.0%</span>
+          <span>${nome} (${meta}%)</span>
+          <span style="color:${alerta ? '#FF6B35' : cor}">
+            ${atual.toFixed(1)}%
+          </span>
         </div>
-        <div class="progress-bar">
-          <div style="width:0%; background:#00D1FF"></div>
-        </div>
-      </div>
 
-      <div class="meta-item">
-        <div class="meta-header">
-          <span>Lazer (${regra.lazer}%)</span>
-          <span style="color:#FFD700">0.0%</span>
-        </div>
         <div class="progress-bar">
-          <div style="width:0%; background:#FFD700"></div>
+          <div style="
+            width:${largura}%;
+            background:${alerta ? '#FF6B35' : cor};
+          "></div>
         </div>
       </div>
     `;
+  };
 
+  if (receita === 0) {
+    container.innerHTML = `
+      ${montarMeta('Essencial', regra.essencial, 0, '#00FFB2')}
+      ${montarMeta('Reserva', regra.reserva, 0, '#00D1FF')}
+      ${montarMeta('Lazer', regra.lazer, 0, '#FFD700')}
+    `;
     return;
   }
 
-  const pEssencial = ((despesa / receita) * 100).toFixed(1);
-  const pReserva = ((reserva / receita) * 100).toFixed(1);
-  const pLazer = ((lazer / receita) * 100).toFixed(1);
+  const pEssencial = (despesa / receita) * 100;
+  const pReserva = (reserva / receita) * 100;
+  const pLazer = (lazer / receita) * 100;
 
   container.innerHTML = `
-    <div class="meta-item">
-      <div class="meta-header">
-        <span>Essencial (${regra.essencial}%)</span>
-        <span style="color:${pEssencial > regra.essencial ? '#FF6B35' : '#00FFB2'}">
-          ${pEssencial}%
-        </span>
-      </div>
-      <div class="progress-bar">
-        <div style="width:${Math.min(pEssencial, 100)}%; background:${pEssencial > regra.essencial ? '#FF6B35' : '#00FFB2'}"></div>
-      </div>
-    </div>
+    ${montarMeta(
+    'Essencial',
+    regra.essencial,
+    pEssencial,
+    '#00FFB2',
+    pEssencial > regra.essencial
+  )}
 
-    <div class="meta-item">
-      <div class="meta-header">
-        <span>Reserva (${regra.reserva}%)</span>
-        <span style="color:#00D1FF">${pReserva}%</span>
-      </div>
-      <div class="progress-bar">
-        <div style="width:${Math.min(pReserva, 100)}%; background:#00D1FF"></div>
-      </div>
-    </div>
+    ${montarMeta(
+    'Reserva',
+    regra.reserva,
+    pReserva,
+    '#00D1FF',
+    pReserva < regra.reserva
+  )}
 
-    <div class="meta-item">
-      <div class="meta-header">
-        <span>Lazer (${regra.lazer}%)</span>
-        <span style="color:${pLazer > regra.lazer ? '#FF6B35' : '#FFD700'}">
-          ${pLazer}%
-        </span>
-      </div>
-      <div class="progress-bar">
-        <div style="width:${Math.min(pLazer, 100)}%; background:${pLazer > regra.lazer ? '#FF6B35' : '#FFD700'}"></div>
-      </div>
-    </div>
+    ${montarMeta(
+    'Lazer',
+    regra.lazer,
+    pLazer,
+    '#FFD700',
+    pLazer > regra.lazer
+  )}
   `;
 }
-
 /* ========================================
    CATEGORIAS
 ======================================== */
@@ -852,79 +861,10 @@ window.alternarOrdemFiltro = () => {
   }
 };
 
-/* ========================================
-   BOTTOM NAV
-======================================== */
-
-function setBottomActive(name) {
-  document
-    .querySelectorAll('.bottom-nav-btn')
-    .forEach(btn => {
-      btn.classList.toggle(
-        'active',
-        btn.dataset.bottom === name
-      );
-    });
-}
-
-window.fecharBottomPanels = () => {
-  document
-    .querySelectorAll('.bottom-panel')
-    .forEach(panel => {
-      panel.classList.remove('active');
-    });
-
-  setBottomActive(null);
-};
-
-function abrirBottomPanel(panelId, activeName) {
-  const panel =
-    document.getElementById(panelId);
-
-  if (!panel) return;
-
-  const alreadyOpen =
-    panel.classList.contains('active');
-
-  window.fecharBottomPanels();
-
-  if (!alreadyOpen) {
-    panel.classList.add('active');
-
-    setBottomActive(activeName);
-  }
-}
-
-window.toggleQuickActions = () => {
-  abrirBottomPanel(
-    'quick-actions-panel',
-    'actions'
-  );
-};
-
-window.toggleMetasPanel = () => {
-  abrirBottomPanel(
-    'metas-panel',
-    'metas'
-  );
-};
-
-window.toggleMenuPanel = () => {
-  abrirBottomPanel(
-    'menu-panel',
-    'menu'
-  );
-};
-
-window.salvarRegraFinanceira = () => {
-  const essencial =
-    Number(document.getElementById('meta-essencial')?.value || 70);
-
-  const reserva =
-    Number(document.getElementById('meta-reserva')?.value || 20);
-
-  const lazer =
-    Number(document.getElementById('meta-lazer')?.value || 10);
+window.salvarRegraFinanceira = async () => {
+  const essencial = Number(document.getElementById('meta-essencial')?.value || 70);
+  const reserva = Number(document.getElementById('meta-reserva')?.value || 20);
+  const lazer = Number(document.getElementById('meta-lazer')?.value || 10);
 
   const total = essencial + reserva + lazer;
 
@@ -938,6 +878,10 @@ window.salvarRegraFinanceira = () => {
     reserva,
     lazer
   };
+
+  await saveUserSettings({
+    regraFinanceira: window.regraFinanceira
+  });
 
   window.atualizarDashboard?.();
 
@@ -1509,6 +1453,27 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('input, select').forEach(el => {
     el.style.fontSize = '16px';
   });
+
+  document.getElementById('btn-bottom-actions')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    window.toggleQuickActions();
+  });
+
+  document.getElementById('btn-bottom-metas')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    window.toggleMetasPanel();
+  });
+
+  document.getElementById('btn-bottom-menu')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    window.toggleMenuPanel();
+  });
 });
 
 /* ========================================
@@ -1548,3 +1513,88 @@ function popularSelectMeses() {
       </option>
     `).join('');
 }
+
+window.fecharBottomPanels = function () {
+  document.querySelectorAll('.bottom-panel').forEach((panel) => {
+    panel.classList.remove('active');
+  });
+
+  document.querySelectorAll('.bottom-nav-btn').forEach((btn) => {
+    btn.classList.remove('active');
+  });
+};
+
+window.toggleQuickActions = function () {
+  const panel = document.getElementById('quick-actions-panel');
+  const btn = document.querySelector('[data-bottom="actions"]');
+
+  if (!panel) {
+    console.error('quick-actions-panel não encontrado');
+    return;
+  }
+
+  const isOpen = panel.classList.contains('active');
+
+  window.fecharBottomPanels();
+
+  if (!isOpen) {
+    panel.classList.add('active');
+    btn?.classList.add('active');
+  }
+};
+
+window.toggleMetasPanel = function () {
+  const panel = document.getElementById('metas-panel');
+  const btn = document.querySelector('[data-bottom="metas"]');
+
+  if (!panel) {
+    console.error('metas-panel não encontrado');
+    return;
+  }
+
+  const isOpen = panel.classList.contains('active');
+
+  window.fecharBottomPanels();
+
+  if (!isOpen) {
+    panel.classList.add('active');
+    btn?.classList.add('active');
+  }
+};
+
+window.toggleMenuPanel = function () {
+  const panel = document.getElementById('menu-panel');
+  const btn = document.querySelector('[data-bottom="menu"]');
+
+  if (!panel) {
+    console.error('menu-panel não encontrado');
+    return;
+  }
+
+  const isOpen = panel.classList.contains('active');
+
+  window.fecharBottomPanels();
+
+  if (!isOpen) {
+    panel.classList.add('active');
+    btn?.classList.add('active');
+  }
+};
+
+window.carregarConfiguracoesUsuario = async (uid) => {
+  const settings = await getUserSettings(uid);
+
+  if (!settings?.regraFinanceira) return;
+
+  window.regraFinanceira = settings.regraFinanceira;
+
+  const metaEssencial = document.getElementById('meta-essencial');
+  const metaReserva = document.getElementById('meta-reserva');
+  const metaLazer = document.getElementById('meta-lazer');
+
+  if (metaEssencial) metaEssencial.value = window.regraFinanceira.essencial;
+  if (metaReserva) metaReserva.value = window.regraFinanceira.reserva;
+  if (metaLazer) metaLazer.value = window.regraFinanceira.lazer;
+
+  window.atualizarDashboard?.();
+};

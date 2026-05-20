@@ -616,6 +616,106 @@ body.modal-open {
   opacity: 0.9;
 }
 
+
+.wallet-card {
+  overflow: hidden;
+}
+
+.wallet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wallet-kicker {
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.wallet-add-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wallet-cards-list {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 8px 2px 4px;
+  scroll-snap-type: x mandatory;
+}
+
+.wallet-credit-card {
+  min-width: 230px;
+  height: 140px;
+  border-radius: 22px;
+  padding: 18px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  color: #ffffff;
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.28);
+}
+
+.wallet-card-top,
+.wallet-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wallet-card-top span {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.wallet-card-top i {
+  font-size: 22px;
+  opacity: 0.9;
+}
+
+.wallet-card-number {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  opacity: 0.9;
+}
+
+.wallet-card-footer small {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.card-color-0 {
+  background: linear-gradient(135deg, #6d28d9, #9333ea);
+}
+
+.card-color-1 {
+  background: linear-gradient(135deg, #ea580c, #f97316);
+}
+
+.card-color-2 {
+  background: linear-gradient(135deg, #0369a1, #0ea5e9);
+}
+
+.card-color-3 {
+  background: linear-gradient(135deg, #047857, #10b981);
+}
+
 /* =========================================
    POUPANÇA
 ========================================= */
@@ -815,6 +915,54 @@ body.modal-open {
   display: flex !important;
 }
 
+.btn-close {
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+
+  background:
+    linear-gradient(180deg,
+      rgba(20, 30, 50, 0.95),
+      rgba(10, 15, 28, 0.95));
+
+  color: #00FFB2;
+
+  font-size: 20px;
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn-close:hover {
+  transform: scale(1.05);
+
+  border-color:
+    rgba(0, 255, 178, 0.35);
+
+  box-shadow:
+    0 0 18px rgba(0, 255, 178, 0.18);
+
+  background:
+    linear-gradient(180deg,
+      rgba(0, 255, 178, 0.12),
+      rgba(20, 30, 50, 0.95));
+}
+
+.btn-close i {
+  font-size: 22px;
+  line-height: 1;
+}
+
 @media (max-width: 768px) {
 
   .mobile-bottom-nav {
@@ -901,5 +1049,24 @@ body.modal-open {
 
   .tab-section.active {
     padding-bottom: calc(120px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .bottom-panel {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: calc(76px + env(safe-area-inset-bottom)) !important;
+    z-index: 10050 !important;
+
+    flex-direction: column;
+    gap: 12px;
+
+    padding: 16px;
+
+    background: #0f172a;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 22px 22px 0 0;
+
+    box-shadow: 0 -14px 35px rgba(0, 0, 0, 0.4);
   }
 }

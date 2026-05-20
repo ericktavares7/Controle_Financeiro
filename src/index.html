@@ -144,13 +144,23 @@
           </div>
         </article>
 
-        <article class="card savings" id="card-poupanca">
-          <header><span class="icon">★</span>
-            <h3>Taxa de Poupança</h3>
+        <article class="card wallet-card" id="card-carteira">
+          <header class="wallet-header">
+            <div>
+              <span class="wallet-kicker">Carteira</span>
+              <h3>Cartões cadastrados</h3>
+            </div>
+
+            <button type="button" class="wallet-add-btn" onclick="window.abrirModalCartao()">
+              + Adicionar
+            </button>
           </header>
-          <p class="value" id="display-poupanca">0%</p>
-          <p id="msg-poupanca" class="poupanca-msg"></p>
+
+          <div id="wallet-cards-list" class="wallet-cards-list">
+            <p class="msg-vazio">Nenhum cartão cadastrado.</p>
+          </div>
         </article>
+
       </div>
 
       <section class="bottom-charts-grid">
@@ -178,7 +188,9 @@
       <div class="modal-content">
         <div class="modal-header">
           <h2>Nova Transação</h2>
-          <button type="button" id="fechar-modal" class="btn-close" onclick="window.fecharModal()">&times;</button>
+          <button type="button" id="fechar-modal" class="btn-close" onclick="window.fecharModal()">
+            <i class="ph ph-x"></i>
+          </button>
         </div>
 
         <form id="form-transacao">
@@ -344,17 +356,17 @@
     </section>
 
     <nav class="mobile-bottom-nav">
-      <button type="button" class="bottom-nav-btn" data-bottom="actions" onclick="window.fecharBottomPanels()">
+      <button type="button" id="btn-bottom-actions" class="bottom-nav-btn" data-bottom="actions">
         <i class="ph ph-plus"></i>
         <span>Ações</span>
       </button>
 
-      <button type="button" class="bottom-nav-btn" data-bottom="metas" onclick="window.toggleMetasPanel()">
+      <button type="button" id="btn-bottom-metas" class="bottom-nav-btn" data-bottom="metas">
         <i class="ph ph-target"></i>
         <span>Metas</span>
       </button>
 
-      <button type="button" class="bottom-nav-btn" data-bottom="menu" onclick="window.toggleMenuPanel()">
+      <button type="button" id="btn-bottom-menu" class="bottom-nav-btn" data-bottom="menu">
         <i class="ph ph-list"></i>
         <span>Menu</span>
       </button>
