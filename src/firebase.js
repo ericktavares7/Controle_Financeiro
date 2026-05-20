@@ -11,7 +11,8 @@ import {
   doc,
   getDoc,
   deleteDoc,
-  updateDoc
+  updateDoc,
+  getDocs
 } from "firebase/firestore";
 
 import {
@@ -301,4 +302,28 @@ export async function updateCreditCard(cardId, data) {
 
 export async function deleteCreditCard(cardId) {
   await deleteDoc(doc(db, "cartoes", cardId));
+}
+
+export async function updateTransaction(id, data) {
+  await updateDoc(
+    doc(db, "transacoes", id),
+    data
+  );
+}
+
+export async function deleteInstallmentGroup(groupId) {
+  if (!groupId) return;
+
+  const q = query(
+    collection(db, "transacoes"),
+    where("installmentGroupId", "==", groupId)
+  );
+
+  const snapshot = await getDocs(q);
+
+  const deletes = snapshot.docs.map((docSnap) => {
+    return deleteDoc(doc(db, "transacoes", docSnap.id));
+  });
+
+  await Promise.all(deletes);
 }

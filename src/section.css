@@ -233,7 +233,6 @@ body {
 
   transition:
     transform 0.25s ease,
-    box-shadow 0.25s ease,
     background 0.25s ease;
 
   position: relative;
@@ -246,9 +245,6 @@ body {
 .action-card:hover {
   background: rgba(255, 255, 255, 0.08);
   transform: translateY(-4px);
-
-  box-shadow:
-    0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .action-card:active {
@@ -300,17 +296,15 @@ body {
 
 .btn-income {
   border-bottom: 3px solid #00FFB2;
-  box-shadow: 0 4px 15px -5px rgba(0, 255, 178, 0.4);
 }
 
 .btn-expense {
   border-bottom: 3px solid #FF6B35;
-  box-shadow: 0 4px 15px -5px rgba(255, 107, 53, 0.4);
+
 }
 
 .btn-caixinha {
   border-bottom: 3px solid #00D1FF;
-  box-shadow: 0 4px 15px -5px rgba(0, 209, 255, 0.4);
 }
 
 .btn-income .action-icon {
@@ -554,9 +548,6 @@ body.modal-open {
 
   transform: scale(1.02);
 
-  box-shadow:
-    0 0 20px rgba(0, 255, 179, 0.185);
-
   z-index: 10;
 }
 
@@ -667,7 +658,6 @@ body.modal-open {
   justify-content: space-between;
 
   color: #ffffff;
-  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.28);
 }
 
 .wallet-card-top,
@@ -701,21 +691,80 @@ body.modal-open {
 }
 
 .card-color-0 {
-  background: linear-gradient(135deg, #6d28d9, #9333ea);
+  background:
+    linear-gradient(135deg,
+      #6d28d9,
+      #9333ea);
 }
+
+/* INTER */
 
 .card-color-1 {
-  background: linear-gradient(135deg, #ea580c, #f97316);
+  background:
+    linear-gradient(135deg,
+      #ea580c,
+      #ff7b00);
 }
+
+/* NEON */
 
 .card-color-2 {
-  background: linear-gradient(135deg, #0369a1, #0ea5e9);
+  background:
+    linear-gradient(135deg,
+      #121826,
+      #1f2937);
+
+  border:
+    1px solid rgba(0, 255, 178, 0.25);
 }
+
+/* MERCADO PAGO */
 
 .card-color-3 {
-  background: linear-gradient(135deg, #047857, #10b981);
+  background:
+    linear-gradient(135deg,
+      #009ee3,
+      #00c6ff);
 }
 
+/* CAIXA */
+
+.card-color-4 {
+  background:
+    linear-gradient(135deg,
+      #005ca9,
+      #f39200);
+}
+
+/* BLACK */
+
+.card-color-5 {
+  background:
+    linear-gradient(135deg,
+      #0a0a0a,
+      #232323);
+
+  border:
+    1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* EMERALD */
+
+.card-color-6 {
+  background:
+    linear-gradient(135deg,
+      #047857,
+      #10b981);
+}
+
+/* ROSE */
+
+.card-color-7 {
+  background:
+    linear-gradient(135deg,
+      #be185d,
+      #fb7185);
+}
 
 .wallet-card-invoice {
   display: flex;
@@ -899,7 +948,6 @@ body.modal-open {
 
 .btn-card {
   border-bottom: 3px solid #8B5CF6;
-  box-shadow: 0 4px 15px -5px rgba(139, 92, 246, 0.4);
 }
 
 .btn-card .action-icon {
@@ -909,7 +957,6 @@ body.modal-open {
 
 .modal-content.borda-cartao {
   border-top: 4px solid #8B5CF6;
-  box-shadow: 0 -5px 15px rgba(139, 92, 246, 0.2);
 }
 
 #modal-cartao {
@@ -939,6 +986,12 @@ body.modal-open {
 }
 
 #modal-cartao.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.modal.active {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
@@ -1001,7 +1054,6 @@ body.modal-open {
     transform 0.2s ease,
     background 0.2s ease,
     border-color 0.2s ease,
-    box-shadow 0.2s ease;
 }
 
 .btn-close:hover {
@@ -1009,9 +1061,6 @@ body.modal-open {
 
   border-color:
     rgba(0, 255, 178, 0.35);
-
-  box-shadow:
-    0 0 18px rgba(0, 255, 178, 0.18);
 
   background:
     linear-gradient(180deg,
@@ -1045,9 +1094,6 @@ body.modal-open {
 
     border-top:
       1px solid rgba(255, 255, 255, 0.06);
-
-    box-shadow:
-      0 -10px 30px rgba(0, 0, 0, 0.18);
 
     -webkit-backdrop-filter: blur(18px);
     backdrop-filter: blur(18px);
@@ -1127,7 +1173,405 @@ body.modal-open {
     background: #0f172a;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 22px 22px 0 0;
-
-    box-shadow: 0 -14px 35px rgba(0, 0, 0, 0.4);
   }
+}
+
+#modal-editar-cartao {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 18px;
+
+  background: rgba(0, 0, 0, 0.62);
+
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease;
+
+}
+
+#modal-editar-cartao.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+#modal-editar-cartao .modal-content {
+  position: relative;
+
+  width: 100%;
+  max-width: 430px;
+  max-height: 88dvh;
+  overflow-y: auto;
+
+  padding: 24px;
+
+  border-radius: 26px;
+
+  background: linear-gradient(180deg, #111827, #0b1020);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  transform: translateY(24px) scale(0.96);
+  opacity: 0;
+
+  transition:
+    transform 0.28s cubic-bezier(.2, .8, .2, 1),
+    opacity 0.28s ease;
+}
+
+#modal-editar-cartao.active {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  z-index: 999999 !important;
+}
+
+#modal-editar-cartao.active .modal-content {
+  transform: translateY(0) scale(1) !important;
+  opacity: 1 !important;
+}
+
+#modal-editar-cartao .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 22px;
+}
+
+#modal-editar-cartao .modal-header h2 {
+  margin: 0;
+
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.7px;
+}
+
+#modal-editar-cartao .btn-close {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+}
+
+#modal-editar-cartao .form-group {
+  margin-bottom: 16px;
+}
+
+#modal-editar-cartao .form-group label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #cbd5e1;
+
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#modal-editar-cartao input,
+#modal-editar-cartao select {
+  width: 100%;
+  height: 50px;
+
+  padding: 0 14px;
+
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+
+  background: #0f172a;
+
+  color: #ffffff;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  outline: none;
+}
+
+#modal-editar-cartao input:focus,
+#modal-editar-cartao select:focus {
+  border-color: rgba(0, 255, 178, 0.45);
+}
+
+#modal-editar-cartao .btn-save {
+  width: 100%;
+  height: 52px;
+
+  margin-top: 8px;
+
+  border-radius: 14px;
+
+  font-size: 14px;
+  font-weight: 900;
+}
+
+#modal-editar-cartao .btn-danger {
+  width: 100%;
+  height: 52px;
+
+  margin-top: 12px;
+
+  border-radius: 14px;
+}
+
+.btn-edit-tx {
+  width: 34px;
+  height: 34px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.04);
+
+  color: #94a3b8;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition:
+    all 0.2s ease;
+}
+
+.btn-edit-tx:hover {
+  background: rgba(0, 255, 178, 0.08);
+  color: #00FFB2;
+
+  border-color:
+    rgba(0, 255, 178, 0.25);
+}
+
+.btn-edit-tx i {
+  font-size: 16px;
+}
+
+#modal-editar-transacao {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 18px;
+
+  background: rgba(0, 0, 0, 0.62);
+
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease;
+}
+
+#modal-editar-transacao.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+#modal-editar-transacao .modal-content {
+  width: 100%;
+  max-width: 420px;
+
+  transform: translateY(24px) scale(0.96);
+  opacity: 0;
+
+  transition:
+    transform 0.28s cubic-bezier(.2, .8, .2, 1),
+    opacity 0.28s ease;
+}
+
+#modal-editar-transacao.active .modal-content {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+#mes-receita {
+  color: #00FFB2 !important;
+}
+
+#mes-despesa {
+  color: #FF5A5A !important;
+}
+
+#mes-saldo {
+  color: #00D1FF !important;
+}
+
+.tx-val--income {
+  color: #00FFB2 !important;
+}
+
+.tx-val--expense {
+  color: #FF5A5A !important;
+}
+
+.tx-val--goal {
+  color: #00D1FF !important;
+}
+
+.confirm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.55);
+
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease;
+}
+
+.confirm-modal.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.confirm-card {
+  width: 100%;
+  max-width: 360px;
+
+  padding: 24px;
+
+  border-radius: 28px;
+
+  background:
+    linear-gradient(180deg,
+      #111827,
+      #0f172a);
+
+  border:
+    1px solid rgba(255, 255, 255, 0.08);
+
+  text-align: center;
+
+  transform: translateY(18px) scale(0.96);
+  opacity: 0;
+
+  transition:
+    transform 0.28s cubic-bezier(.2, .8, .2, 1),
+    opacity 0.28s ease;
+}
+
+.confirm-modal.active .confirm-card {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.confirm-icon {
+  width: 62px;
+  height: 62px;
+
+  margin: 0 auto 18px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(255, 90, 90, 0.12);
+
+  color: #FF5A5A;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-icon i {
+  font-size: 30px;
+}
+
+.confirm-card h3 {
+  margin-bottom: 10px;
+
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.confirm-card p {
+  color: #94a3b8;
+
+  font-size: 14px;
+  line-height: 1.5;
+
+  margin-bottom: 22px;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+
+  margin-bottom: 12px;
+}
+
+.confirm-btn {
+  flex: 1;
+  height: 48px;
+
+  border: none;
+  border-radius: 14px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.confirm-btn.secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+}
+
+.confirm-btn.danger {
+  background: #FF5A5A;
+  color: white;
+}
+
+.confirm-cancel {
+  background: transparent;
+  border: none;
+
+  color: #94a3b8;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
 }

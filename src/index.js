@@ -20,7 +20,9 @@ import {
   saveUserSettings,
   getUserSettings,
   updateCreditCard,
-  deleteCreditCard
+  deleteCreditCard,
+  updateTransaction,
+  deleteInstallmentGroup
 } from './firebase.js';
 
 import { deleteDoc, doc, Timestamp } from "firebase/firestore";
@@ -165,13 +167,25 @@ function calcularDataFatura(dataCompra, fechamento, vencimento) {
   return new Date(ano, mes, vencimento);
 }
 
-function calcularFaturaAtualDoCartao(cardId) {
+function getMesSelecionado() {
   const select = document.getElementById('filtro-mes');
 
-  if (!select) return 0;
+  if (!select) {
+    const hoje = new Date();
 
-  const [anoFiltro, mesFiltro] =
-    select.value.split('-').map(Number);
+    return {
+      ano: hoje.getFullYear(),
+      mes: hoje.getMonth()
+    };
+  }
+
+  const [ano, mes] = select.value.split('-').map(Number);
+
+  return { ano, mes };
+}
+
+function calcularFaturaAtualDoCartao(cardId) {
+  const { ano, mes } = getMesSelecionado();
 
   return (window.transactions || []).reduce((total, t) => {
     if (
@@ -182,19 +196,18 @@ function calcularFaturaAtualDoCartao(cardId) {
       return total;
     }
 
-    const d =
+    const data =
       t.createdAt?.toDate
         ? t.createdAt.toDate()
         : new Date(t.createdAt);
 
-    if (
-      d.getFullYear() === anoFiltro &&
-      d.getMonth() === mesFiltro
-    ) {
-      return total + (Number(t.val) || 0);
-    }
+    const pertenceAoMes =
+      data.getFullYear() === ano &&
+      data.getMonth() === mes;
 
-    return total;
+    if (!pertenceAoMes) return total;
+
+    return total + (Number(t.val) || 0);
   }, 0);
 }
 
@@ -340,13 +353,121 @@ document.addEventListener('click', (e) => {
    DELETAR TRANSAÇÃO
 ======================================== */
 
-window.deletarTransacao = async (id) => {
-  const confirmar = confirm('Deseja realmente excluir?');
+window.abrirConfirmacaoSimples = ({
+  title = 'Confirmar ação?',
+  text = 'Essa ação não poderá ser desfeita.',
+  confirmText = 'Confirmar',
+  cancelText = 'Cancelar',
+  onConfirm
+}) => {
+  const modal = document.getElementById('modal-confirmacao');
+  const titleEl = document.getElementById('confirm-title');
+  const textEl = document.getElementById('confirm-text');
+  const btnPrimary = document.getElementById('confirm-primary');
+  const btnSecondary = document.getElementById('confirm-secondary');
 
-  if (!confirmar) return;
+  if (!modal || !titleEl || !textEl || !btnPrimary || !btnSecondary) {
+    console.error('Modal de confirmação não encontrado.');
+    return;
+  }
+
+  titleEl.textContent = title;
+  textEl.textContent = text;
+
+  btnPrimary.textContent = confirmText;
+  btnSecondary.textContent = cancelText;
+
+  const btnCancelBottom = document.querySelector('.confirm-cancel');
+  if (btnCancelBottom) btnCancelBottom.style.display = 'none';
+
+  btnPrimary.onclick = async () => {
+    await onConfirm?.();
+    window.fecharConfirmacao();
+  };
+
+  btnSecondary.onclick = () => {
+    window.fecharConfirmacao();
+  };
+
+
+  requestAnimationFrame(() => {
+    modal.classList.add('active');
+  });
+};
+
+window.fecharConfirmacao = () => {
+  document
+    .getElementById('modal-confirmacao')
+    ?.classList.remove('active');
+};
+
+window.abrirConfirmacaoParcelas = ({
+  onDeleteAll,
+  onDeleteOne
+}) => {
+  const modal = document.getElementById('modal-confirmacao');
+  const btnAll = document.getElementById('confirm-primary');
+  const btnOne = document.getElementById('confirm-secondary');
+  const btnCancelBottom = document.querySelector('.confirm-cancel');
+
+  document.getElementById('confirm-title').textContent = 'Excluir dívida?';
+  document.getElementById('confirm-text').textContent =
+    'Essa despesa possui parcelas futuras.';
+
+  btnOne.textContent = 'Apenas esta';
+  btnAll.textContent = 'Excluir tudo';
+
+  if (btnCancelBottom) btnCancelBottom.style.display = 'block';
+
+  btnAll.onclick = async () => {
+    await onDeleteAll?.();
+    window.fecharConfirmacao();
+  };
+
+  btnOne.onclick = async () => {
+    await onDeleteOne?.();
+    window.fecharConfirmacao();
+  };
+
+  requestAnimationFrame(() => {
+    modal?.classList.add('active');
+  });
+};
+
+window.deletarTransacao = async (id) => {
+  const tx = (window.transactions || []).find(t => t.id === id);
+
+  if (!tx) {
+    console.error('Transação não encontrada:', id);
+    return;
+  }
 
   try {
-    await deleteDoc(doc(db, "transacoes", id));
+    if (tx.installmentGroupId) {
+      window.abrirConfirmacaoParcelas({
+        onDeleteAll: async () => {
+          await deleteInstallmentGroup(tx.installmentGroupId);
+        },
+
+        onDeleteOne: async () => {
+          await deleteDoc(doc(db, "transacoes", id));
+        }
+      });
+
+      return;
+    }
+
+    window.abrirConfirmacaoSimples({
+      title: 'Excluir transação?',
+      text: 'Essa ação removerá este lançamento do seu histórico.',
+      confirmText: 'Excluir',
+      cancelText: 'Cancelar',
+
+      onConfirm: async () => {
+        await deleteDoc(doc(db, "transacoes", id));
+      }
+    });
+
   } catch (e) {
     console.error("Erro ao excluir:", e);
   }
@@ -390,24 +511,24 @@ function atualizarCartoesNaTela(cards) {
           <i class="ph ph-credit-card"></i>
 
           <button
-            type="button"
-            class="wallet-card-config"
-            onclick="event.stopPropagation(); window.abrirEditorCartao('${card.id}')"
-          >
-            <i class="ph ph-gear-six"></i>
-          </button>
+  type="button"
+  class="wallet-card-config"
+  data-card-id="${card.id}"
+>
+  <i class="ph ph-gear-six"></i>
+</button> 
 
         </div>
 
       </div>
 
       <div class="wallet-card-invoice">
-        <small>Fatura atual</small>
+  <small>Fatura do mês</small>
 
-        <strong>
-          ${formatBRL(calcularFaturaAtualDoCartao(card.id))}
-        </strong>
-      </div>
+  <strong>
+    ${formatBRL(calcularFaturaAtualDoCartao(card.id))}
+  </strong>
+</div>
 
       <div class="wallet-card-footer">
         <small>
@@ -427,7 +548,18 @@ function atualizarCartoesNaTela(cards) {
 
 window.abrirEditorCartao = (cardId) => {
   const card = (window.cards || []).find(c => c.id === cardId);
-  if (!card) return;
+
+  if (!card) {
+    console.error('Cartão não encontrado:', cardId, window.cards);
+    return;
+  }
+
+  const modal = document.getElementById('modal-editar-cartao');
+
+  if (!modal) {
+    console.error('Modal editar cartão não encontrado no HTML');
+    return;
+  }
 
   document.getElementById('edit-card-id').value = card.id;
   document.getElementById('edit-card-name').value = card.name || '';
@@ -435,11 +567,15 @@ window.abrirEditorCartao = (cardId) => {
   document.getElementById('edit-card-due').value = card.dueDay || '';
   document.getElementById('edit-card-color').value = card.colorIndex ?? 0;
 
-  document.getElementById('modal-editar-cartao')?.classList.add('active');
+  document.body.classList.add('modal-open');
+  requestAnimationFrame(() => {
+    modal.classList.add('active');
+  });
 };
 
 window.fecharEditorCartao = () => {
   document.getElementById('modal-editar-cartao')?.classList.remove('active');
+  document.body.classList.remove('modal-open');
 };
 
 window.removerCartaoAtual = async () => {
@@ -803,8 +939,15 @@ function renderListaTransacoes(lista) {
 
         <div class="tx-right">
           <span class="tx-val ${income ? 'tx-val--income' : goal ? 'tx-val--goal' : 'tx-val--expense'}">
-            ${sinal} ${formatBRL(t.val)}
-          </span>
+             ${sinal} ${formatBRL(t.val)}
+           </span>
+
+          <button
+             class="btn-edit-tx"
+             data-tx-id="${t.id}"
+             >
+            <i class="ph ph-pencil-simple"></i>
+          </button>
 
           <button
             class="tx-delete"
@@ -983,6 +1126,21 @@ window.salvarRegraFinanceira = async () => {
   window.fecharBottomPanels();
 };
 
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.wallet-card-config');
+
+  if (!btn) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const cardId = btn.dataset.cardId;
+
+  console.log('Clicou na engrenagem:', cardId);
+
+  window.abrirEditorCartao(cardId);
+});
+
 /* ========================================
    DOM READY
 ======================================== */
@@ -996,6 +1154,22 @@ const authButton = document.getElementById('btn-auth-primary');
 document.addEventListener('DOMContentLoaded', () => {
   popularSelectMeses();
 
+  const filtroMes = document.getElementById('filtro-mes');
+  const filtroMesHeader = document.getElementById('filtro-mes-header');
+
+  if (filtroMes && filtroMesHeader) {
+    filtroMesHeader.innerHTML = filtroMes.innerHTML;
+    filtroMesHeader.value = filtroMes.value;
+
+    filtroMesHeader.addEventListener('change', () => {
+      filtroMes.value = filtroMesHeader.value;
+      window.atualizarDashboard?.();
+    });
+
+    filtroMes.addEventListener('change', () => {
+      filtroMesHeader.value = filtroMes.value;
+    });
+  }
   /* AUTH FORM */
 
   const loginForm = document.getElementById('auth-form');
@@ -1258,6 +1432,37 @@ document.addEventListener('DOMContentLoaded', () => {
     window.fecharEditorCartao();
   });
 
+  document
+    .getElementById('form-editar-transacao')
+    ?.addEventListener('submit', async (e) => {
+
+      e.preventDefault();
+
+      const id =
+        document.getElementById('edit-tx-id').value;
+
+      const paymentMethod =
+        document.getElementById('edit-tx-payment').value;
+
+      const cardId =
+        document.getElementById('edit-tx-card').value || null;
+
+      await updateTransaction(id, {
+        desc:
+          document.getElementById('edit-tx-desc').value,
+
+        val:
+          Number(
+            document.getElementById('edit-tx-val').value
+          ),
+
+        paymentMethod,
+        cardId
+      });
+
+      window.fecharModalEditarTx();
+    });
+
   /* TABS */
 
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1409,6 +1614,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('input-card')?.value ||
         null;
 
+      const cartao =
+        (window.cards || []).find(card => card.id === cardId);
+
       let dataLancamento = dataCompra;
 
       if (
@@ -1453,7 +1661,43 @@ document.addEventListener('DOMContentLoaded', () => {
           Timestamp.fromDate(dataLancamento)
       };
 
-      await addTransaction(nova);
+      const recurrence =
+        document.getElementById('input-recurrence')?.value || 'single';
+
+      const installments =
+        Number(document.getElementById('input-installments')?.value || 1);
+
+      if (
+        tipo === 'expense' &&
+        paymentMethod === 'credit' &&
+        recurrence === 'installment'
+      ) {
+        const groupId = crypto.randomUUID();
+
+        for (let i = 0; i < installments; i++) {
+          const dataParcela = new Date(dataCompra);
+          dataParcela.setMonth(dataCompra.getMonth() + i);
+
+          const dataFaturaParcela = calcularDataFatura(
+            dataParcela,
+            Number(cartao.closingDay),
+            Number(cartao.dueDay)
+          );
+
+          await addTransaction({
+            ...nova,
+            desc: `${nova.desc} (${i + 1}/${installments})`,
+            val: Number(nova.val) / installments,
+            purchaseDate: Timestamp.fromDate(dataParcela),
+            createdAt: Timestamp.fromDate(dataFaturaParcela),
+            installmentGroupId: groupId,
+            installmentNumber: i + 1,
+            totalInstallments: installments
+          });
+        }
+      } else {
+        await addTransaction(nova);
+      }
 
       e.target.reset();
 
@@ -1468,6 +1712,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
   /* FORM CARTÃO */
+
+
+  document.getElementById('input-recurrence')?.addEventListener('change', (e) => {
+    const installmentsGroup = document.getElementById('installments-group');
+
+    if (e.target.value === 'installment') {
+      installmentsGroup?.classList.remove('hidden');
+    } else {
+      installmentsGroup?.classList.add('hidden');
+    }
+  });
 
   const formCartao =
     document.getElementById('form-cartao');
@@ -1487,7 +1742,9 @@ document.addEventListener('DOMContentLoaded', () => {
       dueDay:
         Number(
           document.getElementById('card-due').value
-        )
+        ),
+
+      colorIndex: 0
     });
 
     formCartao.reset();
@@ -1504,12 +1761,27 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('credit-card-group');
 
   inputPayment?.addEventListener('change', () => {
+    const recurrenceGroup = document.getElementById('recurrence-group');
+    const installmentsGroup = document.getElementById('installments-group');
+
     if (inputPayment.value === 'credit') {
       creditCardGroup?.classList.remove('hidden');
+      recurrenceGroup?.classList.remove('hidden');
     } else {
       creditCardGroup?.classList.add('hidden');
+      recurrenceGroup?.classList.add('hidden');
+      installmentsGroup?.classList.add('hidden');
     }
   });
+
+  document.getElementById('recurrence-group')?.classList.add('hidden');
+  document.getElementById('installments-group')?.classList.add('hidden');
+
+  const recurrenceInput = document.getElementById('input-recurrence');
+  const installmentsInput = document.getElementById('input-installments');
+
+  if (recurrenceInput) recurrenceInput.value = 'single';
+  if (installmentsInput) installmentsInput.value = 2;
 
   /* ESC */
 
@@ -1557,6 +1829,7 @@ document.addEventListener('DOMContentLoaded', () => {
       window.fecharBottomPanels();
     }
   });
+
 
   /* PREVINE ZOOM IOS */
 
@@ -1623,6 +1896,8 @@ function popularSelectMeses() {
       </option>
     `).join('');
 }
+
+
 
 window.fecharBottomPanels = function () {
   document.querySelectorAll('.bottom-panel').forEach((panel) => {
@@ -1708,3 +1983,51 @@ window.carregarConfiguracoesUsuario = async (uid) => {
 
   window.atualizarDashboard?.();
 };
+
+window.fecharModalEditarTx = () => {
+  document
+    .getElementById('modal-editar-transacao')
+    ?.classList.remove('active');
+};
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.btn-edit-tx');
+
+  if (!btn) return;
+
+  const txId = btn.dataset.txId;
+
+  const tx = (window.transactions || [])
+    .find(t => t.id === txId);
+
+  if (!tx) return;
+
+  document.getElementById('edit-tx-id').value = tx.id;
+  document.getElementById('edit-tx-desc').value = tx.desc || '';
+  document.getElementById('edit-tx-val').value = tx.val || '';
+
+  document.getElementById('edit-tx-payment').value =
+    tx.paymentMethod || 'debit';
+
+  const selectCard =
+    document.getElementById('edit-tx-card');
+
+  selectCard.innerHTML = `
+    <option value="">Selecione</option>
+
+    ${(window.cards || []).map(card => `
+      <option
+        value="${card.id}"
+        ${tx.cardId === card.id ? 'selected' : ''}
+      >
+        ${card.name}
+      </option>
+    `).join('')}
+  `;
+  const modal =
+    document.getElementById('modal-editar-transacao');
+
+  requestAnimationFrame(() => {
+    modal?.classList.add('active');
+  });
+});

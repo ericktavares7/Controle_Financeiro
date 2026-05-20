@@ -97,6 +97,96 @@
 
   </div>
 
+  <div id="modal-editar-transacao" class="modal">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h2>Editar Transação</h2>
+
+        <button type="button" class="btn-close" onclick="window.fecharModalEditarTx()">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <form id="form-editar-transacao">
+
+        <input type="hidden" id="edit-tx-id">
+
+        <div class="form-group">
+          <label>Descrição</label>
+          <input type="text" id="edit-tx-desc">
+        </div>
+
+        <div class="form-group">
+          <label>Valor</label>
+          <input type="number" id="edit-tx-val">
+        </div>
+
+        <div class="form-group">
+          <label>Forma de pagamento</label>
+
+          <select id="edit-tx-payment">
+            <option value="debit">Débito</option>
+            <option value="pix">PIX</option>
+            <option value="money">Dinheiro</option>
+            <option value="credit">Cartão de crédito</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="edit-card-group">
+          <label>Cartão</label>
+
+          <select id="edit-tx-card">
+            <option value="">Selecione</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-save">
+          Salvar alterações
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+
+
+  <div id="modal-confirmacao" class="confirm-modal">
+
+    <div class="confirm-card">
+
+      <div class="confirm-icon">
+        <i class="ph ph-warning-circle"></i>
+      </div>
+
+      <h3 id="confirm-title">
+        Excluir dívida?
+      </h3>
+
+      <p id="confirm-text">
+        Essa despesa possui parcelas futuras.
+      </p>
+
+      <div class="confirm-actions">
+
+        <button type="button" class="confirm-btn secondary" id="confirm-secondary">
+          Apenas esta
+        </button>
+
+        <button type="button" class="confirm-btn danger" id="confirm-primary">
+          Excluir tudo
+        </button>
+
+      </div>
+
+      <button type="button" class="confirm-cancel" onclick="window.fecharConfirmacao()">
+        Cancelar
+      </button>
+
+    </div>
+
+  </div>
+
   <main id="app" class="dashboard-container">
 
     <header class="dashboard-header">
@@ -122,6 +212,8 @@
         </nav>
 
         <div class="header-actions">
+          <select id="filtro-mes-header" class="month-bubble">
+          </select>
           <div class="status-badge">
             <span>●</span> ao vivo
           </div>
@@ -254,6 +346,21 @@
             <select id="input-card">
               <option value="">Selecione um cartão</option>
             </select>
+
+            <div class="form-group hidden" id="recurrence-group">
+              <label>Recorrência / Parcelamento</label>
+
+              <select id="input-recurrence">
+                <option value="single">Apenas esta fatura</option>
+                <option value="installment">Repetir por parcelas</option>
+              </select>
+            </div>
+
+            <div class="form-group hidden" id="installments-group">
+              <label>Quantidade de meses</label>
+
+              <input type="number" id="input-installments" min="2" max="60" value="2">
+            </div>
           </div>
 
           <input type="hidden" id="input-tipo" value="expense">
@@ -262,6 +369,8 @@
         </form>
       </div>
     </div>
+
+
 
     <div id="modal-cartao" class="modal">
       <div class="modal-content borda-cartao">
@@ -325,11 +434,16 @@
             <label>Cor do cartão</label>
 
             <select id="edit-card-color">
-              <option value="0">Roxo</option>
-              <option value="1">Laranja</option>
-              <option value="2">Azul</option>
-              <option value="3">Verde</option>
+              <option value="0">Nubank Roxo</option>
+              <option value="1">Inter Laranja</option>
+              <option value="2">Neon</option>
+              <option value="3">Mercado Pago</option>
+              <option value="4">Caixa</option>
+              <option value="5">Black Premium</option>
+              <option value="6">Emerald</option>
+              <option value="7">Rose Gold</option>
             </select>
+
           </div>
 
           <button type="submit" class="btn-save">
@@ -349,9 +463,8 @@
       <div class="transacoes-container">
         <header class="section-header">
           <h3>Histórico de Transações</h3>
-          <select aria-label="FILTRAR O MÊS" id="filtro-mes" class="select-moderno"></select>
+          <select id="filtro-mes" hidden></select>
         </header>
-
         <div class="top-cards-container">
           <article class="card-valor btn-receita">
             <p>↑ Receita</p>

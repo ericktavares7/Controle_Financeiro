@@ -110,6 +110,24 @@
   justify-self: end;
 }
 
+.month-bubble {
+  width: auto;
+  min-height: 36px;
+
+  padding: 8px 14px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  background: #0f172a;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
 /* Badge ao vivo */
 .status-badge {
   background: #0f1f35;
@@ -402,5 +420,23 @@
 
   .tab-section.active {
     padding-top: 12px !important;
+  }
+
+  .header-actions {
+    display: flex !important;
+    width: 100%;
+    justify-content: space-between !important;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .month-bubble {
+    max-width: 145px;
+    font-size: 12px;
+  }
+
+  .status-badge,
+  .btn-logout {
+    flex-shrink: 0;
   }
 }
