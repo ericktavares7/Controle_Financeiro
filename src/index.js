@@ -726,6 +726,13 @@ function atualizarMetasIA(receita, despesa = 0, reserva = 0, lazer = 0) {
     lazer: 10
   };
 
+  const tituloRegra = document.getElementById('titulo-regra-financeira');
+
+  if (tituloRegra) {
+    tituloRegra.textContent =
+      `Regra ${regra.essencial}/${regra.reserva}/${regra.lazer}`;
+  }
+
   const essencialIdeal = receita * (regra.essencial / 100);
   const reservaIdeal = receita * (regra.reserva / 100);
   const lazerIdeal = receita * (regra.lazer / 100);
