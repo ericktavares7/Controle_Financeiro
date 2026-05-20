@@ -1190,16 +1190,104 @@ const authButton = document.getElementById('btn-auth-primary');
 document.addEventListener('DOMContentLoaded', () => {
   popularSelectMeses();
 
+  const mesesPicker = [
+    'Jan', 'Fev', 'Mar',
+    'Abr', 'Mai', 'Jun',
+    'Jul', 'Ago', 'Set',
+    'Out', 'Nov', 'Dez'
+  ];
+
+  let pickerYear = new Date().getFullYear();
+
+  const filtroMes = document.getElementById('filtro-mes');
+  const btnMonthPicker = document.getElementById('btn-open-month-picker');
+  const monthModal = document.getElementById('month-picker-modal');
+  const monthsGrid = document.getElementById('months-grid');
+  const monthYearLabel = document.getElementById('month-picker-year');
+  const prevYearBtn = document.getElementById('prev-year');
+  const nextYearBtn = document.getElementById('next-year');
+
   function atualizarTextoBotaoMes() {
     if (!filtroMes || !btnMonthPicker) return;
 
-    const [ano, mes] =
-      filtroMes.value.split('-').map(Number);
+    const [ano, mes] = filtroMes.value.split('-').map(Number);
 
     btnMonthPicker.innerHTML = `
-    ${mesesPicker[mes - 1]} ${ano}
+    ${mesesPicker[mes]} ${ano}
     <i class="ph ph-caret-down"></i>
   `;
+  }
+
+  function renderMonthPicker() {
+    if (!filtroMes || !monthsGrid || !monthYearLabel) return;
+
+    monthYearLabel.textContent = pickerYear;
+
+    const valorAtual = filtroMes.value;
+
+    monthsGrid.innerHTML = mesesPicker.map((nome, index) => {
+      const value = `${pickerYear}-${index}`;
+
+      return `
+      <button
+        type="button"
+        class="month-item ${value === valorAtual ? 'active' : ''}"
+        data-value="${value}"
+      >
+        ${nome}
+      </button>
+    `;
+    }).join('');
+  }
+
+  if (filtroMes && btnMonthPicker && monthModal && monthsGrid) {
+    const [anoAtual] = filtroMes.value.split('-').map(Number);
+    pickerYear = anoAtual;
+
+    atualizarTextoBotaoMes();
+    renderMonthPicker();
+
+    btnMonthPicker.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      monthModal.classList.toggle('active');
+      renderMonthPicker();
+    });
+
+    prevYearBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      pickerYear--;
+      renderMonthPicker();
+    });
+
+    nextYearBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      pickerYear++;
+      renderMonthPicker();
+    });
+
+    monthsGrid.addEventListener('click', (e) => {
+      const btn = e.target.closest('.month-item');
+      if (!btn) return;
+
+      filtroMes.value = btn.dataset.value;
+
+      atualizarTextoBotaoMes();
+      window.atualizarDashboard?.();
+
+      monthModal.classList.remove('active');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.month-picker-wrapper')) {
+        monthModal.classList.remove('active');
+      }
+    });
   }
 
   /* AUTH FORM */
