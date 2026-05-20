@@ -6,16 +6,74 @@ import './chat.css';
 import './transactions.css';
 import './auth.css';
 import './responsive.css';
+
 import Chart from 'chart.js/auto';
+
 import {
   db,
   auth,
   addTransaction,
   login,
-  register
+  register,
+  addCreditCard,
+  listenCreditCards
 } from './firebase.js';
+
 import { deleteDoc, doc, Timestamp } from "firebase/firestore";
 import { signOut } from "firebase/auth";
+
+/* ========================================
+   ESTADO GLOBAL
+======================================== */
+
+window.cards = [];
+window.transactions = [];
+
+window.regraFinanceira = {
+  essencial: 70,
+  reserva: 20,
+  lazer: 10
+};
+
+let ordemCrescente = false;
+let isRegister = false;
+let unsubscribeCards = null;
+
+/* ========================================
+   CATEGORIAS
+======================================== */
+
+const categoriasPorTipo = {
+  income: [
+    "Salário",
+    "Freelance",
+    "Investimentos",
+    "Presente",
+    "Venda",
+    "Outros"
+  ],
+
+  expense: [
+    "Alimentação",
+    "Transporte",
+    "Moradia",
+    "Lazer",
+    "Saúde",
+    "Educação",
+    "Outros"
+  ],
+
+  goal: [
+    "Reserva de Emergência",
+    "Meta de Compra",
+    "Aposentadoria",
+    "Viagem"
+  ]
+};
+
+/* ========================================
+   AUTH / LOGOUT
+======================================== */
 
 window.logOut = async () => {
   try {
@@ -25,40 +83,112 @@ window.logOut = async () => {
   }
 };
 
-const categoriasPorTipo = {
-  income: ["Salário", "Freelance", "Investimentos", "Presente", "Venda", "Outros"],
-  expense: ["Alimentação", "Transporte", "Moradia", "Lazer", "Saúde", "Educação", "Cartão de Crédito", "Outros"],
-  goal: ["Reserva de Emergência", "Meta de Compra", "Aposentadoria", "Viagem"]
+window.updateUserHeader = (user) => {
+  const userName = document.getElementById('header-user-name');
+
+  if (!userName || !user) return;
+
+  const nome =
+    user.displayName ||
+    user.email?.split('@')[0] ||
+    'Usuário';
+
+  userName.textContent = nome;
 };
 
-// --- FUNÇÕES GLOBAIS ---
+/* ========================================
+   MENSAGENS AUTH
+======================================== */
 
 function showAuthMessage(message, type = 'error') {
-
-  const container =
-    document.getElementById('auth-message');
+  const container = document.getElementById('auth-message');
 
   if (!container) return;
 
   container.innerHTML = `
-  <div class="auth-message ${type}">
-    <span class="auth-message-icon">
-      ${type === 'error' ? '⚠' : '✓'}
-    </span>
+    <div class="auth-message ${type}">
+      <span class="auth-message-icon">
+        ${type === 'error' ? '⚠' : '✓'}
+      </span>
 
-    <span>
-      ${message}
-    </span>
-  </div>
-`;
+      <span>
+        ${message}
+      </span>
+    </div>
+  `;
 
   setTimeout(() => {
     container.innerHTML = '';
   }, 4000);
 }
 
-window.abrirModal = (tipo) => {
+/* ========================================
+   HELPERS
+======================================== */
 
+const formatBRL = (v) =>
+  Number(v || 0).toLocaleString(
+    'pt-BR',
+    {
+      style: 'currency',
+      currency: 'BRL'
+    }
+  );
+
+const formatDate = (date) => {
+  if (!date) return "--/--/--";
+
+  const d =
+    date.toDate
+      ? date.toDate()
+      : date instanceof Date
+        ? date
+        : new Date(date);
+
+  return d.toLocaleDateString('pt-BR');
+};
+
+function calcularDataFatura(dataCompra, fechamento, vencimento) {
+  const data = new Date(dataCompra);
+
+  let ano = data.getFullYear();
+  let mes = data.getMonth();
+
+  if (data.getDate() > fechamento) {
+    mes += 1;
+  }
+
+  return new Date(ano, mes, vencimento);
+}
+
+function atualizarTextoMesSelecionado(ano, mes) {
+  const headerDate = document.getElementById('header-date');
+
+  if (!headerDate) return;
+
+  const meses = [
+    "janeiro",
+    "fevereiro",
+    "março",
+    "abril",
+    "maio",
+    "junho",
+    "julho",
+    "agosto",
+    "setembro",
+    "outubro",
+    "novembro",
+    "dezembro"
+  ];
+
+  headerDate.textContent = `${meses[mes]} ${ano} • dashboard pessoal`;
+}
+
+/* ========================================
+   MODAIS
+======================================== */
+
+window.abrirModal = (tipo) => {
   const modal = document.getElementById('modal-registro');
   const inputTipo = document.getElementById('input-tipo');
   const selectCat = document.getElementById('input-cat');
@@ -66,15 +196,13 @@ window.abrirModal = (tipo) => {
 
   if (!modal || !inputTipo || !selectCat) return;
 
-  /* TRAVA SCROLL */
+  window.fecharBottomPanels?.();
+
   document.body.style.overflow = 'hidden';
 
-  /* DEFINE TIPO */
   inputTipo.value = tipo;
 
-  /* REMOVE BORDAS */
   if (modalContent) {
-
     modalContent.classList.remove(
       'borda-receita',
       'borda-despesa',
@@ -91,99 +219,196 @@ window.abrirModal = (tipo) => {
     modalContent.classList.add(classeBorda);
   }
 
-  /* POPULA CATEGORIAS */
   selectCat.innerHTML = '';
 
   const lista = categoriasPorTipo[tipo] || [];
 
   lista.forEach(cat => {
-
     const option = document.createElement('option');
 
     option.value = cat;
     option.textContent = cat;
 
     selectCat.appendChild(option);
-
   });
 
-  /* ABRE MODAL */
+  const paymentGroup = document.getElementById('payment-method-group');
+  const creditCardGroup = document.getElementById('credit-card-group');
+  const inputPayment = document.getElementById('input-payment');
+  const inputCard = document.getElementById('input-card');
+
+  if (tipo === 'expense') {
+    paymentGroup?.classList.remove('hidden');
+  } else {
+    paymentGroup?.classList.add('hidden');
+    creditCardGroup?.classList.add('hidden');
+
+    if (inputPayment) inputPayment.value = 'debit';
+    if (inputCard) inputCard.value = '';
+  }
+
   modal.classList.add('active');
 };
 
 window.fecharModal = () => {
-
   const modal = document.getElementById('modal-registro');
 
   if (!modal) return;
 
   modal.classList.remove('active');
 
-  /* LIBERA SCROLL */
   document.body.style.overflow = '';
 };
 
-// FECHAR AO CLICAR NO FUNDO ESCURO
+window.abrirModalCartao = () => {
+  const modal = document.getElementById('modal-cartao');
+
+  if (!modal) return;
+
+  window.fecharBottomPanels?.();
+
+  document.body.classList.add('modal-open');
+
+  modal.classList.add('active');
+};
+
+window.fecharModalCartao = () => {
+  const modal = document.getElementById('modal-cartao');
+
+  if (!modal) return;
+
+  modal.classList.remove('active');
+
+  document.body.classList.remove('modal-open');
+};
+
+/* ========================================
+   CLIQUE FORA DOS MODAIS
+======================================== */
+
 document.addEventListener('click', (e) => {
-  const modal = document.getElementById('modal-registro');
-  if (e.target === modal) {
+  const modalRegistro = document.getElementById('modal-registro');
+  const modalCartao = document.getElementById('modal-cartao');
+
+  if (e.target === modalRegistro) {
     window.fecharModal();
+  }
+
+  if (e.target === modalCartao) {
+    window.fecharModalCartao();
   }
 });
 
+/* ========================================
+   DELETAR TRANSAÇÃO
+======================================== */
+
 window.deletarTransacao = async (id) => {
-  if (confirm('Deseja realmente excluir?')) {
-    try { await deleteDoc(doc(db, "transacoes", id)); }
-    catch (e) { console.error("Erro:", e); }
+  const confirmar = confirm('Deseja realmente excluir?');
+
+  if (!confirmar) return;
+
+  try {
+    await deleteDoc(doc(db, "transacoes", id));
+  } catch (e) {
+    console.error("Erro ao excluir:", e);
   }
 };
 
-const formatBRL = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-const formatDate = (date) => {
-  if (!date) return "--/--/--";
-  const d = date.toDate ? date.toDate() : (date instanceof Date ? date : new Date(date));
-  return d.toLocaleDateString('pt-BR');
-};
+/* ========================================
+   CARTÕES
+======================================== */
 
-function atualizarTextoMesSelecionado(ano, mes) {
-  const headerDate = document.getElementById('header-date');
+function atualizarCartoesNaTela(cards) {
+  window.cards = cards;
 
-  if (!headerDate) return;
+  const selectCard = document.getElementById('input-card');
 
-  const meses = [
-    "janeiro", "fevereiro", "março", "abril", "maio", "junho",
-    "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
-  ];
+  if (!selectCard) return;
 
-  headerDate.textContent = `${meses[mes]} ${ano} • dashboard pessoal`;
+  selectCard.innerHTML = `
+    <option value="">Selecione um cartão</option>
+
+    ${cards.map(card => `
+      <option value="${card.id}">
+        ${card.name || 'Cartão sem nome'}
+      </option>
+    `).join('')}
+  `;
 }
 
-// --- CORE: ATUALIZAÇÃO DO DASHBOARD ---
+window.initCardsListener = (uid) => {
+  if (unsubscribeCards) {
+    unsubscribeCards();
+  }
+
+  unsubscribeCards = listenCreditCards(
+    uid,
+    atualizarCartoesNaTela
+  );
+};
+
+/* ========================================
+   DASHBOARD
+======================================== */
+
 window.atualizarDashboard = () => {
   const select = document.getElementById('filtro-mes');
+
   if (!select) return;
 
-  const [anoFiltro, mesFiltro] = select.value.split('-').map(Number);
+  const [anoFiltro, mesFiltro] =
+    select.value.split('-').map(Number);
+
   atualizarTextoMesSelecionado(anoFiltro, mesFiltro);
 
-  const dadosExibicao = (window.transactions || []).filter(t => {
-    const d = t.createdAt?.toDate ? t.createdAt.toDate() : (t.createdAt instanceof Date ? t.createdAt : new Date(t.createdAt));
-    return d.getFullYear() === anoFiltro && d.getMonth() === mesFiltro;
-  });
+  const dadosExibicao =
+    (window.transactions || []).filter(t => {
+      const d =
+        t.createdAt?.toDate
+          ? t.createdAt.toDate()
+          : t.createdAt instanceof Date
+            ? t.createdAt
+            : new Date(t.createdAt);
+
+      return (
+        d.getFullYear() === anoFiltro &&
+        d.getMonth() === mesFiltro
+      );
+    });
 
   dadosExibicao.sort((a, b) => {
-    return ordemCrescente ? a.val - b.val : b.val - a.val;
+    return ordemCrescente
+      ? Number(a.val) - Number(b.val)
+      : Number(b.val) - Number(a.val);
   });
 
   renderListaTransacoes(dadosExibicao);
   renderCategoriasGrafico(dadosExibicao);
 
-  // (Certifique-se de que os IDs abaixo existem no seu HTML)
-  let rec = 0, des = 0, res = 0;
+  let rec = 0;
+  let des = 0;
+  let res = 0;
+  let lazer = 0;
+
   dadosExibicao.forEach(t => {
-    if (t.type === 'income') rec += t.val;
-    else if (t.type === 'expense') des += t.val;
-    else if (t.type === 'goal') res += t.val;
+    const valor = Number(t.val) || 0;
+
+    if (t.type === 'income') {
+      rec += valor;
+    }
+
+    else if (t.type === 'expense') {
+      des += valor;
+
+      if (String(t.cat).toLowerCase() === 'lazer') {
+        lazer += valor;
+      }
+    }
+
+    else if (t.type === 'goal') {
+      res += valor;
+    }
   });
 
   const mesReceita = document.getElementById('mes-receita');
@@ -194,24 +419,63 @@ window.atualizarDashboard = () => {
   if (mesDespesa) mesDespesa.textContent = formatBRL(des);
   if (mesSaldo) mesSaldo.textContent = formatBRL(rec - des - res);
 
-  atualizarMetasIA(rec, des, res);
+  atualizarMetasIA(rec, des, res, lazer);
+  atualizarPoupanca(rec, des, res);
 };
+
+function atualizarPoupanca(receita, despesa, reserva) {
+  const display = document.getElementById('display-poupanca');
+  const msg = document.getElementById('msg-poupanca');
+
+  if (!display) return;
+
+  if (!receita) {
+    display.textContent = '0%';
+
+    if (msg) {
+      msg.textContent = 'Sem receita registrada neste mês.';
+      msg.className = 'poupanca-msg poupanca-msg--alerta';
+    }
+
+    return;
+  }
+
+  const taxa = ((reserva / receita) * 100).toFixed(1);
+
+  display.textContent = `${taxa}%`;
+
+  if (!msg) return;
+
+  if (Number(taxa) >= window.regraFinanceira.reserva) {
+    msg.textContent = 'Meta de reserva dentro do planejado.';
+    msg.className = 'poupanca-msg poupanca-msg--sucesso';
+  } else {
+    msg.textContent = 'Reserva abaixo da meta definida.';
+    msg.className = 'poupanca-msg poupanca-msg--critico';
+  }
+}
 
 function atualizarMetasIA(receita, despesa = 0, reserva = 0, lazer = 0) {
   const container = document.getElementById('metas-container');
+
+  if (!container) return;
 
   receita = Number(receita) || 0;
   despesa = Number(despesa) || 0;
   reserva = Number(reserva) || 0;
   lazer = Number(lazer) || 0;
 
-  if (!container) return;
+  const regra = window.regraFinanceira || {
+    essencial: 70,
+    reserva: 20,
+    lazer: 10
+  };
 
   if (receita === 0) {
     container.innerHTML = `
       <div class="meta-item">
         <div class="meta-header">
-          <span>Essencial (70%)</span>
+          <span>Essencial (${regra.essencial}%)</span>
           <span style="color:#00FFB2">0.0%</span>
         </div>
         <div class="progress-bar">
@@ -221,7 +485,7 @@ function atualizarMetasIA(receita, despesa = 0, reserva = 0, lazer = 0) {
 
       <div class="meta-item">
         <div class="meta-header">
-          <span>Reserva (20%)</span>
+          <span>Reserva (${regra.reserva}%)</span>
           <span style="color:#00D1FF">0.0%</span>
         </div>
         <div class="progress-bar">
@@ -231,7 +495,7 @@ function atualizarMetasIA(receita, despesa = 0, reserva = 0, lazer = 0) {
 
       <div class="meta-item">
         <div class="meta-header">
-          <span>Lazer (10%)</span>
+          <span>Lazer (${regra.lazer}%)</span>
           <span style="color:#FFD700">0.0%</span>
         </div>
         <div class="progress-bar">
@@ -239,6 +503,7 @@ function atualizarMetasIA(receita, despesa = 0, reserva = 0, lazer = 0) {
         </div>
       </div>
     `;
+
     return;
   }
 
@@ -249,17 +514,19 @@ function atualizarMetasIA(receita, despesa = 0, reserva = 0, lazer = 0) {
   container.innerHTML = `
     <div class="meta-item">
       <div class="meta-header">
-        <span>Essencial (70%)</span>
-        <span style="color:${pEssencial > 70 ? '#FF6B35' : '#00FFB2'}">${pEssencial}%</span>
+        <span>Essencial (${regra.essencial}%)</span>
+        <span style="color:${pEssencial > regra.essencial ? '#FF6B35' : '#00FFB2'}">
+          ${pEssencial}%
+        </span>
       </div>
       <div class="progress-bar">
-        <div style="width:${Math.min(pEssencial, 100)}%; background:${pEssencial > 70 ? '#FF6B35' : '#00FFB2'}"></div>
+        <div style="width:${Math.min(pEssencial, 100)}%; background:${pEssencial > regra.essencial ? '#FF6B35' : '#00FFB2'}"></div>
       </div>
     </div>
 
     <div class="meta-item">
       <div class="meta-header">
-        <span>Reserva (20%)</span>
+        <span>Reserva (${regra.reserva}%)</span>
         <span style="color:#00D1FF">${pReserva}%</span>
       </div>
       <div class="progress-bar">
@@ -269,15 +536,21 @@ function atualizarMetasIA(receita, despesa = 0, reserva = 0, lazer = 0) {
 
     <div class="meta-item">
       <div class="meta-header">
-        <span>Lazer (10%)</span>
-        <span style="color:#FFD700">${pLazer}%</span>
+        <span>Lazer (${regra.lazer}%)</span>
+        <span style="color:${pLazer > regra.lazer ? '#FF6B35' : '#FFD700'}">
+          ${pLazer}%
+        </span>
       </div>
       <div class="progress-bar">
-        <div style="width:${Math.min(pLazer, 100)}%; background:#FFD700"></div>
+        <div style="width:${Math.min(pLazer, 100)}%; background:${pLazer > regra.lazer ? '#FF6B35' : '#FFD700'}"></div>
       </div>
     </div>
   `;
 }
+
+/* ========================================
+   CATEGORIAS
+======================================== */
 
 window.destacarCategoria = (nomeCat) => {
   const btnTransacoes =
@@ -310,10 +583,9 @@ window.destacarCategoria = (nomeCat) => {
         item.classList.remove('tx-highlight-soft');
       });
     }, 2000);
-
   }, 150);
 };
-// AJUSTE NA RENDERIZAÇÃO: Adicione o onclick na barra
+
 function renderCategoriasGrafico(lista) {
   const containers = [
     document.getElementById('categoryList'),
@@ -337,25 +609,32 @@ function renderCategoriasGrafico(lista) {
     totais[cat].valor += Number(t.val) || 0;
   });
 
-  const categoriasArray = Object.entries(totais)
-    .sort((a, b) => b[1].valor - a[1].valor);
+  const categoriasArray =
+    Object.entries(totais)
+      .sort((a, b) => b[1].valor - a[1].valor);
 
-  const maiorValor = Math.max(
-    ...categoriasArray.map(c => c[1].valor),
-    0
-  );
+  const maiorValor =
+    Math.max(
+      ...categoriasArray.map(c => c[1].valor),
+      0
+    );
 
-  const html = categoriasArray.length
-    ? categoriasArray.map(([cat, info]) => {
-      const porc = maiorValor > 0 ? (info.valor / maiorValor) * 100 : 0;
-      const cor =
-        info.tipo === 'income'
-          ? '#00FFB2'
-          : info.tipo === 'goal'
-            ? '#00D1FF'
-            : '#FF6B35';
+  const html =
+    categoriasArray.length
+      ? categoriasArray.map(([cat, info]) => {
+        const porc =
+          maiorValor > 0
+            ? (info.valor / maiorValor) * 100
+            : 0;
 
-      return `
+        const cor =
+          info.tipo === 'income'
+            ? '#00FFB2'
+            : info.tipo === 'goal'
+              ? '#00D1FF'
+              : '#FF6B35';
+
+        return `
           <div class="category-bar-item" onclick="window.destacarCategoria('${cat}')">
             <div class="bar-info">
               <span>${cat}</span>
@@ -367,51 +646,60 @@ function renderCategoriasGrafico(lista) {
             </div>
           </div>
         `;
-    }).join('')
-    : `<p class="msg-vazio">Nenhuma categoria registrada ainda.</p>`;
+      }).join('')
+      : `<p class="msg-vazio">Nenhuma categoria registrada ainda.</p>`;
 
   containers.forEach(container => {
     container.innerHTML = html;
   });
 }
 
-function renderListaTransacoes(lista) {
+/* ========================================
+   LISTA DE TRANSAÇÕES
+======================================== */
 
+function renderListaTransacoes(lista) {
   const cRec = document.getElementById('lista-receitas-historico');
   const cDes = document.getElementById('lista-despesas-historico');
 
   if (!cRec || !cDes) return;
 
   const template = (t) => {
-
     const categoriaClasse =
       `cat-${(t.cat || 'Geral').replace(/\s+/g, '-')}`;
 
     const income = t.type === 'income';
     const goal = t.type === 'goal';
 
+    const sinal =
+      income
+        ? '+'
+        : goal
+          ? '◆'
+          : '-';
+
+    const paymentInfo =
+      t.paymentMethod === 'credit'
+        ? ' • Cartão'
+        : t.paymentMethod === 'debit'
+          ? ' • Débito/Pix'
+          : '';
+
     return `
       <div class="tx-item ${categoriaClasse}" id="tx-${t.id}">
-
         <div class="tx-info">
-
           <span class="tx-desc">
             ${t.desc}
           </span>
 
           <span class="tx-meta">
-            ${t.cat || 'Geral'} • ${formatDate(t.createdAt)}
+            ${t.cat || 'Geral'}${paymentInfo} • ${formatDate(t.createdAt)}
           </span>
-
         </div>
 
         <div class="tx-right">
-
           <span class="tx-val ${income ? 'tx-val--income' : goal ? 'tx-val--goal' : 'tx-val--expense'}">
-
-            ${income ? '+' : goal ? '◆' : '-'}
-            ${formatBRL(t.val)}
-
+            ${sinal} ${formatBRL(t.val)}
           </span>
 
           <button
@@ -420,16 +708,16 @@ function renderListaTransacoes(lista) {
           >
             ✕
           </button>
-
         </div>
-
       </div>
     `;
   };
 
-  const receitas = lista.filter(t => t.type === 'income');
+  const receitas =
+    lista.filter(t => t.type === 'income');
 
-  const despesas = lista.filter(t => t.type !== 'income');
+  const despesas =
+    lista.filter(t => t.type !== 'income');
 
   cRec.innerHTML =
     receitas.length
@@ -442,15 +730,19 @@ function renderListaTransacoes(lista) {
       : `<p class="msg-vazio">Sem despesas</p>`;
 }
 
-window.atualizarGrafico = (chart, todasTransactions) => {
+/* ========================================
+   GRÁFICO EVOLUÇÃO
+======================================== */
 
+window.atualizarGrafico = (chart, todasTransactions) => {
   if (!chart) return;
 
   if (!todasTransactions || todasTransactions.length === 0) {
-
     chart.data.labels = [];
-    chart.data.datasets[0].data = [];
-    chart.data.datasets[1].data = [];
+
+    chart.data.datasets.forEach(dataset => {
+      dataset.data = [];
+    });
 
     chart.update();
 
@@ -475,7 +767,6 @@ window.atualizarGrafico = (chart, todasTransactions) => {
   const mesesChaves = [
     ...new Set(
       todasTransactions.map(t => {
-
         const d =
           t.createdAt?.toDate
             ? t.createdAt.toDate()
@@ -492,8 +783,8 @@ window.atualizarGrafico = (chart, todasTransactions) => {
   const caixinhas = [];
 
   mesesChaves.forEach(chave => {
-
-    const [ano, mes] = chave.split('-').map(Number);
+    const [ano, mes] =
+      chave.split('-').map(Number);
 
     labels.push(
       `${mesesNomes[mes]}/${ano.toString().slice(-2)}`
@@ -504,7 +795,6 @@ window.atualizarGrafico = (chart, todasTransactions) => {
     let reservas = 0;
 
     todasTransactions.forEach(t => {
-
       const d =
         t.createdAt?.toDate
           ? t.createdAt.toDate()
@@ -514,16 +804,16 @@ window.atualizarGrafico = (chart, todasTransactions) => {
         d.getFullYear() === ano &&
         d.getMonth() === mes
       ) {
-
         if (t.type === 'income') {
-          receitas += Number(t.val);
+          receitas += Number(t.val) || 0;
         }
 
         if (t.type === 'expense') {
-          despesas += Number(t.val);
+          despesas += Number(t.val) || 0;
         }
+
         if (t.type === 'goal') {
-          reservas += Number(t.val);
+          reservas += Number(t.val) || 0;
         }
       }
     });
@@ -531,7 +821,6 @@ window.atualizarGrafico = (chart, todasTransactions) => {
     ganhos.push(receitas);
     gastos.push(despesas);
     caixinhas.push(reservas);
-
   });
 
   chart.data.labels = labels;
@@ -543,23 +832,121 @@ window.atualizarGrafico = (chart, todasTransactions) => {
   chart.update();
 };
 
-let ordemCrescente = false;
+/* ========================================
+   FILTRO ORDEM
+======================================== */
 
 window.alternarOrdemFiltro = () => {
   ordemCrescente = !ordemCrescente;
+
   const btn = document.getElementById('btn-ordem');
 
-  // Muda o ícone do botão para dar feedback visual
-  if (btn) btn.innerHTML = ordemCrescente ? '▲' : '▼';
+  if (btn) {
+    btn.innerHTML = ordemCrescente ? '▲' : '▼';
+  }
 
   try {
-    atualizarDashboard();
+    window.atualizarDashboard();
   } catch (e) {
     console.error(e);
   }
 };
 
-let isRegister = false
+/* ========================================
+   BOTTOM NAV
+======================================== */
+
+function setBottomActive(name) {
+  document
+    .querySelectorAll('.bottom-nav-btn')
+    .forEach(btn => {
+      btn.classList.toggle(
+        'active',
+        btn.dataset.bottom === name
+      );
+    });
+}
+
+window.fecharBottomPanels = () => {
+  document
+    .querySelectorAll('.bottom-panel')
+    .forEach(panel => {
+      panel.classList.remove('active');
+    });
+
+  setBottomActive(null);
+};
+
+function abrirBottomPanel(panelId, activeName) {
+  const panel =
+    document.getElementById(panelId);
+
+  if (!panel) return;
+
+  const alreadyOpen =
+    panel.classList.contains('active');
+
+  window.fecharBottomPanels();
+
+  if (!alreadyOpen) {
+    panel.classList.add('active');
+
+    setBottomActive(activeName);
+  }
+}
+
+window.toggleQuickActions = () => {
+  abrirBottomPanel(
+    'quick-actions-panel',
+    'actions'
+  );
+};
+
+window.toggleMetasPanel = () => {
+  abrirBottomPanel(
+    'metas-panel',
+    'metas'
+  );
+};
+
+window.toggleMenuPanel = () => {
+  abrirBottomPanel(
+    'menu-panel',
+    'menu'
+  );
+};
+
+window.salvarRegraFinanceira = () => {
+  const essencial =
+    Number(document.getElementById('meta-essencial')?.value || 70);
+
+  const reserva =
+    Number(document.getElementById('meta-reserva')?.value || 20);
+
+  const lazer =
+    Number(document.getElementById('meta-lazer')?.value || 10);
+
+  const total = essencial + reserva + lazer;
+
+  if (total !== 100) {
+    alert('A soma das metas precisa ser 100%.');
+    return;
+  }
+
+  window.regraFinanceira = {
+    essencial,
+    reserva,
+    lazer
+  };
+
+  window.atualizarDashboard?.();
+
+  window.fecharBottomPanels();
+};
+
+/* ========================================
+   DOM READY
+======================================== */
 
 const authTitle = document.getElementById('auth-title');
 const authSubtitle = document.getElementById('auth-subtitle');
@@ -570,133 +957,102 @@ const authButton = document.getElementById('btn-auth-primary');
 document.addEventListener('DOMContentLoaded', () => {
   popularSelectMeses();
 
-  /* ========================================
-     LOGIN
-  ======================================== */
+  /* AUTH FORM */
 
   const loginForm = document.getElementById('auth-form');
 
-  if (loginForm) {
+  loginForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
+    const email =
+      document.getElementById('auth-email').value;
 
-    loginForm.addEventListener(
-      'submit',
-      async (e) => {
+    const senha =
+      document.getElementById('auth-password').value;
 
-        e.preventDefault();
+    const nome =
+      document.getElementById('auth-name')?.value || '';
 
-        console.log("Criando conta...");
+    const sobrenome =
+      document.getElementById('auth-lastname')?.value || '';
 
-        const email =
-          document.getElementById('auth-email').value;
+    const btn =
+      document.getElementById('btn-auth-primary');
 
-        const senha =
-          document.getElementById('auth-password').value;
+    btn.disabled = true;
 
-        const nome =
-          document.getElementById('auth-name')?.value || '';
+    btn.innerHTML = `
+      <span class="auth-loader"></span>
+    `;
 
-        const sobrenome =
-          document.getElementById('auth-lastname')?.value || '';
-
-        const btn =
-          document.getElementById('btn-auth-primary');
-
-        btn.disabled = true;
-
-        btn.innerHTML = `
-        <span class="auth-loader"></span>
-      `;
-
-        try {
-
-          /* REGISTER */
-          if (isRegister) {
-
-            await register(
-              nome,
-              sobrenome,
-              email,
-              senha
-            );
-
-          }
-
-          /* LOGIN */
-          else {
-
-            await login(email, senha);
-
-          }
-
-        } catch (err) {
-
-          console.error(err);
-
-          let msg = 'Erro ao autenticar.';
-
-          switch (err.code) {
-
-            /* LOGIN */
-            case 'auth/invalid-credential':
-              msg = 'E-mail ou senha incorretos.';
-              break;
-
-            case 'auth/user-not-found':
-              msg = 'Usuário não encontrado.';
-              break;
-
-            case 'auth/wrong-password':
-              msg = 'Senha incorreta.';
-              break;
-
-            /* CADASTRO */
-            case 'auth/email-already-in-use':
-              msg = 'Esse e-mail já está cadastrado.';
-              break;
-
-            case 'auth/weak-password':
-              msg = 'A senha precisa ter no mínimo 6 caracteres.';
-              break;
-
-            /* GERAIS */
-            case 'auth/invalid-email':
-              msg = 'Digite um e-mail válido.';
-              break;
-
-            case 'auth/network-request-failed':
-              msg = 'Você está sem internet.';
-              break;
-
-            case 'auth/too-many-requests':
-              msg = 'Muitas tentativas. Aguarde alguns minutos.';
-              break;
-          }
-
-          showAuthMessage(msg, 'error');
-        }
-        finally {
-
-          setTimeout(() => {
-
-            btn.disabled = false;
-
-            btn.innerHTML =
-              isRegister
-                ? 'Criar Conta'
-                : 'Entrar';
-
-          }, 700);
-
-        }
-
+    try {
+      if (isRegister) {
+        await register(
+          nome,
+          sobrenome,
+          email,
+          senha
+        );
+      } else {
+        await login(email, senha);
       }
-    );
-  }
+    }
 
-  /* ========================================
-    TOGGLE LOGIN / CADASTRO
- ======================================== */
+    catch (err) {
+      console.error(err);
+
+      let msg = 'Erro ao autenticar.';
+
+      switch (err.code) {
+        case 'auth/invalid-credential':
+          msg = 'E-mail ou senha incorretos.';
+          break;
+
+        case 'auth/user-not-found':
+          msg = 'Usuário não encontrado.';
+          break;
+
+        case 'auth/wrong-password':
+          msg = 'Senha incorreta.';
+          break;
+
+        case 'auth/email-already-in-use':
+          msg = 'Esse e-mail já está cadastrado.';
+          break;
+
+        case 'auth/weak-password':
+          msg = 'A senha precisa ter no mínimo 6 caracteres.';
+          break;
+
+        case 'auth/invalid-email':
+          msg = 'Digite um e-mail válido.';
+          break;
+
+        case 'auth/network-request-failed':
+          msg = 'Você está sem internet.';
+          break;
+
+        case 'auth/too-many-requests':
+          msg = 'Muitas tentativas. Aguarde alguns minutos.';
+          break;
+      }
+
+      showAuthMessage(msg, 'error');
+    }
+
+    finally {
+      setTimeout(() => {
+        btn.disabled = false;
+
+        btn.innerHTML =
+          isRegister
+            ? 'Criar Conta'
+            : 'Entrar';
+      }, 700);
+    }
+  });
+
+  /* TOGGLE LOGIN / REGISTER */
 
   function setAuthMode(registerMode, pushState = true) {
     isRegister = registerMode;
@@ -707,9 +1063,9 @@ document.addEventListener('DOMContentLoaded', () => {
       authButton.innerHTML = 'Criar Conta';
 
       toggleText.innerHTML = `
-      Já possui uma conta?
-      <a href="#" id="toggle-auth-link">Voltar para login</a>
-    `;
+        Já possui uma conta?
+        <a href="#" id="toggle-auth-link">Voltar para login</a>
+      `;
 
       authExtras.forEach(el => {
         el.classList.remove('hidden');
@@ -717,18 +1073,23 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (pushState) {
-        history.pushState({ authMode: 'register' }, '', '#cadastro');
+        history.pushState(
+          { authMode: 'register' },
+          '',
+          '#cadastro'
+        );
       }
+    }
 
-    } else {
+    else {
       authTitle.textContent = 'Bem-vindo de volta';
       authSubtitle.textContent = 'Acesse sua conta para gerenciar suas finanças';
       authButton.innerHTML = 'Entrar';
 
       toggleText.innerHTML = `
-      Não tem uma conta?
-      <a href="#" id="toggle-auth-link">Criar conta grátis</a>
-    `;
+        Não tem uma conta?
+        <a href="#" id="toggle-auth-link">Criar conta grátis</a>
+      `;
 
       authExtras.forEach(el => {
         el.classList.remove('show');
@@ -736,7 +1097,11 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (pushState) {
-        history.pushState({ authMode: 'login' }, '', '#login');
+        history.pushState(
+          { authMode: 'login' },
+          '',
+          '#login'
+        );
       }
     }
 
@@ -744,58 +1109,133 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function bindToggleAuthLink() {
-    const link = document.getElementById('toggle-auth-link');
+    const link =
+      document.getElementById('toggle-auth-link');
 
     link?.addEventListener('click', (e) => {
       e.preventDefault();
+
       setAuthMode(!isRegister);
     });
   }
 
   bindToggleAuthLink();
 
-  history.replaceState({ authMode: 'login' }, '', '#login');
+  history.replaceState(
+    { authMode: 'login' },
+    '',
+    '#login'
+  );
 
   window.addEventListener('popstate', async () => {
-    const authContainer = document.getElementById('auth-container');
-    const app = document.getElementById('app');
+    const authContainer =
+      document.getElementById('auth-container');
+
+    const app =
+      document.getElementById('app');
+
+    const modalRegistroAberto =
+      document
+        .getElementById('modal-registro')
+        ?.classList.contains('active');
+
+    const modalCartaoAberto =
+      document
+        .getElementById('modal-cartao')
+        ?.classList.contains('active');
+
+    const bottomAberto =
+      document.querySelector('.bottom-panel.active');
+
+    if (bottomAberto) {
+      window.fecharBottomPanels();
+
+      history.pushState(
+        { app: true },
+        '',
+        '#app'
+      );
+
+      return;
+    }
+
+    if (modalRegistroAberto || modalCartaoAberto) {
+      window.fecharModal?.();
+      window.fecharModalCartao?.();
+
+      history.pushState(
+        { app: true },
+        '',
+        '#app'
+      );
+
+      return;
+    }
 
     const estaNaTelaCadastro = isRegister;
-    const estaLogado = document.body.classList.contains('logged-in');
 
-    if (estaNaTelaCadastro && authContainer?.style.display !== 'none') {
+    const estaLogado =
+      document.body.classList.contains('logged-in');
+
+    if (
+      estaNaTelaCadastro &&
+      authContainer?.style.display !== 'none'
+    ) {
       setAuthMode(false, false);
       return;
     }
 
-    if (estaLogado && app?.style.display !== 'none') {
-      const confirmar = confirm('Deseja realmente sair da sua conta?');
+    if (
+      estaLogado &&
+      app?.style.display !== 'none'
+    ) {
+      const confirmar =
+        confirm('Deseja realmente sair da sua conta?');
 
       if (confirmar) {
         await window.logOut();
       } else {
-        history.pushState({ app: true }, '', '#app');
+        history.pushState(
+          { app: true },
+          '',
+          '#app'
+        );
       }
     }
   });
 
-  // Tabs
+  /* TABS */
+
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      window.fecharBottomPanels?.();
+
       const target = btn.dataset.tab;
-      document.querySelectorAll('.tab-section, .tab-btn').forEach(el => el.classList.remove('active'));
-      document.getElementById(`tab-${target}`)?.classList.add('active');
+
+      document
+        .querySelectorAll('.tab-section, .tab-btn')
+        .forEach(el => el.classList.remove('active'));
+
+      document
+        .getElementById(`tab-${target}`)
+        ?.classList.add('active');
+
       btn.classList.add('active');
     });
   });
 
-  // Gráfico de Linha (Ondas)
-  const ctx = document.getElementById('mainEvolutionChart');
+  /* CHART */
+
+  const ctx =
+    document.getElementById('mainEvolutionChart');
+
   if (ctx) {
     window.meuGrafico = new Chart(ctx, {
       type: 'bar',
+
       data: {
         labels: [],
+
         datasets: [
           {
             label: 'Receitas',
@@ -806,6 +1246,7 @@ document.addEventListener('DOMContentLoaded', () => {
             borderRadius: 8,
             maxBarThickness: 42
           },
+
           {
             label: 'Despesas',
             data: [],
@@ -815,6 +1256,7 @@ document.addEventListener('DOMContentLoaded', () => {
             borderRadius: 8,
             maxBarThickness: 42
           },
+
           {
             label: 'Caixinhas',
             data: [],
@@ -826,12 +1268,15 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         ]
       },
+
       options: {
         responsive: true,
         maintainAspectRatio: false,
+
         plugins: {
           legend: {
             display: true,
+
             labels: {
               color: '#94a3b8',
               usePointStyle: true,
@@ -839,20 +1284,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
         },
+
         scales: {
           x: {
             grid: {
               display: false
             },
+
             ticks: {
               color: '#94a3b8'
             }
           },
+
           y: {
             beginAtZero: true,
+
             grid: {
               color: 'rgba(255,255,255,0.05)'
             },
+
             ticks: {
               color: '#94a3b8'
             }
@@ -862,56 +1312,239 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  document.getElementById('filtro-mes')?.addEventListener('change', window.atualizarDashboard);
+  /* FILTRO MÊS */
 
-  document.getElementById('form-transacao')?.addEventListener('submit', async (e) => {
+  document
+    .getElementById('filtro-mes')
+    ?.addEventListener(
+      'change',
+      window.atualizarDashboard
+    );
+
+  /* FORM TRANSAÇÃO */
+
+  document
+    .getElementById('form-transacao')
+    ?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const inputDataStr =
+        document.getElementById('input-data')?.value;
+
+      let dataCompra = new Date();
+
+      if (inputDataStr) {
+        const [ano, mes, dia] =
+          inputDataStr.split('-').map(Number);
+
+        dataCompra =
+          new Date(ano, mes - 1, dia);
+      }
+
+      const tipo =
+        document.getElementById('input-tipo').value;
+
+      const categoria =
+        document.getElementById('input-cat').value;
+
+      const paymentMethod =
+        document.getElementById('input-payment')?.value ||
+        'debit';
+
+      const cardId =
+        document.getElementById('input-card')?.value ||
+        null;
+
+      let dataLancamento = dataCompra;
+
+      if (
+        tipo === 'expense' &&
+        paymentMethod === 'credit'
+      ) {
+        const cartao =
+          (window.cards || [])
+            .find(card => card.id === cardId);
+
+        if (!cartao) {
+          alert('Selecione um cartão de crédito.');
+          return;
+        }
+
+        dataLancamento = calcularDataFatura(
+          dataCompra,
+          Number(cartao.closingDay),
+          Number(cartao.dueDay)
+        );
+      }
+
+      const nova = {
+        desc:
+          document.getElementById('input-desc').value,
+
+        val:
+          parseFloat(
+            document.getElementById('input-val').value
+          ),
+
+        type: tipo,
+        cat: categoria,
+
+        paymentMethod,
+        cardId,
+
+        purchaseDate:
+          Timestamp.fromDate(dataCompra),
+
+        createdAt:
+          Timestamp.fromDate(dataLancamento)
+      };
+
+      await addTransaction(nova);
+
+      e.target.reset();
+
+      document.getElementById('input-payment').value = 'debit';
+      document.getElementById('input-card').value = '';
+
+      document
+        .getElementById('credit-card-group')
+        ?.classList.add('hidden');
+
+      window.fecharModal();
+    });
+
+  /* FORM CARTÃO */
+
+  const formCartao =
+    document.getElementById('form-cartao');
+
+  formCartao?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const inputDataStr = document.getElementById('input-data')?.value;
-    let dataFinal = new Date();
-    if (inputDataStr) {
-      const [ano, mes, dia] = inputDataStr.split('-').map(Number);
-      dataFinal = new Date(ano, mes - 1, dia);
-    }
 
-    const nova = {
-      desc: document.getElementById('input-desc').value,
-      val: parseFloat(document.getElementById('input-val').value),
-      type: document.getElementById('input-tipo').value,
-      cat: document.getElementById('input-cat').value,
-      createdAt: Timestamp.fromDate(dataFinal)
-    };
-    await addTransaction(nova);
-    e.target.reset();
-    window.fecharModal();
+    await addCreditCard({
+      name:
+        document.getElementById('card-name').value,
+
+      closingDay:
+        Number(
+          document.getElementById('card-closing').value
+        ),
+
+      dueDay:
+        Number(
+          document.getElementById('card-due').value
+        )
+    });
+
+    formCartao.reset();
+
+    window.fecharModalCartao();
   });
+
+  /* PAYMENT METHOD */
+
+  const inputPayment =
+    document.getElementById('input-payment');
+
+  const creditCardGroup =
+    document.getElementById('credit-card-group');
+
+  inputPayment?.addEventListener('change', () => {
+    if (inputPayment.value === 'credit') {
+      creditCardGroup?.classList.remove('hidden');
+    } else {
+      creditCardGroup?.classList.add('hidden');
+    }
+  });
+
+  /* ESC */
 
   document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
 
-    if (e.key === 'Escape') {
+    const modalRegistro =
+      document
+        .getElementById('modal-registro')
+        ?.classList.contains('active');
 
-      const modal = document.getElementById('modal-registro');
+    const modalCartao =
+      document
+        .getElementById('modal-cartao')
+        ?.classList.contains('active');
 
-      if (modal?.classList.contains('active')) {
-        window.fecharModal();
-      }
+    const bottomPanel =
+      document.querySelector('.bottom-panel.active');
+
+    if (bottomPanel) {
+      window.fecharBottomPanels();
+      return;
+    }
+
+    if (modalRegistro) {
+      window.fecharModal();
+      return;
+    }
+
+    if (modalCartao) {
+      window.fecharModalCartao();
     }
   });
 
-  /* ========================================
-     PREVINE ZOOM IOS
-  ======================================== */
+  /* FECHAR BOTTOM PANEL AO CLICAR FORA */
+
+  document.addEventListener('click', (e) => {
+    const clicouPainel =
+      e.target.closest('.bottom-panel');
+
+    const clicouBotao =
+      e.target.closest('.bottom-nav-btn');
+
+    if (!clicouPainel && !clicouBotao) {
+      window.fecharBottomPanels();
+    }
+  });
+
+  /* PREVINE ZOOM IOS */
 
   document.querySelectorAll('input, select').forEach(el => {
     el.style.fontSize = '16px';
   });
 });
 
-
+/* ========================================
+   POPULAR SELECT MESES
+======================================== */
 
 function popularSelectMeses() {
-  const select = document.getElementById('filtro-mes');
+  const select =
+    document.getElementById('filtro-mes');
+
   if (!select) return;
-  const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+  const meses = [
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro"
+  ];
+
   const d = new Date();
-  select.innerHTML = meses.map((n, i) => `<option value="${d.getFullYear()}-${i}" ${i === d.getMonth() ? 'selected' : ''}>${n} ${d.getFullYear()}</option>`).join('');
+
+  select.innerHTML =
+    meses.map((n, i) => `
+      <option
+        value="${d.getFullYear()}-${i}"
+        ${i === d.getMonth() ? 'selected' : ''}
+      >
+        ${n} ${d.getFullYear()}
+      </option>
+    `).join('');
 }

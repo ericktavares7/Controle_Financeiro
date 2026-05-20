@@ -98,14 +98,17 @@
   </div>
 
   <main id="app" class="dashboard-container">
+
     <header class="dashboard-header">
       <div class="header-container">
+
         <div class="brand-group">
           <div class="logo">
             <img src="/logo_finance.png" alt="Logo Finance" class="logo-img">
           </div>
+
           <div class="brand-info">
-            <h1>Finance Simplefy</h1>
+            <h1 id="header-user-name">Finance Simplefy</h1>
             <p class="current-date" id="header-date">maio 2026 • dashboard pessoal</p>
           </div>
         </div>
@@ -131,23 +134,6 @@
     </header>
 
     <section class="tab-section active" id="tab-overview">
-
-      <div class="top-actions-grid">
-        <button id="dash-card-receita" class="action-card btn-income" onclick="window.abrirModal('income')">
-          <div class="action-icon">＋</div>
-          <div class="action-info"><small>Novo Ganho</small><strong>RECEITA</strong></div>
-        </button>
-
-        <button id="dash-card-despesa" class="action-card btn-expense" onclick="window.abrirModal('expense')">
-          <div class="action-icon">－</div>
-          <div class="action-info"><small>Novo Gasto</small><strong>DESPESA</strong></div>
-        </button>
-
-        <button id="dash-card-caixinhas" class="action-card btn-caixinha" onclick="window.abrirModal('goal')">
-          <div class="action-icon">🚀</div>
-          <div class="action-info"><small>CAIXINHAS</small><strong id="saldo-caixinhas">R$ 0.00</strong></div>
-        </button>
-      </div>
 
       <div class="summary-grid">
         <article class="card balance" id="card-metas">
@@ -223,7 +209,6 @@
                 <option value="Saúde">Saúde</option>
                 <option value="Educação">Educação</option>
                 <option value="Outros">Outros</option>
-                <option value="Cartão de Crédito">Cartão de Crédito</option>
               </optgroup>
 
               <optgroup label="💰 RECEITAS" id="group-receitas">
@@ -241,9 +226,55 @@
             </select>
           </div>
 
+
+          <div class="form-group" id="payment-method-group">
+            <label>Forma de pagamento</label>
+
+            <select id="input-payment">
+              <option value="debit">Débito / Pix / Saldo em conta</option>
+              <option value="credit">Cartão de crédito</option>
+            </select>
+          </div>
+
+          <div class="form-group hidden" id="credit-card-group">
+            <label>Cartão de crédito</label>
+
+            <select id="input-card">
+              <option value="">Selecione um cartão</option>
+            </select>
+          </div>
+
           <input type="hidden" id="input-tipo" value="expense">
 
           <button type="submit" class="btn-save">Confirmar Registro</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="modal-cartao" class="modal">
+      <div class="modal-content borda-cartao">
+        <div class="modal-header">
+          <h2>Novo Cartão de Crédito</h2>
+          <button type="button" class="btn-close" onclick="window.fecharModalCartao()">&times;</button>
+        </div>
+
+        <form id="form-cartao">
+          <div class="form-group">
+            <label>Nome do cartão</label>
+            <input type="text" id="card-name" placeholder="Ex: Nubank, Inter, Itaú..." required>
+          </div>
+
+          <div class="form-group">
+            <label>Dia de fechamento</label>
+            <input type="number" id="card-closing" min="1" max="31" placeholder="Ex: 20" required>
+          </div>
+
+          <div class="form-group">
+            <label>Dia de vencimento</label>
+            <input type="number" id="card-due" min="1" max="31" placeholder="Ex: 27" required>
+          </div>
+
+          <button type="submit" class="btn-save">Salvar Cartão</button>
         </form>
       </div>
     </div>
@@ -311,6 +342,77 @@
         </div>
       </section>
     </section>
+
+    <nav class="mobile-bottom-nav">
+      <button type="button" class="bottom-nav-btn" data-bottom="actions" onclick="window.fecharBottomPanels()">
+        <i class="ph ph-plus"></i>
+        <span>Ações</span>
+      </button>
+
+      <button type="button" class="bottom-nav-btn" data-bottom="metas" onclick="window.toggleMetasPanel()">
+        <i class="ph ph-target"></i>
+        <span>Metas</span>
+      </button>
+
+      <button type="button" class="bottom-nav-btn" data-bottom="menu" onclick="window.toggleMenuPanel()">
+        <i class="ph ph-list"></i>
+        <span>Menu</span>
+      </button>
+    </nav>
+
+    <div id="quick-actions-panel" class="bottom-panel">
+      <button class="action-card btn-income" onclick="window.abrirModal('income'); window.fecharBottomPanels()">
+        <div class="action-icon">＋</div>
+        <div class="action-info"><small>Novo Ganho</small><strong>RECEITA</strong></div>
+      </button>
+
+      <button class="action-card btn-expense" onclick="window.abrirModal('expense'); window.fecharBottomPanels()">
+        <div class="action-icon">－</div>
+        <div class="action-info"><small>Novo Gasto</small><strong>DESPESA</strong></div>
+      </button>
+
+      <button class="action-card btn-caixinha" onclick="window.abrirModal('goal'); window.fecharBottomPanels()">
+        <div class="action-icon">🚀</div>
+        <div class="action-info"><small>Caixinhas</small><strong>RESERVA</strong></div>
+      </button>
+
+      <button class="action-card btn-card" onclick="window.abrirModalCartao(); window.fecharBottomPanels()">
+        <div class="action-icon">💳</div>
+        <div class="action-info"><small>Novo Cartão</small><strong>CARTÃO DE CRÉDITO</strong></div>
+      </button>
+    </div>
+
+    <div id="metas-panel" class="bottom-panel">
+
+      <h3>Editar regra financeira</h3>
+
+      <div class="form-group">
+        <label>Essenciais (%)</label>
+        <input type="number" id="meta-essencial" value="70" min="0" max="100">
+      </div>
+
+      <div class="form-group">
+        <label>Reserva (%)</label>
+        <input type="number" id="meta-reserva" value="20" min="0" max="100">
+      </div>
+
+      <div class="form-group">
+        <label>Lazer (%)</label>
+        <input type="number" id="meta-lazer" value="10" min="0" max="100">
+      </div>
+
+      <button type="button" class="btn-save" onclick="window.salvarRegraFinanceira()">
+        Salvar regra
+      </button>
+    </div>
+
+    <div id="menu-panel" class="bottom-panel">
+      <h3>Menu</h3>
+
+      <button type="button" class="btn-save" onclick="window.logOut()">
+        Sair da conta
+      </button>
+    </div>
   </main>
 
 </body>

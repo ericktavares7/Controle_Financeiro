@@ -6,7 +6,8 @@ import {
   query,
   where,
   onSnapshot,
-  orderBy
+  orderBy,
+  getDocs
 } from "firebase/firestore";
 
 import {
@@ -97,6 +98,10 @@ onAuthStateChanged(auth, (user) => {
 
     console.log("Usuário logado:", user.email);
 
+    if (window.updateUserHeader) {
+      window.updateUserHeader(user);
+    }
+
     /* ESCONDE LOGIN */
     if (authContainer) {
       authContainer?.classList.add('fade-out');
@@ -126,6 +131,9 @@ onAuthStateChanged(auth, (user) => {
 
     /* NOVO LISTENER */
     unsubscribeTransactions = dbListenFirestore(user.uid);
+    if (window.initCardsListener) {
+      window.initCardsListener(user.uid);
+    }
 
   } else {
 
@@ -220,5 +228,36 @@ export function dbListenFirestore(uid) {
 
     console.error("Erro Firestore:", error);
 
+  });
+}
+
+/* ========================================
+   ADD CREDIT CARD
+======================================== */
+
+export async function addCreditCard(data) {
+  if (!auth.currentUser) return;
+
+  await addDoc(collection(db, "cartoes"), {
+    ...data,
+    userId: auth.currentUser.uid,
+    createdAt: new Date()
+  });
+}
+
+export function listenCreditCards(uid, callback) {
+  const q = query(
+    collection(db, "cartoes"),
+    where("userId", "==", uid),
+    orderBy("createdAt", "asc")
+  );
+
+  return onSnapshot(q, (snapshot) => {
+    const cards = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    callback(cards);
   });
 }
