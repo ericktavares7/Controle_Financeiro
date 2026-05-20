@@ -291,6 +291,60 @@
       </div>
     </div>
 
+    <div id="modal-editar-cartao" class="modal">
+      <div class="modal-content borda-cartao">
+
+        <div class="modal-header">
+          <h2>Editar Cartão</h2>
+
+          <button type="button" class="btn-close" onclick="window.fecharEditorCartao()">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+
+        <form id="form-editar-cartao">
+
+          <input type="hidden" id="edit-card-id">
+
+          <div class="form-group">
+            <label>Nome do cartão</label>
+            <input type="text" id="edit-card-name" required>
+          </div>
+
+          <div class="form-group">
+            <label>Dia de fechamento</label>
+            <input type="number" id="edit-card-closing" min="1" max="31" required>
+          </div>
+
+          <div class="form-group">
+            <label>Dia de vencimento</label>
+            <input type="number" id="edit-card-due" min="1" max="31" required>
+          </div>
+
+          <div class="form-group">
+            <label>Cor do cartão</label>
+
+            <select id="edit-card-color">
+              <option value="0">Roxo</option>
+              <option value="1">Laranja</option>
+              <option value="2">Azul</option>
+              <option value="3">Verde</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-save">
+            Salvar alterações
+          </button>
+
+          <button type="button" class="btn-danger" onclick="window.removerCartaoAtual()">
+            Remover cartão
+          </button>
+
+        </form>
+
+      </div>
+    </div>
+
     <section class="tab-section" id="tab-transacoes">
       <div class="transacoes-container">
         <header class="section-header">

@@ -18,7 +18,9 @@ import {
   addCreditCard,
   listenCreditCards,
   saveUserSettings,
-  getUserSettings
+  getUserSettings,
+  updateCreditCard,
+  deleteCreditCard
 } from './firebase.js';
 
 import { deleteDoc, doc, Timestamp } from "firebase/firestore";
@@ -375,26 +377,84 @@ function atualizarCartoesNaTela(cards) {
   if (walletList) {
     walletList.innerHTML = cards.length
       ? cards.map((card, index) => `
-        <div class="wallet-credit-card card-color-${index % 4}">
-          <div class="wallet-card-top">
-            <span>${card.name || 'Cartão sem nome'}</span>
-            <i class="ph ph-credit-card"></i>
-          </div>
+    <div class="wallet-credit-card card-color-${card.colorIndex ?? index % 4}">
 
-          <div class="wallet-card-invoice">
-            <small>Fatura atual</small>
-             <strong>${formatBRL(calcularFaturaAtualDoCartao(card.id))}</strong>
-          </div>
+      <div class="wallet-card-top">
 
-          <div class="wallet-card-footer">
-            <small>Fecha dia ${card.closingDay || '--'}</small>
-            <small>Vence dia ${card.dueDay || '--'}</small>
-          </div>
+        <span>
+          ${card.name || 'Cartão sem nome'}
+        </span>
+
+        <div class="wallet-card-actions">
+
+          <i class="ph ph-credit-card"></i>
+
+          <button
+            type="button"
+            class="wallet-card-config"
+            onclick="event.stopPropagation(); window.abrirEditorCartao('${card.id}')"
+          >
+            <i class="ph ph-gear-six"></i>
+          </button>
+
         </div>
-      `).join('')
+
+      </div>
+
+      <div class="wallet-card-invoice">
+        <small>Fatura atual</small>
+
+        <strong>
+          ${formatBRL(calcularFaturaAtualDoCartao(card.id))}
+        </strong>
+      </div>
+
+      <div class="wallet-card-footer">
+        <small>
+          Fecha dia ${card.closingDay || '--'}
+        </small>
+
+        <small>
+          Vence dia ${card.dueDay || '--'}
+        </small>
+      </div>
+
+    </div>
+  `).join('')
       : `<p class="msg-vazio">Nenhum cartão cadastrado.</p>`;
   }
 }
+
+window.abrirEditorCartao = (cardId) => {
+  const card = (window.cards || []).find(c => c.id === cardId);
+  if (!card) return;
+
+  document.getElementById('edit-card-id').value = card.id;
+  document.getElementById('edit-card-name').value = card.name || '';
+  document.getElementById('edit-card-closing').value = card.closingDay || '';
+  document.getElementById('edit-card-due').value = card.dueDay || '';
+  document.getElementById('edit-card-color').value = card.colorIndex ?? 0;
+
+  document.getElementById('modal-editar-cartao')?.classList.add('active');
+};
+
+window.fecharEditorCartao = () => {
+  document.getElementById('modal-editar-cartao')?.classList.remove('active');
+};
+
+window.removerCartaoAtual = async () => {
+  const cardId = document.getElementById('edit-card-id')?.value;
+
+  if (!cardId) return;
+
+  const confirmar = confirm('Remover este cartão? As transações antigas continuarão salvas.');
+
+  if (!confirmar) return;
+
+  await deleteCreditCard(cardId);
+
+  window.fecharEditorCartao();
+};
 
 window.initCardsListener = (uid) => {
   if (unsubscribeCards) {
@@ -1181,6 +1241,21 @@ document.addEventListener('DOMContentLoaded', () => {
         );
       }
     }
+  });
+
+  document.getElementById('form-editar-cartao')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const cardId = document.getElementById('edit-card-id').value;
+
+    await updateCreditCard(cardId, {
+      name: document.getElementById('edit-card-name').value,
+      closingDay: Number(document.getElementById('edit-card-closing').value),
+      dueDay: Number(document.getElementById('edit-card-due').value),
+      colorIndex: Number(document.getElementById('edit-card-color').value)
+    });
+
+    window.fecharEditorCartao();
   });
 
   /* TABS */

@@ -9,7 +9,9 @@ import {
   orderBy,
   setDoc,
   doc,
-  getDoc
+  getDoc,
+  deleteDoc,
+  updateDoc
 } from "firebase/firestore";
 
 import {
@@ -291,4 +293,12 @@ export async function getUserSettings(uid) {
   }
 
   return snapshot.data();
-} 
+}
+
+export async function updateCreditCard(cardId, data) {
+  await updateDoc(doc(db, "cartoes", cardId), data);
+}
+
+export async function deleteCreditCard(cardId) {
+  await deleteDoc(doc(db, "cartoes", cardId));
+}
