@@ -716,6 +716,25 @@ body.modal-open {
   background: linear-gradient(135deg, #047857, #10b981);
 }
 
+
+.wallet-card-invoice {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wallet-card-invoice small {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.wallet-card-invoice strong {
+  font-size: 22px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+
 /* =========================================
    POUPANÇA
 ========================================= */

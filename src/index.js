@@ -163,6 +163,39 @@ function calcularDataFatura(dataCompra, fechamento, vencimento) {
   return new Date(ano, mes, vencimento);
 }
 
+function calcularFaturaAtualDoCartao(cardId) {
+  const select = document.getElementById('filtro-mes');
+
+  if (!select) return 0;
+
+  const [anoFiltro, mesFiltro] =
+    select.value.split('-').map(Number);
+
+  return (window.transactions || []).reduce((total, t) => {
+    if (
+      t.type !== 'expense' ||
+      t.paymentMethod !== 'credit' ||
+      t.cardId !== cardId
+    ) {
+      return total;
+    }
+
+    const d =
+      t.createdAt?.toDate
+        ? t.createdAt.toDate()
+        : new Date(t.createdAt);
+
+    if (
+      d.getFullYear() === anoFiltro &&
+      d.getMonth() === mesFiltro
+    ) {
+      return total + (Number(t.val) || 0);
+    }
+
+    return total;
+  }, 0);
+}
+
 function atualizarTextoMesSelecionado(ano, mes) {
   const headerDate = document.getElementById('header-date');
 
@@ -348,8 +381,9 @@ function atualizarCartoesNaTela(cards) {
             <i class="ph ph-credit-card"></i>
           </div>
 
-          <div class="wallet-card-number">
-            •••• ${String(card.id).slice(-4)}
+          <div class="wallet-card-invoice">
+            <small>Fatura atual</small>
+             <strong>${formatBRL(calcularFaturaAtualDoCartao(card.id))}</strong>
           </div>
 
           <div class="wallet-card-footer">
@@ -445,6 +479,7 @@ window.atualizarDashboard = () => {
   if (mesSaldo) mesSaldo.textContent = formatBRL(rec - des - res);
 
   atualizarMetasIA(rec, des, res, lazer);
+  atualizarCartoesNaTela(window.cards || []);
   atualizarPoupanca(rec, des, res);
 };
 
