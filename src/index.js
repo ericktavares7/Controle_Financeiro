@@ -1190,21 +1190,18 @@ const authButton = document.getElementById('btn-auth-primary');
 document.addEventListener('DOMContentLoaded', () => {
   popularSelectMeses();
 
-  const filtroMes = document.getElementById('filtro-mes');
-  const filtroMesHeader = document.getElementById('filtro-mes-header');
+  const filtro =
+    document.getElementById('filtro-mes');
 
-  if (filtroMes && filtroMesHeader) {
-    filtroMesHeader.innerHTML = filtroMes.innerHTML;
-    filtroMesHeader.value = filtroMes.value;
+  if (filtro?.value) {
+    const [ano, mes] = filtro.value.split('-');
 
-    filtroMesHeader.addEventListener('change', () => {
-      filtroMes.value = filtroMesHeader.value;
-      window.atualizarDashboard?.();
-    });
-
-    filtroMes.addEventListener('change', () => {
-      filtroMesHeader.value = filtroMes.value;
-    });
+    document.getElementById(
+      'btn-open-month-picker'
+    ).innerHTML = `
+    ${MONTHS[Number(mes) - 1]} ${ano}
+    <i class="ph ph-caret-down"></i>
+  `;
   }
   /* AUTH FORM */
 
