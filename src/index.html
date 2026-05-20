@@ -212,15 +212,36 @@
         </nav>
 
         <div class="header-actions">
-          <select id="filtro-mes-header" class="month-bubble">
-          </select>
-          <div class="status-badge">
-            <span>●</span> ao vivo
+          <div class="month-picker-header">
+
+            <button type="button" id="prev-year" class="month-nav-btn">
+              <i class="ph ph-caret-left"></i>
+            </button>
+
+            <strong id="month-picker-year">
+              2026
+            </strong>
+
+            <button type="button" id="next-year" class="month-nav-btn">
+              <i class="ph ph-caret-right"></i>
+            </button>
+
           </div>
-          <button onclick="logOut()" class="btn-logout">
-            <i class="ph ph-sign-out"></i> Sair
-          </button>
+
+          <div class="months-grid" id="months-grid"></div>
+
         </div>
+
+      </div>
+
+      </div>
+      <div class="status-badge">
+        <span>●</span> ao vivo
+      </div>
+      <button onclick="logOut()" class="btn-logout">
+        <i class="ph ph-sign-out"></i> Sair
+      </button>
+      </div>
 
       </div>
     </header>
@@ -553,11 +574,6 @@
       <button class="action-card btn-caixinha" onclick="window.abrirModal('goal'); window.fecharBottomPanels()">
         <div class="action-icon">🚀</div>
         <div class="action-info"><small>Caixinhas</small><strong>RESERVA</strong></div>
-      </button>
-
-      <button class="action-card btn-card" onclick="window.abrirModalCartao(); window.fecharBottomPanels()">
-        <div class="action-icon">💳</div>
-        <div class="action-info"><small>Novo Cartão</small><strong>CARTÃO DE CRÉDITO</strong></div>
       </button>
     </div>
 

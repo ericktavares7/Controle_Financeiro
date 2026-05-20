@@ -1575,3 +1575,194 @@ body.modal-open {
 
   cursor: pointer;
 }
+
+.meta-card-line {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.meta-card-line:last-child {
+  border-bottom: none;
+}
+
+.meta-line-top,
+.meta-money-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.meta-line-top strong {
+  display: block;
+  color: #fff;
+  font-size: 15px;
+}
+
+.meta-line-top span,
+.meta-money-row span {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.meta-money-row strong {
+  color: #fff;
+}
+
+.meta-status {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.meta-status.ok {
+  color: #00FFB2;
+}
+
+.meta-status.warning {
+  color: #FFD700;
+}
+
+.meta-status.danger {
+  color: #FF6B35;
+}
+
+.meta-empty {
+  color: #94a3b8;
+  font-size: 13px;
+  margin: 0;
+}
+
+.wallet-cards-list {
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge antigo */
+
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
+}
+
+.wallet-cards-list::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari/Edge */
+}
+
+.wallet-cards-list:active {
+  cursor: grabbing;
+}
+
+.month-picker-wrapper {
+  position: relative;
+}
+
+.month-picker-modal {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+
+  width: 290px;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+
+  transform: translateY(10px);
+
+  z-index: 99999;
+}
+
+.month-picker-modal.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+
+  transform: translateY(0);
+}
+
+.month-picker-card {
+  padding: 18px;
+
+  border-radius: 24px;
+
+  background:
+    linear-gradient(180deg,
+      #111827,
+      #0f172a);
+
+  border:
+    1px solid rgba(255, 255, 255, 0.08);
+
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.45);
+}
+
+.month-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 18px;
+}
+
+.month-picker-header strong {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.month-nav-btn {
+  width: 34px;
+  height: 34px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.05);
+
+  color: white;
+
+  cursor: pointer;
+}
+
+.months-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.month-item {
+  height: 42px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.04);
+
+  color: #cbd5e1;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.month-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.month-item.active {
+  background: #00FFB2;
+  color: #081018;
+}

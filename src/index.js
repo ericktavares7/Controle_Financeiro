@@ -713,7 +713,6 @@ function atualizarPoupanca(receita, despesa, reserva) {
 
 function atualizarMetasIA(receita, despesa = 0, reserva = 0, lazer = 0) {
   const container = document.getElementById('metas-container');
-
   if (!container) return;
 
   receita = Number(receita) || 0;
@@ -727,65 +726,102 @@ function atualizarMetasIA(receita, despesa = 0, reserva = 0, lazer = 0) {
     lazer: 10
   };
 
-  const montarMeta = (nome, meta, atual, cor, alerta = false) => {
-    const largura = Math.min(atual, 100);
+  const essencialIdeal = receita * (regra.essencial / 100);
+  const reservaIdeal = receita * (regra.reserva / 100);
+  const lazerIdeal = receita * (regra.lazer / 100);
+
+  const montarLinha = ({ nome, percentual, usado, ideal, cor, tipo }) => {
+    const usadoPercentual = receita > 0 ? (usado / receita) * 100 : 0;
+    const progresso = ideal > 0 ? Math.min((usado / ideal) * 100, 100) : 0;
+
+    let status = '';
+    let statusClass = '';
+
+    if (tipo === 'limite') {
+      if (usado > ideal) {
+        status = `Passou ${formatBRL(usado - ideal)} do recomendado`;
+        statusClass = 'meta-status danger';
+      } else {
+        status = `Ainda pode usar ${formatBRL(ideal - usado)}`;
+        statusClass = 'meta-status ok';
+      }
+    }
+
+    if (tipo === 'objetivo') {
+      if (usado >= ideal) {
+        status = `Meta atingida`;
+        statusClass = 'meta-status ok';
+      } else {
+        status = `Faltam ${formatBRL(ideal - usado)} para a meta`;
+        statusClass = 'meta-status warning';
+      }
+    }
 
     return `
-      <div class="meta-item">
-        <div class="meta-header">
-          <span>${nome} (${meta}%)</span>
-          <span style="color:${alerta ? '#FF6B35' : cor}">
-            ${atual.toFixed(1)}%
-          </span>
+      <div class="meta-card-line">
+        <div class="meta-line-top">
+          <div>
+            <strong>${nome}</strong>
+            <span>${percentual}% da receita</span>
+          </div>
+
+          <b style="color:${cor}">
+            ${usadoPercentual.toFixed(1)}%
+          </b>
         </div>
 
-        <div class="progress-bar">
-          <div style="
-            width:${largura}%;
-            background:${alerta ? '#FF6B35' : cor};
-          "></div>
+        <div class="meta-money-row">
+          <span>Usado: <strong>${formatBRL(usado)}</strong></span>
+          <span>Ideal: <strong>${formatBRL(ideal)}</strong></span>
         </div>
+
+        <div class="progress-bar meta-progress">
+          <div style="width:${progresso}%; background:${cor};"></div>
+        </div>
+
+        <p class="${statusClass}">
+          ${status}
+        </p>
       </div>
     `;
   };
 
   if (receita === 0) {
     container.innerHTML = `
-      ${montarMeta('Essencial', regra.essencial, 0, '#00FFB2')}
-      ${montarMeta('Reserva', regra.reserva, 0, '#00D1FF')}
-      ${montarMeta('Lazer', regra.lazer, 0, '#FFD700')}
+      <p class="meta-empty">
+        Cadastre uma receita no mês para calcular sua regra financeira.
+      </p>
     `;
     return;
   }
 
-  const pEssencial = (despesa / receita) * 100;
-  const pReserva = (reserva / receita) * 100;
-  const pLazer = (lazer / receita) * 100;
-
   container.innerHTML = `
-    ${montarMeta(
-    'Essencial',
-    regra.essencial,
-    pEssencial,
-    '#00FFB2',
-    pEssencial > regra.essencial
-  )}
+    ${montarLinha({
+    nome: 'Essenciais',
+    percentual: regra.essencial,
+    usado: despesa,
+    ideal: essencialIdeal,
+    cor: despesa > essencialIdeal ? '#FF6B35' : '#00FFB2',
+    tipo: 'limite'
+  })}
 
-    ${montarMeta(
-    'Reserva',
-    regra.reserva,
-    pReserva,
-    '#00D1FF',
-    pReserva < regra.reserva
-  )}
+    ${montarLinha({
+    nome: 'Reserva',
+    percentual: regra.reserva,
+    usado: reserva,
+    ideal: reservaIdeal,
+    cor: '#00D1FF',
+    tipo: 'objetivo'
+  })}
 
-    ${montarMeta(
-    'Lazer',
-    regra.lazer,
-    pLazer,
-    '#FFD700',
-    pLazer > regra.lazer
-  )}
+    ${montarLinha({
+    nome: 'Lazer',
+    percentual: regra.lazer,
+    usado: lazer,
+    ideal: lazerIdeal,
+    cor: lazer > lazerIdeal ? '#FF6B35' : '#FFD700',
+    tipo: 'limite'
+  })}
   `;
 }
 /* ========================================
@@ -2031,3 +2067,118 @@ document.addEventListener('click', (e) => {
     modal?.classList.add('active');
   });
 });
+
+const MONTHS = [
+  'Jan', 'Fev', 'Mar',
+  'Abr', 'Mai', 'Jun',
+  'Jul', 'Ago', 'Set',
+  'Out', 'Nov', 'Dez'
+];
+
+window.currentPickerYear =
+  new Date().getFullYear();
+
+window.renderMonthPicker = () => {
+  const grid =
+    document.getElementById('months-grid');
+
+  const yearLabel =
+    document.getElementById('month-picker-year');
+
+  if (!grid || !yearLabel) return;
+
+  yearLabel.textContent =
+    window.currentPickerYear;
+
+  const filtro =
+    document.getElementById('filtro-mes');
+
+  const valorAtual =
+    filtro?.value || '';
+
+  grid.innerHTML = MONTHS.map((mes, index) => {
+
+    const value =
+      `${window.currentPickerYear}-${String(index + 1).padStart(2, '0')}`;
+
+    const active =
+      value === valorAtual;
+
+    return `
+      <button
+        type="button"
+        class="month-item ${active ? 'active' : ''}"
+        data-value="${value}"
+      >
+        ${mes}
+      </button>
+    `;
+  }).join('');
+};
+
+document.addEventListener('click', (e) => {
+
+  const openBtn =
+    e.target.closest('#btn-open-month-picker');
+
+  if (openBtn) {
+    document
+      .getElementById('month-picker-modal')
+      ?.classList.toggle('active');
+
+    window.renderMonthPicker();
+
+    return;
+  }
+
+  const monthBtn =
+    e.target.closest('.month-item');
+
+  if (monthBtn) {
+
+    const value =
+      monthBtn.dataset.value;
+
+    const filtro =
+      document.getElementById('filtro-mes');
+
+    filtro.value = value;
+
+    window.atualizarDashboard?.();
+
+    const [ano, mes] = value.split('-');
+
+    document.getElementById(
+      'btn-open-month-picker'
+    ).innerHTML = `
+      ${MONTHS[Number(mes) - 1]} ${ano}
+      <i class="ph ph-caret-down"></i>
+    `;
+
+    document
+      .getElementById('month-picker-modal')
+      ?.classList.remove('active');
+
+    return;
+  }
+
+  if (!e.target.closest('.month-picker-wrapper')) {
+    document
+      .getElementById('month-picker-modal')
+      ?.classList.remove('active');
+  }
+});
+
+document
+  .getElementById('prev-year')
+  ?.addEventListener('click', () => {
+    window.currentPickerYear--;
+    window.renderMonthPicker();
+  });
+
+document
+  .getElementById('next-year')
+  ?.addEventListener('click', () => {
+    window.currentPickerYear++;
+    window.renderMonthPicker();
+  });
