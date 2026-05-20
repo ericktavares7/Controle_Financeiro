@@ -150,7 +150,6 @@
     </div>
   </div>
 
-
   <div id="modal-confirmacao" class="confirm-modal">
 
     <div class="confirm-card">
@@ -211,16 +210,15 @@
           </ul>
         </nav>
 
-        <div class="header-actions">
+        <div class="month-picker-card">
+
           <div class="month-picker-header">
 
             <button type="button" id="prev-year" class="month-nav-btn">
               <i class="ph ph-caret-left"></i>
             </button>
 
-            <strong id="month-picker-year">
-              2026
-            </strong>
+            <strong id="month-picker-year">2026</strong>
 
             <button type="button" id="next-year" class="month-nav-btn">
               <i class="ph ph-caret-right"></i>
@@ -228,9 +226,24 @@
 
           </div>
 
-          <div class="months-grid" id="months-grid"></div>
+          <button type="button" id="btn-open-month-picker" class="month-bubble">
+            Maio 2026
+            <i class="ph ph-caret-down"></i>
+          </button>
 
+          <div id="months-grid" class="months-grid"></div>
         </div>
+      </div>
+
+      <div class="status-badge">
+        <span>●</span> ao vivo
+      </div>
+
+      <button onclick="logOut()" class="btn-logout">
+        <i class="ph ph-sign-out"></i> Sair
+      </button>
+
+      </div>
 
       </div>
 
@@ -390,8 +403,6 @@
         </form>
       </div>
     </div>
-
-
 
     <div id="modal-cartao" class="modal">
       <div class="modal-content borda-cartao">

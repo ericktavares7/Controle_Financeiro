@@ -1190,19 +1190,18 @@ const authButton = document.getElementById('btn-auth-primary');
 document.addEventListener('DOMContentLoaded', () => {
   popularSelectMeses();
 
-  const filtro =
-    document.getElementById('filtro-mes');
+  function atualizarTextoBotaoMes() {
+    if (!filtroMes || !btnMonthPicker) return;
 
-  if (filtro?.value) {
-    const [ano, mes] = filtro.value.split('-');
+    const [ano, mes] =
+      filtroMes.value.split('-').map(Number);
 
-    document.getElementById(
-      'btn-open-month-picker'
-    ).innerHTML = `
-    ${MONTHS[Number(mes) - 1]} ${ano}
+    btnMonthPicker.innerHTML = `
+    ${mesesPicker[mes - 1]} ${ano}
     <i class="ph ph-caret-down"></i>
   `;
   }
+
   /* AUTH FORM */
 
   const loginForm = document.getElementById('auth-form');
@@ -2112,70 +2111,3 @@ window.renderMonthPicker = () => {
     `;
   }).join('');
 };
-
-document.addEventListener('click', (e) => {
-
-  const openBtn =
-    e.target.closest('#btn-open-month-picker');
-
-  if (openBtn) {
-    document
-      .getElementById('month-picker-modal')
-      ?.classList.toggle('active');
-
-    window.renderMonthPicker();
-
-    return;
-  }
-
-  const monthBtn =
-    e.target.closest('.month-item');
-
-  if (monthBtn) {
-
-    const value =
-      monthBtn.dataset.value;
-
-    const filtro =
-      document.getElementById('filtro-mes');
-
-    filtro.value = value;
-
-    window.atualizarDashboard?.();
-
-    const [ano, mes] = value.split('-');
-
-    document.getElementById(
-      'btn-open-month-picker'
-    ).innerHTML = `
-      ${MONTHS[Number(mes) - 1]} ${ano}
-      <i class="ph ph-caret-down"></i>
-    `;
-
-    document
-      .getElementById('month-picker-modal')
-      ?.classList.remove('active');
-
-    return;
-  }
-
-  if (!e.target.closest('.month-picker-wrapper')) {
-    document
-      .getElementById('month-picker-modal')
-      ?.classList.remove('active');
-  }
-});
-
-document
-  .getElementById('prev-year')
-  ?.addEventListener('click', () => {
-    window.currentPickerYear--;
-    window.renderMonthPicker();
-  });
-
-document
-  .getElementById('next-year')
-  ?.addEventListener('click', () => {
-    window.currentPickerYear++;
-    window.renderMonthPicker();
-  });
