@@ -25,7 +25,7 @@ import {
 } from './firebase.js';
 
 import { deleteDoc, doc, Timestamp } from "firebase/firestore";
-import { signOut } from "firebase/auth";
+import { signOut, updateProfile } from "firebase/auth";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 Chart.register(ChartDataLabels);
 
@@ -2402,24 +2402,6 @@ window.toggleMenuPanel = function () {
   }
 };
 
-window.carregarConfiguracoesUsuario = async (uid) => {
-  const settings = await getUserSettings(uid);
-
-  if (!settings?.regraFinanceira) return;
-
-  window.regraFinanceira = settings.regraFinanceira;
-
-  const metaEssencial = document.getElementById('meta-essencial');
-  const metaReserva = document.getElementById('meta-reserva');
-  const metaLazer = document.getElementById('meta-lazer');
-
-  if (metaEssencial) metaEssencial.value = window.regraFinanceira.essencial;
-  if (metaReserva) metaReserva.value = window.regraFinanceira.reserva;
-  if (metaLazer) metaLazer.value = window.regraFinanceira.lazer;
-
-  window.atualizarDashboard?.();
-};
-
 window.fecharModalEditarTx = () => {
   document
     .getElementById('modal-editar-transacao')
@@ -2508,6 +2490,165 @@ const MONTHS = [
 
 window.currentPickerYear =
   new Date().getFullYear();
+
+
+
+window.abrirMenuConfig = (secao) => {
+  const modal = document.getElementById('modal-config');
+  if (!modal) return;
+
+  document.querySelectorAll('.config-section').forEach(s => s.classList.add('hidden'));
+
+  const alvo = document.getElementById(`config-${secao}`);
+  if (alvo) alvo.classList.remove('hidden');
+
+  if (secao === 'regras') {
+    document.getElementById('config-meta-essencial').value = window.regraFinanceira.essencial;
+    document.getElementById('config-meta-reserva').value = window.regraFinanceira.reserva;
+    document.getElementById('config-meta-lazer').value = window.regraFinanceira.lazer;
+  }
+
+  if (secao === 'categorias') {
+    window.renderCategoriasConfig();
+  }
+
+  if (secao === 'tema') {
+    const temaAtual = document.body.classList.contains('tema-claro') ? 'light' : 'dark';
+    document.querySelectorAll('.tema-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`.tema-btn[onclick*="${temaAtual}"]`)?.classList.add('active');
+  }
+
+  window.fecharBottomPanels();
+  requestAnimationFrame(() => modal.classList.add('active'));
+};
+
+window.fecharModalConfig = () => {
+  document.getElementById('modal-config')?.classList.remove('active');
+};
+
+window.salvarNome = async () => {
+  const novoNome = document.getElementById('input-novo-nome')?.value?.trim();
+  if (!novoNome) return;
+
+  try {
+    await updateProfile(auth.currentUser, { displayName: novoNome });
+    window.updateUserHeader(auth.currentUser);
+    window.fecharModalConfig();
+  } catch (e) {
+    console.error('Erro ao salvar nome:', e);
+  }
+};
+
+window.enviarResetSenha = async () => {
+  try {
+    const { sendPasswordResetEmail } = await import('firebase/auth');
+    await sendPasswordResetEmail(auth, auth.currentUser.email);
+    alert(`Link enviado para ${auth.currentUser.email}`);
+    window.fecharModalConfig();
+  } catch (e) {
+    console.error('Erro ao enviar reset:', e);
+  }
+};
+
+window.salvarRegrasConfig = async () => {
+  const essencial = Number(document.getElementById('config-meta-essencial')?.value || 70);
+  const reserva = Number(document.getElementById('config-meta-reserva')?.value || 20);
+  const lazer = Number(document.getElementById('config-meta-lazer')?.value || 10);
+
+  if (essencial + reserva + lazer !== 100) {
+    alert('A soma precisa ser 100%.');
+    return;
+  }
+
+  window.regraFinanceira = { essencial, reserva, lazer };
+
+  await saveUserSettings({ regraFinanceira: window.regraFinanceira });
+
+  window.atualizarDashboard?.();
+  window.fecharModalConfig();
+};
+
+window.setTema = async (tema) => {
+  if (tema === 'light') {
+    document.body.classList.add('tema-claro');
+  } else {
+    document.body.classList.remove('tema-claro');
+  }
+
+  document.querySelectorAll('.tema-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelector(`.tema-btn[onclick*="${tema}"]`)?.classList.add('active');
+
+  await saveUserSettings({ tema });
+};
+
+window.salvarCategoria = async () => {
+  const tipo = document.getElementById('config-cat-tipo')?.value;
+  const nome = document.getElementById('config-cat-nome')?.value?.trim();
+
+  if (!nome) return;
+
+  if (!categoriasPorTipo[tipo].includes(nome)) {
+    categoriasPorTipo[tipo].push(nome);
+  }
+
+  await saveUserSettings({ categorias: categoriasPorTipo });
+
+  document.getElementById('config-cat-nome').value = '';
+  window.renderCategoriasConfig();
+};
+
+window.removerCategoria = async (tipo, nome) => {
+  categoriasPorTipo[tipo] = categoriasPorTipo[tipo].filter(c => c !== nome);
+  await saveUserSettings({ categorias: categoriasPorTipo });
+  window.renderCategoriasConfig();
+};
+
+window.renderCategoriasConfig = () => {
+  const lista = document.getElementById('config-cat-lista');
+  if (!lista) return;
+
+  const tipos = { expense: 'Despesas', income: 'Receitas', goal: 'Caixinhas' };
+
+  lista.innerHTML = Object.entries(categoriasPorTipo).map(([tipo, cats]) => `
+    <p style="font-size:11px; color:#64748b; text-transform:uppercase; margin:12px 0 6px;">${tipos[tipo]}</p>
+    <div>
+      ${cats.map(cat => `
+        <span class="cat-tag">
+          ${cat}
+          <button onclick="window.removerCategoria('${tipo}', '${cat}')">✕</button>
+        </span>
+      `).join('')}
+    </div>
+  `).join('');
+};
+
+window.carregarConfiguracoesUsuario = async (uid) => {
+  const settings = await getUserSettings(uid);
+
+  if (!settings) return;
+
+  if (settings.regraFinanceira) {
+    window.regraFinanceira = settings.regraFinanceira;
+    const metaEssencial = document.getElementById('meta-essencial');
+    const metaReserva = document.getElementById('meta-reserva');
+    const metaLazer = document.getElementById('meta-lazer');
+    if (metaEssencial) metaEssencial.value = window.regraFinanceira.essencial;
+    if (metaReserva) metaReserva.value = window.regraFinanceira.reserva;
+    if (metaLazer) metaLazer.value = window.regraFinanceira.lazer;
+  }
+
+  if (settings.tema === 'light') {
+    document.body.classList.add('tema-claro');
+  }
+
+  if (settings.categorias) {
+    Object.entries(settings.categorias).forEach(([tipo, cats]) => {
+      categoriasPorTipo[tipo] = cats;
+    });
+  }
+
+  window.atualizarDashboard?.();
+};
 
 window.renderMonthPicker = () => {
   const grid =

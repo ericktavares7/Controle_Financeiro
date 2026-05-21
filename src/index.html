@@ -266,7 +266,7 @@
           <div class="status-badge" id="header-saldo-badge">
             <span>◈ Saldo: </span> R$ 0,00
           </div>
-          
+
           <button onclick="logOut()" class="btn-logout">
             <i class="ph ph-sign-out"></i> Sair
           </button>
@@ -660,11 +660,164 @@
     </div>
 
     <div id="menu-panel" class="bottom-panel">
-      <h3>Menu</h3>
+      <div class="menu-card-header">
+        <h3>Configurações</h3>
+        <button type="button" class="btn-close" onclick="window.fecharBottomPanels()">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
 
-      <button type="button" class="btn-save" onclick="window.logOut()">
-        Sair da conta
+      <button class="menu-option-btn" onclick="window.abrirMenuConfig('nome')">
+        <i class="ph ph-user"></i>
+        <div>
+          <strong>Alterar nome</strong>
+          <small>Muda o nome exibido no app</small>
+        </div>
+        <i class="ph ph-caret-right"></i>
       </button>
+
+      <button class="menu-option-btn" onclick="window.abrirMenuConfig('senha')">
+        <i class="ph ph-lock"></i>
+        <div>
+          <strong>Alterar senha</strong>
+          <small>Envia link de redefinição por e-mail</small>
+        </div>
+        <i class="ph ph-caret-right"></i>
+      </button>
+
+      <button class="menu-option-btn" onclick="window.abrirMenuConfig('regras')">
+        <i class="ph ph-sliders"></i>
+        <div>
+          <strong>Regras financeiras</strong>
+          <small>Ajusta sua estratégia 70/20/10</small>
+        </div>
+        <i class="ph ph-caret-right"></i>
+      </button>
+
+      <button class="menu-option-btn" onclick="window.abrirMenuConfig('tema')">
+        <i class="ph ph-sun"></i>
+        <div>
+          <strong>Tema</strong>
+          <small>Claro ou escuro</small>
+        </div>
+        <i class="ph ph-caret-right"></i>
+      </button>
+
+      <button class="menu-option-btn" onclick="window.abrirMenuConfig('categorias')">
+        <i class="ph ph-tag"></i>
+        <div>
+          <strong>Categorias</strong>
+          <small>Adiciona categorias personalizadas</small>
+        </div>
+        <i class="ph ph-caret-right"></i>
+      </button>
+
+      <button type="button" class="btn-danger" onclick="window.logOut()">
+        <i class="ph ph-sign-out"></i> Sair da conta
+      </button>
+    </div>
+
+    <!-- MODAL DE CONFIG -->
+    <div id="modal-config" class="modal">
+      <div class="modal-content">
+
+        <!-- NOME -->
+        <div id="config-nome" class="config-section hidden">
+          <div class="modal-header">
+            <h2>Alterar nome</h2>
+            <button type="button" class="btn-close" onclick="window.fecharModalConfig()">
+              <i class="ph ph-x"></i>
+            </button>
+          </div>
+          <div class="form-group">
+            <label>Novo nome</label>
+            <input type="text" id="input-novo-nome" placeholder="Seu nome">
+          </div>
+          <button type="button" class="btn-save" onclick="window.salvarNome()">Salvar</button>
+        </div>
+
+        <!-- SENHA -->
+        <div id="config-senha" class="config-section hidden">
+          <div class="modal-header">
+            <h2>Alterar senha</h2>
+            <button type="button" class="btn-close" onclick="window.fecharModalConfig()">
+              <i class="ph ph-x"></i>
+            </button>
+          </div>
+          <p style="color:#94a3b8; font-size:14px; margin-bottom:16px;">
+            Vamos enviar um link de redefinição para o seu e-mail cadastrado.
+          </p>
+          <button type="button" class="btn-save" onclick="window.enviarResetSenha()">Enviar link</button>
+        </div>
+
+        <!-- REGRAS -->
+        <div id="config-regras" class="config-section hidden">
+          <div class="modal-header">
+            <h2>Regras financeiras</h2>
+            <button type="button" class="btn-close" onclick="window.fecharModalConfig()">
+              <i class="ph ph-x"></i>
+            </button>
+          </div>
+          <div class="form-group">
+            <label>Essenciais (%)</label>
+            <input type="number" id="config-meta-essencial" min="0" max="100">
+          </div>
+          <div class="form-group">
+            <label>Reserva (%)</label>
+            <input type="number" id="config-meta-reserva" min="0" max="100">
+          </div>
+          <div class="form-group">
+            <label>Lazer (%)</label>
+            <input type="number" id="config-meta-lazer" min="0" max="100">
+          </div>
+          <button type="button" class="btn-save" onclick="window.salvarRegrasConfig()">Salvar</button>
+        </div>
+
+        <!-- TEMA -->
+        <div id="config-tema" class="config-section hidden">
+          <div class="modal-header">
+            <h2>Tema</h2>
+            <button type="button" class="btn-close" onclick="window.fecharModalConfig()">
+              <i class="ph ph-x"></i>
+            </button>
+          </div>
+          <div class="tema-options">
+            <button class="tema-btn" onclick="window.setTema('dark')">
+              <i class="ph ph-moon"></i>
+              <span>Escuro</span>
+            </button>
+            <button class="tema-btn" onclick="window.setTema('light')">
+              <i class="ph ph-sun"></i>
+              <span>Claro</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CATEGORIAS -->
+        <div id="config-categorias" class="config-section hidden">
+          <div class="modal-header">
+            <h2>Categorias</h2>
+            <button type="button" class="btn-close" onclick="window.fecharModalConfig()">
+              <i class="ph ph-x"></i>
+            </button>
+          </div>
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="config-cat-tipo">
+              <option value="expense">Despesa</option>
+              <option value="income">Receita</option>
+              <option value="goal">Caixinha</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nome da categoria</label>
+            <input type="text" id="config-cat-nome" placeholder="Ex: Pet, Academia...">
+          </div>
+          <button type="button" class="btn-save" onclick="window.salvarCategoria()">Adicionar</button>
+          <div id="config-cat-lista" style="margin-top:16px;"></div>
+        </div>
+
+      </div>
     </div>
   </main>
 

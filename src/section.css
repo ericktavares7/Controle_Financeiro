@@ -1785,3 +1785,127 @@ body.modal-open {
 .insight--neutro {
   color: #94a3b8;
 }
+
+.menu-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.menu-card-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.menu-option-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  color: #fff;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: background 0.2s;
+  text-align: left;
+}
+
+.menu-option-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.menu-option-btn>i:first-child {
+  font-size: 22px;
+  color: #00FFB2;
+  flex-shrink: 0;
+}
+
+.menu-option-btn>i:last-child {
+  font-size: 16px;
+  color: #475569;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.menu-option-btn div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.menu-option-btn strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.menu-option-btn small {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.tema-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.tema-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tema-btn i {
+  font-size: 28px;
+  color: #00FFB2;
+}
+
+.tema-btn:hover,
+.tema-btn.active {
+  background: rgba(0, 255, 178, 0.1);
+  border-color: rgba(0, 255, 178, 0.3);
+}
+
+.cat-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  font-size: 12px;
+  color: #cbd5e1;
+  margin: 4px;
+}
+
+.cat-tag button {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+  min-height: unset;
+}
