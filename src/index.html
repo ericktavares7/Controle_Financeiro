@@ -141,6 +141,30 @@
           </select>
         </div>
 
+        <div class="form-group">
+          <label>Despesa fixa?</label>
+
+          <select id="edit-tx-fixed">
+            <option value="no">Não</option>
+            <option value="yes">Sim, repetir todo mês</option>
+          </select>
+        </div>
+
+        <div class="form-group hidden" id="edit-fixed-duration-group">
+          <label>Duração</label>
+
+          <select id="edit-tx-fixed-duration">
+            <option value="limited">Por quantidade de meses</option>
+            <option value="indefinite">Tempo indeterminado</option>
+          </select>
+        </div>
+
+        <div class="form-group hidden" id="edit-fixed-months-group">
+          <label>Por quantos meses?</label>
+
+          <input type="number" id="edit-tx-fixed-months" min="2" max="120" value="12">
+        </div>
+
         <button type="submit" class="btn-save">
           Salvar alterações
         </button>
@@ -239,10 +263,10 @@
             </div>
           </div>
 
-          <div class="status-badge">
-            <span>●</span> ao vivo
+          <div class="status-badge" id="header-saldo-badge">
+            <span>◈ Saldo: </span> R$ 0,00
           </div>
-
+          
           <button onclick="logOut()" class="btn-logout">
             <i class="ph ph-sign-out"></i> Sair
           </button>
@@ -285,6 +309,7 @@
         <article class="chart-card evolution">
           <header>
             <h3>Evolução Mensal</h3>
+            <span class="chart-legend-hint">% calculado sobre a receita do mês</span>
           </header>
           <div class="canvas-wrapper">
             <canvas id="mainEvolutionChart"></canvas>
@@ -356,6 +381,20 @@
             </select>
           </div>
 
+          <div class="form-group hidden" id="fixed-duration-group">
+            <label>Duração</label>
+
+            <select id="input-fixed-duration">
+              <option value="limited">Por quantidade de meses</option>
+              <option value="indefinite">Tempo indeterminado</option>
+            </select>
+          </div>
+
+          <div class="form-group hidden" id="fixed-months-group">
+            <label>Por quantos meses?</label>
+
+            <input type="number" id="input-fixed-months" min="2" max="120" value="12">
+          </div>
 
           <div class="form-group" id="payment-method-group">
             <label>Forma de pagamento</label>
@@ -387,6 +426,21 @@
 
               <input type="number" id="input-installments" min="2" max="60" value="2">
             </div>
+          </div>
+
+          <div class="form-group hidden" id="edit-fixed-duration-group">
+            <label>Duração</label>
+
+            <select id="edit-tx-fixed-duration">
+              <option value="limited">Por quantidade de meses</option>
+              <option value="indefinite">Tempo indeterminado</option>
+            </select>
+          </div>
+
+          <div class="form-group hidden" id="edit-fixed-months-group">
+            <label>Por quantos meses?</label>
+
+            <input type="number" id="edit-tx-fixed-months" min="2" max="120" value="12">
           </div>
 
           <input type="hidden" id="input-tipo" value="expense">
@@ -503,6 +557,7 @@
           <article class="card-valor">
             <p>◈ Saldo</p>
             <h2 id="mes-saldo">R$ 0,00</h2>
+            <span id="insight-saldo" class="insight-saldo"></span>
           </article>
         </div>
 
