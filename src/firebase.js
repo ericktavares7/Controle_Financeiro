@@ -20,7 +20,8 @@ import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  updateProfile
+  updateProfile,
+  sendPasswordResetEmail
 } from "firebase/auth";
 
 const firebaseConfig = {
@@ -326,4 +327,14 @@ export async function deleteInstallmentGroup(groupId) {
   });
 
   await Promise.all(deletes);
+}
+
+export async function resetPassword(email) {
+
+  if (!email) {
+    throw new Error('E-mail inválido.');
+  }
+
+  await sendPasswordResetEmail(auth, email);
+
 }

@@ -210,6 +210,64 @@
 
   </div>
 
+
+  <div id="modal-categorias" class="modal">
+    <div class="modal-content categorias-card">
+      <div class="modal-header">
+        <h2>Categorias</h2>
+
+        <button type="button" class="btn-close" onclick="window.fecharCategorias()">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <form id="form-categoria">
+        <div class="form-group">
+          <label>Tipo</label>
+          <select id="categoria-tipo">
+            <option value="expense">Despesa</option>
+            <option value="income">Receita</option>
+            <option value="goal">Caixinha</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Nome da categoria</label>
+          <input type="text" id="categoria-nome" placeholder="Ex: Academia, Pet, Moto..." required>
+        </div>
+
+        <button type="submit" class="btn-save">
+          Adicionar categoria
+        </button>
+      </form>
+
+      <div id="categorias-lista" class="categorias-lista"></div>
+    </div>
+  </div>
+
+  <div id="modal-editar-nome" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Alterar nome</h2>
+
+        <button type="button" class="btn-close" onclick="window.fecharEditarNome()">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <form id="form-editar-nome">
+        <div class="form-group">
+          <label>Novo nome</label>
+          <input type="text" id="input-novo-nome" required>
+        </div>
+
+        <button type="submit" class="btn-save">
+          Salvar nome
+        </button>
+      </form>
+    </div>
+  </div>
+
   <main id="app" class="dashboard-container">
 
     <header class="dashboard-header">
@@ -276,6 +334,30 @@
       </div>
     </header>
     <section class="tab-section active" id="tab-overview">
+
+
+      <div class="desktop-actions-bar">
+        <button class="action-pill action-income" onclick="window.abrirModal('income')">
+          <i class="ph ph-plus"></i>
+          Receita
+        </button>
+
+        <button class="action-pill action-expense" onclick="window.abrirModal('expense')">
+          <i class="ph ph-minus"></i>
+          Despesa
+        </button>
+
+        <button class="action-pill action-goal" onclick="window.abrirModal('goal')">
+          <i class="ph ph-rocket-launch"></i>
+          Caixinha
+        </button>
+
+        <button type="button" class="action-pill action-menu"
+          onclick="event.stopPropagation(); window.toggleMenuPanel();">
+          <i class="ph ph-list"></i>
+          Menu
+        </button>
+      </div>
 
       <div class="summary-grid">
         <article class="card balance" id="card-metas">
@@ -379,21 +461,6 @@
                 <option value="Metas">Metas</option>
               </optgroup>
             </select>
-          </div>
-
-          <div class="form-group hidden" id="fixed-duration-group">
-            <label>Duração</label>
-
-            <select id="input-fixed-duration">
-              <option value="limited">Por quantidade de meses</option>
-              <option value="indefinite">Tempo indeterminado</option>
-            </select>
-          </div>
-
-          <div class="form-group hidden" id="fixed-months-group">
-            <label>Por quantos meses?</label>
-
-            <input type="number" id="input-fixed-months" min="2" max="120" value="12">
           </div>
 
           <div class="form-group" id="payment-method-group">
@@ -636,27 +703,29 @@
     </div>
 
     <div id="metas-panel" class="bottom-panel">
+      <div class="metas-modal-card">
 
-      <h3>Editar regra financeira</h3>
+        <h3>Editar regra financeira</h3>
 
-      <div class="form-group">
-        <label>Essenciais (%)</label>
-        <input type="number" id="meta-essencial" value="70" min="0" max="100">
+        <div class="form-group">
+          <label>Essenciais (%)</label>
+          <input type="number" id="meta-essencial" value="70" min="0" max="100">
+        </div>
+
+        <div class="form-group">
+          <label>Reserva (%)</label>
+          <input type="number" id="meta-reserva" value="20" min="0" max="100">
+        </div>
+
+        <div class="form-group">
+          <label>Lazer (%)</label>
+          <input type="number" id="meta-lazer" value="10" min="0" max="100">
+        </div>
+
+        <button type="button" class="btn-save" onclick="window.salvarRegraFinanceira()">
+          Salvar regra
+        </button>
       </div>
-
-      <div class="form-group">
-        <label>Reserva (%)</label>
-        <input type="number" id="meta-reserva" value="20" min="0" max="100">
-      </div>
-
-      <div class="form-group">
-        <label>Lazer (%)</label>
-        <input type="number" id="meta-lazer" value="10" min="0" max="100">
-      </div>
-
-      <button type="button" class="btn-save" onclick="window.salvarRegraFinanceira()">
-        Salvar regra
-      </button>
     </div>
 
     <div id="menu-panel" class="bottom-panel">
@@ -667,7 +736,7 @@
         </button>
       </div>
 
-      <button class="menu-option-btn" onclick="window.abrirMenuConfig('nome')">
+      <button class="menu-option-btn" onclick="window.abrirEditarNome()">
         <i class="ph ph-user"></i>
         <div>
           <strong>Alterar nome</strong>
@@ -676,7 +745,7 @@
         <i class="ph ph-caret-right"></i>
       </button>
 
-      <button class="menu-option-btn" onclick="window.abrirMenuConfig('senha')">
+      <button class="menu-option-btn" onclick="window.enviarResetSenha()">
         <i class="ph ph-lock"></i>
         <div>
           <strong>Alterar senha</strong>
@@ -685,7 +754,8 @@
         <i class="ph ph-caret-right"></i>
       </button>
 
-      <button class="menu-option-btn" onclick="window.abrirMenuConfig('regras')">
+      <button type="button" class="menu-option-btn desktop-only"
+        onclick="event.stopPropagation(); window.abrirRegraFinanceira();">
         <i class="ph ph-sliders"></i>
         <div>
           <strong>Regras financeiras</strong>
@@ -694,7 +764,7 @@
         <i class="ph ph-caret-right"></i>
       </button>
 
-      <button class="menu-option-btn" onclick="window.abrirMenuConfig('tema')">
+      <button class="menu-option-btn" onclick="window.alternarTema()">
         <i class="ph ph-sun"></i>
         <div>
           <strong>Tema</strong>
@@ -703,7 +773,7 @@
         <i class="ph ph-caret-right"></i>
       </button>
 
-      <button class="menu-option-btn" onclick="window.abrirMenuConfig('categorias')">
+      <button class="menu-option-btn" onclick="window.abrirCategorias()">
         <i class="ph ph-tag"></i>
         <div>
           <strong>Categorias</strong>
@@ -717,110 +787,8 @@
       </button>
     </div>
 
-    <!-- MODAL DE CONFIG -->
-    <div id="modal-config" class="modal">
-      <div class="modal-content">
-
-        <!-- NOME -->
-        <div id="config-nome" class="config-section hidden">
-          <div class="modal-header">
-            <h2>Alterar nome</h2>
-            <button type="button" class="btn-close" onclick="window.fecharModalConfig()">
-              <i class="ph ph-x"></i>
-            </button>
-          </div>
-          <div class="form-group">
-            <label>Novo nome</label>
-            <input type="text" id="input-novo-nome" placeholder="Seu nome">
-          </div>
-          <button type="button" class="btn-save" onclick="window.salvarNome()">Salvar</button>
-        </div>
-
-        <!-- SENHA -->
-        <div id="config-senha" class="config-section hidden">
-          <div class="modal-header">
-            <h2>Alterar senha</h2>
-            <button type="button" class="btn-close" onclick="window.fecharModalConfig()">
-              <i class="ph ph-x"></i>
-            </button>
-          </div>
-          <p style="color:#94a3b8; font-size:14px; margin-bottom:16px;">
-            Vamos enviar um link de redefinição para o seu e-mail cadastrado.
-          </p>
-          <button type="button" class="btn-save" onclick="window.enviarResetSenha()">Enviar link</button>
-        </div>
-
-        <!-- REGRAS -->
-        <div id="config-regras" class="config-section hidden">
-          <div class="modal-header">
-            <h2>Regras financeiras</h2>
-            <button type="button" class="btn-close" onclick="window.fecharModalConfig()">
-              <i class="ph ph-x"></i>
-            </button>
-          </div>
-          <div class="form-group">
-            <label>Essenciais (%)</label>
-            <input type="number" id="config-meta-essencial" min="0" max="100">
-          </div>
-          <div class="form-group">
-            <label>Reserva (%)</label>
-            <input type="number" id="config-meta-reserva" min="0" max="100">
-          </div>
-          <div class="form-group">
-            <label>Lazer (%)</label>
-            <input type="number" id="config-meta-lazer" min="0" max="100">
-          </div>
-          <button type="button" class="btn-save" onclick="window.salvarRegrasConfig()">Salvar</button>
-        </div>
-
-        <!-- TEMA -->
-        <div id="config-tema" class="config-section hidden">
-          <div class="modal-header">
-            <h2>Tema</h2>
-            <button type="button" class="btn-close" onclick="window.fecharModalConfig()">
-              <i class="ph ph-x"></i>
-            </button>
-          </div>
-          <div class="tema-options">
-            <button class="tema-btn" onclick="window.setTema('dark')">
-              <i class="ph ph-moon"></i>
-              <span>Escuro</span>
-            </button>
-            <button class="tema-btn" onclick="window.setTema('light')">
-              <i class="ph ph-sun"></i>
-              <span>Claro</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- CATEGORIAS -->
-        <div id="config-categorias" class="config-section hidden">
-          <div class="modal-header">
-            <h2>Categorias</h2>
-            <button type="button" class="btn-close" onclick="window.fecharModalConfig()">
-              <i class="ph ph-x"></i>
-            </button>
-          </div>
-          <div class="form-group">
-            <label>Tipo</label>
-            <select id="config-cat-tipo">
-              <option value="expense">Despesa</option>
-              <option value="income">Receita</option>
-              <option value="goal">Caixinha</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Nome da categoria</label>
-            <input type="text" id="config-cat-nome" placeholder="Ex: Pet, Academia...">
-          </div>
-          <button type="button" class="btn-save" onclick="window.salvarCategoria()">Adicionar</button>
-          <div id="config-cat-lista" style="margin-top:16px;"></div>
-        </div>
-
-      </div>
-    </div>
   </main>
-
+  <div id="toast-container"></div>
 </body>
 
 </html>

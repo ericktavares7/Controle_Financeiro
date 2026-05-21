@@ -29,10 +29,10 @@ body {
 
 
 
-#tab-transacoes, 
+#tab-transacoes,
 #tab-transacoes .transacoes-container {
-    border: none;
-    box-shadow: none;
+  border: none;
+  box-shadow: none;
 }
 
 
@@ -56,4 +56,268 @@ button {
   font-size: 13px;
 }
 
+/* =========================================
+   LIGHT MODE
+========================================= */
 
+body.light-mode {
+  --bg-color: #f3f7fc;
+  --card-bg: #ffffff;
+  --border-color: #dbe4ee;
+
+  --txt-principal: #0f172a;
+  --txt-secundario: #64748b;
+
+  background:
+    linear-gradient(180deg,
+      #f8fbff,
+      #eef4fb);
+
+  color: var(--txt-principal);
+}
+
+/* =========================
+   TEXTOS
+========================= */
+
+body.light-mode h1,
+body.light-mode h2,
+body.light-mode h3,
+body.light-mode h4,
+body.light-mode h5,
+body.light-mode strong,
+body.light-mode .tx-desc,
+body.light-mode .brand-info h1,
+body.light-mode .wallet-credit-card h3 {
+  color: #0f172a !important;
+}
+
+body.light-mode p,
+body.light-mode span,
+body.light-mode small,
+body.light-mode .tx-meta,
+body.light-mode .current-date,
+body.light-mode .wallet-kicker,
+body.light-mode .chart-legend-hint {
+  color: #64748b !important;
+}
+
+/* =========================
+   CARDS
+========================= */
+
+body.light-mode .card,
+body.light-mode .chart-card,
+body.light-mode .wallet-card,
+body.light-mode .card-historico,
+body.light-mode .card-valor,
+body.light-mode .modal-content,
+body.light-mode .confirm-card,
+body.light-mode .menu-option-btn,
+body.light-mode .bottom-panel {
+  background: rgba(255, 255, 255, 0.92) !important;
+
+  border:
+    1px solid rgba(15, 23, 42, 0.08) !important;
+
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.06) !important;
+
+  backdrop-filter: blur(10px);
+}
+
+/* =========================
+   INPUTS
+========================= */
+
+body.light-mode input,
+body.light-mode select,
+body.light-mode textarea {
+  background: #f8fafc !important;
+
+  border:
+    1px solid #dbe4ee !important;
+
+  color: #0f172a !important;
+}
+
+body.light-mode input::placeholder,
+body.light-mode textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+body.light-mode .dashboard-header {
+  background:
+    rgba(255, 255, 255, 0.85) !important;
+
+  border-bottom:
+    1px solid rgba(15, 23, 42, 0.06);
+}
+
+body.light-mode .main-nav button {
+  color: #475569 !important;
+}
+
+body.light-mode .main-nav button.active {
+  background: #e8eef7 !important;
+  color: #0f172a !important;
+}
+
+/* =========================
+   TRANSAÇÕES
+========================= */
+
+body.light-mode .tx-item:hover {
+  background:
+    rgba(15, 23, 42, 0.04) !important;
+}
+
+body.light-mode .tx-delete:hover {
+  background:
+    rgba(255, 107, 53, 0.08) !important;
+}
+
+/* =========================
+   BOTÕES
+========================= */
+
+body.light-mode .btn-save,
+body.light-mode .btn-neon {
+  box-shadow:
+    0 10px 24px rgba(0, 255, 178, 0.18);
+}
+
+body.light-mode .btn-logout {
+  background:
+    rgba(255, 255, 255, 0.7) !important;
+
+  border:
+    1px solid rgba(255, 0, 0, 0.15) !important;
+}
+
+/* =========================
+   MENU
+========================= */
+
+body.light-mode #menu-panel.bottom-panel.active {
+  background:
+    rgba(255, 255, 255, 0.88) !important;
+
+  backdrop-filter: blur(14px);
+}
+
+body.light-mode .menu-option-btn {
+  background:
+    rgba(248, 250, 252, 0.9) !important;
+}
+
+/* =========================
+   CHARTS
+========================= */
+
+body.light-mode canvas {
+  filter: saturate(0.95);
+}
+
+/* =========================
+   BOTTOM NAV
+========================= */
+
+body.light-mode .mobile-bottom-nav {
+  background:
+    rgba(255, 255, 255, 0.88) !important;
+
+  border-top:
+    1px solid rgba(15, 23, 42, 0.08);
+}
+
+/* =========================
+   SCROLLBAR
+========================= */
+
+body.light-mode ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+
+body.light-mode #menu-panel h3,
+body.light-mode #menu-panel strong,
+body.light-mode #menu-panel .menu-option-btn,
+body.light-mode #menu-panel .menu-option-btn span,
+body.light-mode #menu-panel .menu-option-btn p,
+body.light-mode #menu-panel .menu-option-btn small,
+body.light-mode #menu-panel .menu-option-btn div {
+  color: #ffffff !important;
+}
+
+body.light-mode #menu-panel .menu-option-btn small {
+  color: #64748b !important;
+}
+
+body.light-mode #menu-panel .btn-close {
+  color: #0f172a !important;
+}
+
+body.light-mode #menu-panel i:not(.ph-sign-out) {
+  color: #334155 !important;
+}
+
+body.light-mode #chat-card {
+  background: rgba(255, 255, 255, 0.92) !important;
+
+  border:
+    1px solid rgba(15, 23, 42, 0.08) !important;
+}
+
+body.light-mode #chat-header h3,
+body.light-mode #chat-mensagens,
+body.light-mode .msg,
+body.light-mode .msg-assistente,
+body.light-mode .msg-usuario {
+  color: #0f172a !important;
+}
+
+body.light-mode .msg-assistente {
+  background:
+    rgba(241, 245, 249, 0.95) !important;
+
+  border:
+    1px solid rgba(15, 23, 42, 0.06);
+}
+
+body.light-mode .msg-usuario {
+  background:
+    linear-gradient(135deg,
+      #00FFB2,
+      #00d2ff) !important;
+
+  color: #041018 !important;
+}
+
+body.light-mode #chat-input {
+  background: #f8fafc !important;
+
+  border:
+    1px solid #dbe4ee !important;
+
+  color: #0f172a !important;
+}
+
+body.light-mode #chat-input::placeholder {
+  color: #94a3b8 !important;
+}
+
+body.light-mode #chat-enviar {
+  background:
+    linear-gradient(135deg,
+      #00FFB2,
+      #00d2ff) !important;
+
+  color: #041018 !important;
+
+  box-shadow:
+    0 10px 24px rgba(0, 210, 255, 0.18);
+}

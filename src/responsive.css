@@ -1,5 +1,6 @@
 /* =========================
-   RESET GLOBAL
+   RESPONSIVE.CSS
+   Ajustes responsivos finais
 ========================= */
 
 *,
@@ -8,191 +9,304 @@
   box-sizing: border-box;
 }
 
+html,
 body {
-  background-color: #0B0B15;
-  color: #FFFFFF;
-
-  margin: 0;
-  padding: 0;
-
+  width: 100%;
   overflow-x: hidden;
 }
 
+body {
+  background-color: #0B0B15;
+  color: #FFFFFF;
+  margin: 0;
+  padding: 0;
+}
+
 /* =========================
-   CONTAINER PRINCIPAL
+   CONTAINER
 ========================= */
 
 .dashboard-container {
   width: 100%;
   padding: 20px;
-  box-sizing: border-box;
 }
 
 /* =========================
-   GRID DE AÇÕES
+   AÇÕES DESKTOP
 ========================= */
 
-.top-actions-grid {
-  display: grid;
-  gap: 20px;
+.desktop-actions-bar {
+  display: none;
 }
 
-/* Desktop */
-@media (min-width: 900px) {
+.action-pill {
+  height: 42px;
+  padding: 0 16px;
 
-  .top-actions-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 
-/* =========================
-   CARDS DE AÇÃO
-========================= */
-
-.action-card {
-  width: 100%;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 
   background: #0f172a;
+  color: #fff;
 
-  border-radius: 16px;
-  border: 1px solid #1e2d40;
-
-  padding: 15px;
-  margin-bottom: 15px;
-
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  text-align: left;
-
+  font-weight: 800;
   cursor: pointer;
-
-  transition: transform 0.2s ease;
 }
 
-.action-card:hover {
-  transform: translateY(-2px);
+.action-income i {
+  color: #00FFB2;
 }
 
-/* =========================
-   BOTÕES COM GLOW
-========================= */
-
-.btn-income {
-  border-bottom: 3px solid #00FFB2;
-  box-shadow: 0 4px 15px rgba(0, 255, 178, 0.2);
+.action-expense i {
+  color: #FF6B35;
 }
 
-.btn-expense {
-  border-bottom: 3px solid #FF6B35;
-  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
-}
-
-.btn-caixinha {
-  border-bottom: 3px solid #00d2ff;
-  box-shadow: 0 4px 15px rgba(0, 210, 255, 0.2);
+.action-goal i {
+  color: #00D1FF;
 }
 
 /* =========================
-   GRID RESUMO
+   DESKTOP / TABLET GRANDE
 ========================= */
 
-.summary-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* Desktop */
-@media (min-width: 900px) {
+@media (min-width: 769px) {
+  .desktop-actions-bar {
+    display: flex !important;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
 
   .summary-grid {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr;
+    display: grid !important;
+    grid-template-columns: 1.1fr 1.4fr;
     gap: 20px;
+  }
+
+  .wallet-card {
+    min-height: auto !important;
+  }
+
+  .wallet-cards-list {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)) !important;
+    gap: 16px !important;
+
+    overflow: visible !important;
+    padding: 16px 0 0 !important;
+  }
+
+  .wallet-credit-card {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+
+  .bottom-panel:not(.active) {
+    display: none !important;
+  }
+
+  .action-menu i {
+    color: #94a3b8;
+  }
+
+  #menu-panel.bottom-panel.active {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+
+    position: fixed !important;
+    inset: 0 !important;
+
+    width: 100vw !important;
+    max-width: none !important;
+    height: 100vh !important;
+
+    padding: 24px !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    background: rgba(0, 0, 0, 0.62) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    backdrop-filter: blur(10px) !important;
+
+    border: none !important;
+    border-radius: 0 !important;
+
+    z-index: 999999 !important;
+  }
+
+  .metas-modal-card {
+    width: 100%;
+    max-width: 480px;
+
+    background: #0f172a;
+
+    border: 1px solid #1e2d40;
+    border-radius: 24px;
+
+    padding: 24px;
+
+    box-shadow:
+      0 24px 60px rgba(0, 0, 0, 0.45);
+  }
+
+  #menu-panel>* {
+    width: 100% !important;
+    max-width: 420px !important;
+  }
+
+  body #metas-panel.bottom-panel.active {
+    position: fixed !important;
+    inset: 0 !important;
+
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+
+    width: 100vw !important;
+    height: 100vh !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 24px !important;
+
+    background: rgba(0, 0, 0, 0.62) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    backdrop-filter: blur(10px) !important;
+
+    border: none !important;
+    border-radius: 0 !important;
+
+    transform: none !important;
+
+    z-index: 9999999 !important;
+  }
+
+  body #metas-panel.bottom-panel.active .metas-modal-card {
+    width: 100% !important;
+    max-width: 480px !important;
+
+    margin: 0 auto !important;
+
+    background: #0f172a !important;
+    border: 1px solid #1e2d40 !important;
+    border-radius: 24px !important;
+
+    padding: 24px !important;
+
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45) !important;
   }
 }
 
 /* =========================
-   BARRAS DE PROGRESSO
+   MOBILE / TABLET PEQUENO
 ========================= */
 
-.progress-bar-container {
-  background: rgba(255, 255, 255, 0.05);
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 14px;
+    padding-bottom: calc(110px + env(safe-area-inset-bottom));
+  }
 
-  border-radius: 10px;
+  .desktop-actions-bar {
+    display: none !important;
+  }
 
-  height: 8px;
+  .summary-grid,
+  .bottom-charts-grid,
+  .historico-segmentado,
+  .top-cards-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px;
+  }
 
-  overflow: visible;
+  .card,
+  .chart-card,
+  .card-kpi,
+  .card-historico {
+    padding: 18px;
+    width: 100%;
+    min-width: 0;
+  }
 
-  position: relative;
-}
+  .tab-section.active {
+    padding-bottom: calc(120px + env(safe-area-inset-bottom)) !important;
+  }
 
-.progress-bar {
-  background: rgba(255, 255, 255, 0.05);
+  .wallet-cards-list {
+    display: flex !important;
+    gap: 14px !important;
 
-  border-radius: 10px;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
 
-  height: 10px;
+    padding: 12px 2px 4px !important;
 
-  overflow: visible;
-}
+    scroll-snap-type: x mandatory;
 
-.progress-bar div {
-  height: 100%;
-  border-radius: 10px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 
-  transition: width 1s ease-in-out;
+    -webkit-overflow-scrolling: touch;
+  }
 
-  filter: drop-shadow(0 0 5px inherit);
-}
+  .wallet-cards-list::-webkit-scrollbar {
+    display: none;
+  }
 
-/* =========================
-   FILLS DAS BARRAS
-========================= */
+  .wallet-credit-card {
+    min-width: 230px !important;
+    max-width: 230px !important;
+    flex: 0 0 230px !important;
+    scroll-snap-align: start;
+  }
 
-/* Essencial */
-.progress-fill.essencial {
-  background: linear-gradient(90deg, #FF6B35, #ff936e);
+  .tx-item {
+    align-items: flex-start;
+  }
 
-  box-shadow: 0 0 15px rgba(255, 107, 53, 0.6);
+  .tx-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
 
-  height: 100%;
-  border-radius: 10px;
+  .tx-val {
+    font-size: 14px;
+  }
 
-  transition: width 0.5s ease-in-out;
-}
+  .chart-card.evolution .canvas-wrapper {
+    height: 300px !important;
 
-/* Reserva */
-.progress-fill.reserva {
-  background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
 
-  box-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
 
-  height: 100%;
-  border-radius: 10px;
-}
+  .chart-card.evolution .canvas-wrapper::-webkit-scrollbar {
+    display: none;
+  }
 
-/* Estilo */
-.progress-fill.estilo {
-  background: linear-gradient(90deg, #FFD700, #ffec8b);
-
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
-
-  height: 100%;
-  border-radius: 10px;
-}
-
-/* =========================
-   RESPONSIVIDADE
-========================= */
-
-@media (max-width: 900px) {
-
-  .brand-info {
-    display: block;
+  .chart-card.evolution .canvas-wrapper canvas {
+    width: 760px !important;
+    min-width: 760px !important;
+    max-width: none !important;
   }
 }
 
@@ -201,16 +315,31 @@ body {
 ========================= */
 
 @media (max-width: 500px) {
-
   .dashboard-container {
-    padding: 14px;
+    padding: 12px;
+    padding-bottom: calc(110px + env(safe-area-inset-bottom));
   }
 
-  .action-card {
-    padding: 14px;
+  .card,
+  .chart-card,
+  .card-kpi,
+  .card-historico {
+    padding: 16px;
   }
 
-  .summary-grid {
-    gap: 16px;
+  .wallet-credit-card {
+    min-width: 230px !important;
+    max-width: 230px !important;
+  }
+}
+
+/* =========================
+   SAFE AREA IOS
+========================= */
+
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 }

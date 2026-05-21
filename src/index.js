@@ -21,7 +21,8 @@ import {
   updateCreditCard,
   deleteCreditCard,
   updateTransaction,
-  deleteInstallmentGroup
+  deleteInstallmentGroup,
+  resetPassword
 } from './firebase.js';
 
 import { deleteDoc, doc, Timestamp } from "firebase/firestore";
@@ -238,6 +239,215 @@ function atualizarTextoMesSelecionado(ano, mes) {
 /* ========================================
    MODAIS
 ======================================== */
+window.abrirEditarNome = () => {
+  window.fecharBottomPanels?.();
+
+  const modal = document.getElementById('modal-editar-nome');
+  const input = document.getElementById('input-novo-nome');
+
+  if (input) {
+    input.value = auth.currentUser?.displayName || '';
+  }
+
+  requestAnimationFrame(() => {
+    modal?.classList.add('active');
+  });
+};
+
+window.fecharEditarNome = () => {
+  document.getElementById('modal-editar-nome')?.classList.remove('active');
+};
+
+window.enviarResetSenha = async () => {
+
+  try {
+
+    const email =
+      auth.currentUser?.email;
+
+    if (!email) {
+      alert('Usuário não encontrado.');
+      return;
+    }
+
+    await resetPassword(email);
+
+    window.showToast({
+      type: 'success',
+      title: 'E-mail enviado',
+      message: `Link de redefinição enviado para ${email}`
+    });
+
+  } catch (e) {
+
+    window.showToast({
+      type: 'error',
+      title: 'Erro',
+      message: 'Não foi possível enviar o e-mail.'
+    });
+
+  }
+
+};
+
+window.aplicarTema = (tema) => {
+  document.body.classList.toggle('light-mode', tema === 'light');
+  localStorage.setItem('theme', tema);
+};
+
+window.alternarTema = async () => {
+  const isLight = document.body.classList.contains('light-mode');
+  const novoTema = isLight ? 'dark' : 'light';
+
+  window.aplicarTema(novoTema);
+
+  await saveUserSettings({
+    theme: novoTema
+  });
+
+  window.showToast({
+    type: 'success',
+    title: 'Tema alterado',
+    message: novoTema === 'light'
+      ? 'Tema claro ativado.'
+      : 'Tema escuro ativado.'
+  });
+};
+
+window.abrirRegraFinanceira = () => {
+  window.fecharBottomPanels?.();
+
+  const panel = document.getElementById('metas-panel');
+
+  if (!panel) {
+    console.error('metas-panel não encontrado');
+    return;
+  }
+
+  const regra = window.regraFinanceira || {
+    essencial: 70,
+    reserva: 20,
+    lazer: 10
+  };
+
+  document.getElementById('meta-essencial').value = regra.essencial;
+  document.getElementById('meta-reserva').value = regra.reserva;
+  document.getElementById('meta-lazer').value = regra.lazer;
+
+  requestAnimationFrame(() => {
+    panel.classList.add('active');
+  });
+};
+
+window.categoriasCustom = {
+  income: [],
+  expense: [],
+  goal: []
+};
+
+window.abrirCategorias = () => {
+  window.fecharBottomPanels?.();
+
+  document.getElementById('modal-categorias')?.classList.add('active');
+  window.renderCategoriasCustom?.();
+};
+
+window.fecharCategorias = () => {
+  document.getElementById('modal-categorias')?.classList.remove('active');
+};
+
+window.renderCategoriasCustom = () => {
+  const lista = document.getElementById('categorias-lista');
+  if (!lista) return;
+
+  const labels = {
+    income: 'Receitas',
+    expense: 'Despesas',
+    goal: 'Caixinhas'
+  };
+
+  lista.innerHTML = Object.entries(window.categoriasCustom)
+    .map(([tipo, categorias]) => `
+      <div class="categoria-grupo">
+        <h4>${labels[tipo]}</h4>
+
+        <div class="categoria-tags">
+          ${categorias.length
+        ? categorias.map(cat => `
+                <span class="cat-tag">
+                  ${cat}
+                  <button type="button" onclick="window.removerCategoria('${tipo}', '${cat}')">
+                    ×
+                  </button>
+                </span>
+              `).join('')
+        : `<small>Nenhuma categoria criada.</small>`
+      }
+        </div>
+      </div>
+    `).join('');
+};
+
+window.removerCategoria = async (tipo, nome) => {
+  window.categoriasCustom[tipo] =
+    window.categoriasCustom[tipo].filter(c => c !== nome);
+
+  await saveUserSettings({
+    categoriasCustom: window.categoriasCustom
+  });
+
+  window.renderCategoriasCustom();
+};
+
+window.showToast = ({
+  type = 'success',
+  title = 'Sucesso',
+  message = ''
+}) => {
+
+  const container =
+    document.getElementById('toast-container');
+
+  if (!container) return;
+
+  const toast =
+    document.createElement('div');
+
+  toast.className =
+    `toast toast-${type}`;
+
+  toast.innerHTML = `
+    <div class="toast-icon">
+      <i class="ph ${type === 'success'
+      ? 'ph-check-circle'
+      : 'ph-warning-circle'
+    }"></i>
+    </div>
+
+    <div class="toast-content">
+      <strong>${title}</strong>
+      <p>${message}</p>
+    </div>
+  `;
+
+  container.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+  });
+
+  setTimeout(() => {
+
+    toast.classList.remove('show');
+
+    setTimeout(() => {
+      toast.remove();
+    }, 280);
+
+  }, 4000);
+
+};
+
 
 window.abrirModal = (tipo) => {
   const modal = document.getElementById('modal-registro');
@@ -272,7 +482,10 @@ window.abrirModal = (tipo) => {
 
   selectCat.innerHTML = '';
 
-  const lista = categoriasPorTipo[tipo] || [];
+  const lista = [
+    ...(categoriasPorTipo[tipo] || []),
+    ...(window.categoriasCustom?.[tipo] || [])
+  ];
 
   lista.forEach(cat => {
     const option = document.createElement('option');
@@ -1257,6 +1470,9 @@ const authExtras = document.querySelectorAll('.auth-extra');
 const authButton = document.getElementById('btn-auth-primary');
 
 document.addEventListener('DOMContentLoaded', () => {
+  const temaSalvo = localStorage.getItem('theme') || 'dark';
+  window.aplicarTema(temaSalvo);
+
   popularSelectMeses();
 
   const mesesPicker = [
@@ -1454,6 +1670,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  document.getElementById('form-editar-nome')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const novoNome = document.getElementById('input-novo-nome')?.value.trim();
+
+    if (!novoNome) return;
+
+    await updateProfile(auth.currentUser, {
+      displayName: novoNome
+    });
+
+    await saveUserSettings({
+      displayName: novoNome
+    });
+
+    window.updateUserHeader(auth.currentUser);
+
+    window.showToast({
+      type: 'success',
+      title: 'Nome atualizado',
+      message: 'Seu nome foi alterado com sucesso.'
+    });
+
+    window.fecharEditarNome();
+  });
   /* TOGGLE LOGIN / REGISTER */
 
   function setAuthMode(registerMode, pushState = true) {
@@ -2232,17 +2473,48 @@ document.addEventListener('DOMContentLoaded', () => {
   /* FECHAR BOTTOM PANEL AO CLICAR FORA */
 
   document.addEventListener('click', (e) => {
-    const clicouPainel =
-      e.target.closest('.bottom-panel');
+    const painel = e.target.closest('.bottom-panel');
+    const botao = e.target.closest('.bottom-nav-btn, .action-menu');
 
-    const clicouBotao =
-      e.target.closest('.bottom-nav-btn');
+    if (!painel && !botao) {
+      window.fecharBottomPanels();
+    }
 
-    if (!clicouPainel && !clicouBotao) {
+    if (
+      e.target.id === 'menu-panel' &&
+      e.target.classList.contains('active')
+    ) {
       window.fecharBottomPanels();
     }
   });
 
+
+  document.getElementById('form-categoria')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const tipo = document.getElementById('categoria-tipo').value;
+    const nome = document.getElementById('categoria-nome').value.trim();
+
+    if (!nome) return;
+
+    if (!window.categoriasCustom[tipo].includes(nome)) {
+      window.categoriasCustom[tipo].push(nome);
+    }
+
+    await saveUserSettings({
+      categoriasCustom: window.categoriasCustom
+    });
+
+    document.getElementById('categoria-nome').value = '';
+
+    window.renderCategoriasCustom();
+
+    window.showToast({
+      type: 'success',
+      title: 'Categoria criada',
+      message: `${nome} foi adicionada.`
+    });
+  });
 
   /* PREVINE ZOOM IOS */
 
@@ -2539,17 +2811,6 @@ window.salvarNome = async () => {
   }
 };
 
-window.enviarResetSenha = async () => {
-  try {
-    const { sendPasswordResetEmail } = await import('firebase/auth');
-    await sendPasswordResetEmail(auth, auth.currentUser.email);
-    alert(`Link enviado para ${auth.currentUser.email}`);
-    window.fecharModalConfig();
-  } catch (e) {
-    console.error('Erro ao enviar reset:', e);
-  }
-};
-
 window.salvarRegrasConfig = async () => {
   const essencial = Number(document.getElementById('config-meta-essencial')?.value || 70);
   const reserva = Number(document.getElementById('config-meta-reserva')?.value || 20);
@@ -2645,6 +2906,14 @@ window.carregarConfiguracoesUsuario = async (uid) => {
     Object.entries(settings.categorias).forEach(([tipo, cats]) => {
       categoriasPorTipo[tipo] = cats;
     });
+  }
+
+  if (settings?.categoriasCustom) {
+    window.categoriasCustom = {
+      income: settings.categoriasCustom.income || [],
+      expense: settings.categoriasCustom.expense || [],
+      goal: settings.categoriasCustom.goal || []
+    };
   }
 
   window.atualizarDashboard?.();
