@@ -6,7 +6,6 @@ import './chat.css';
 import './transactions.css';
 import './auth.css';
 import './responsive.css';
-
 import Chart from 'chart.js/auto';
 
 import {
@@ -27,9 +26,11 @@ import {
 
 import { deleteDoc, doc, Timestamp } from "firebase/firestore";
 import { signOut } from "firebase/auth";
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+Chart.register(ChartDataLabels);
 
 /* ========================================
-   ESTADO GLOBAL
+ESTADO GLOBAL
 ======================================== */
 
 window.cards = [];
@@ -287,14 +288,19 @@ window.abrirModal = (tipo) => {
   const inputPayment = document.getElementById('input-payment');
   const inputCard = document.getElementById('input-card');
 
+  const fixedExpenseGroup = document.getElementById('fixed-expense-group');
+  const fixedMonthsGroup = document.getElementById('fixed-months-group');
+
   if (tipo === 'expense') {
     paymentGroup?.classList.remove('hidden');
+    fixedExpenseGroup?.classList.remove('hidden');
   } else {
     paymentGroup?.classList.add('hidden');
     creditCardGroup?.classList.add('hidden');
+    fixedExpenseGroup?.classList.add('hidden');
+    fixedMonthsGroup?.classList.add('hidden');
 
     if (inputPayment) inputPayment.value = 'debit';
-    if (inputCard) inputCard.value = '';
   }
 
   modal.classList.add('active');
@@ -674,6 +680,53 @@ window.atualizarDashboard = () => {
   if (mesDespesa) mesDespesa.textContent = formatBRL(des);
   if (mesSaldo) mesSaldo.textContent = formatBRL(rec - des - res);
 
+  const headerSaldo = document.getElementById('header-saldo-badge');
+  if (headerSaldo) {
+    const saldo = rec - des - res;
+    headerSaldo.innerHTML = `<span>◈ Saldo: </span> ${formatBRL(saldo)}`;
+    headerSaldo.style.color = saldo >= 0 ? '#00FFB2' : '#FF6B35';
+  }
+
+  const insightEl = document.getElementById('insight-saldo');
+  if (insightEl) {
+    const [anoFiltroN, mesFiltroN] = select.value.split('-').map(Number);
+    const mesAnterior = mesFiltroN === 0 ? 11 : mesFiltroN - 1;
+    const anoAnterior = mesFiltroN === 0 ? anoFiltroN - 1 : anoFiltroN;
+
+    const txMesAnterior = (window.transactions || []).filter(t => {
+      const d = t.createdAt?.toDate ? t.createdAt.toDate() : new Date(t.createdAt);
+      return d.getFullYear() === anoAnterior && d.getMonth() === mesAnterior;
+    });
+
+    let recAnt = 0, desAnt = 0, resAnt = 0;
+    txMesAnterior.forEach(t => {
+      const v = Number(t.val) || 0;
+      if (t.type === 'income') recAnt += v;
+      else if (t.type === 'expense') desAnt += v;
+      else if (t.type === 'goal') resAnt += v;
+    });
+
+    const saldoAtual = rec - des - res;
+    const saldoAnterior = recAnt - desAnt - resAnt;
+
+    const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+    if (!txMesAnterior.length) {
+      insightEl.textContent = '';
+    } else if (saldoAtual > saldoAnterior) {
+      const diff = Math.round(((saldoAtual - saldoAnterior) / Math.abs(saldoAnterior || 1)) * 100);
+      insightEl.textContent = `↑ ${diff}% melhor que ${mesesNomes[mesAnterior]}`;
+      insightEl.className = 'insight-saldo insight--positivo';
+    } else if (saldoAtual < saldoAnterior) {
+      const diff = Math.round(((saldoAnterior - saldoAtual) / Math.abs(saldoAnterior || 1)) * 100);
+      insightEl.textContent = `↓ ${diff}% pior que ${mesesNomes[mesAnterior]}`;
+      insightEl.className = 'insight-saldo insight--negativo';
+    } else {
+      insightEl.textContent = `= igual a ${mesesNomes[mesAnterior]}`;
+      insightEl.className = 'insight-saldo insight--neutro';
+    }
+  }
+
   atualizarMetasIA(rec, des, res, lazer);
   atualizarCartoesNaTela(window.cards || []);
   atualizarPoupanca(rec, des, res);
@@ -1029,97 +1082,106 @@ window.atualizarGrafico = (chart, todasTransactions) => {
 
   if (!todasTransactions || todasTransactions.length === 0) {
     chart.data.labels = [];
-
-    chart.data.datasets.forEach(dataset => {
-      dataset.data = [];
-    });
-
+    chart.data.datasets.forEach(dataset => dataset.data = []);
     chart.update();
-
     return;
   }
 
   const mesesNomes = [
-    'Jan',
-    'Fev',
-    'Mar',
-    'Abr',
-    'Mai',
-    'Jun',
-    'Jul',
-    'Ago',
-    'Set',
-    'Out',
-    'Nov',
-    'Dez'
+    'Jan', 'Fev', 'Mar', 'Abr',
+    'Mai', 'Jun', 'Jul', 'Ago',
+    'Set', 'Out', 'Nov', 'Dez'
   ];
 
-  const mesesChaves = [
+  const hoje = new Date();
+  const limite = new Date(hoje.getFullYear(), hoje.getMonth() + 12, 1);
+
+  let mesesChaves = [
     ...new Set(
       todasTransactions.map(t => {
-        const d =
-          t.createdAt?.toDate
-            ? t.createdAt.toDate()
-            : new Date(t.createdAt);
-
+        const d = t.createdAt?.toDate
+          ? t.createdAt.toDate()
+          : new Date(t.createdAt);
         return `${d.getFullYear()}-${d.getMonth()}`;
       })
     )
-  ].sort();
+  ].sort((a, b) => {
+    const [anoA, mesA] = a.split('-').map(Number);
+    const [anoB, mesB] = b.split('-').map(Number);
+    return new Date(anoA, mesA) - new Date(anoB, mesB);
+  }).filter(chave => {
+    const [ano, mes] = chave.split('-').map(Number);
+    return new Date(ano, mes, 1) <= limite;
+  });
 
   const labels = [];
-  const ganhos = [];
-  const gastos = [];
-  const caixinhas = [];
+  const receitasData = [];
+  const despesasData = [];
+  const caixinhasData = [];
 
   mesesChaves.forEach(chave => {
-    const [ano, mes] =
-      chave.split('-').map(Number);
-
-    labels.push(
-      `${mesesNomes[mes]}/${ano.toString().slice(-2)}`
-    );
+    const [ano, mes] = chave.split('-').map(Number);
+    labels.push(`${mesesNomes[mes]}/${ano.toString().slice(-2)}`);
 
     let receitas = 0;
     let despesas = 0;
-    let reservas = 0;
+    let caixinhas = 0;
 
     todasTransactions.forEach(t => {
-      const d =
-        t.createdAt?.toDate
-          ? t.createdAt.toDate()
-          : new Date(t.createdAt);
+      const d = t.createdAt?.toDate
+        ? t.createdAt.toDate()
+        : new Date(t.createdAt);
 
-      if (
-        d.getFullYear() === ano &&
-        d.getMonth() === mes
-      ) {
-        if (t.type === 'income') {
-          receitas += Number(t.val) || 0;
-        }
-
-        if (t.type === 'expense') {
-          despesas += Number(t.val) || 0;
-        }
-
-        if (t.type === 'goal') {
-          reservas += Number(t.val) || 0;
-        }
+      if (d.getFullYear() === ano && d.getMonth() === mes) {
+        if (t.type === 'income') receitas += Number(t.val) || 0;
+        if (t.type === 'expense') despesas += Number(t.val) || 0;
+        if (t.type === 'goal') caixinhas += Number(t.val) || 0;
       }
     });
 
-    ganhos.push(receitas);
-    gastos.push(despesas);
-    caixinhas.push(reservas);
+    receitasData.push(receitas);
+    despesasData.push(-despesas);
+    caixinhasData.push(-caixinhas);
   });
 
-  chart.data.labels = labels;
+  const totalMeses = labels.length;
+  const isMobile = window.innerWidth < 768;
 
-  chart.data.datasets[0].data = ganhos;
-  chart.data.datasets[1].data = gastos;
-  chart.data.datasets[2].data = caixinhas;
+  chart.data.labels = labels;
+  chart.data.datasets[0].data = receitasData;
+  chart.data.datasets[1].data = despesasData;
+  chart.data.datasets[2].data = caixinhasData;
+
+  if (isMobile) {
+    const wrapper = document.querySelector('.chart-card.evolution .canvas-wrapper');
+    const canvas = document.getElementById('mainEvolutionChart');
+
+    if (wrapper && canvas) {
+      const largura = Math.max(totalMeses * 70, wrapper.clientWidth);
+      chart.canvas.style.width = largura + 'px';
+      chart.canvas.width = largura;
+      chart.options.responsive = false;
+      chart.resize(largura, 280);
+    }
+  } else {
+    chart.options.responsive = true;
+    chart.resize();
+  }
 
   chart.update();
+
+  if (isMobile) {
+    const wrapper = document.querySelector('.chart-card.evolution .canvas-wrapper');
+    if (wrapper) {
+      const filtroVal = document.getElementById('filtro-mes')?.value || '';
+      const [anoFiltro, mesFiltro] = filtroVal.split('-').map(Number);
+      const mesLabel = `${mesesNomes[mesFiltro]}/${String(anoFiltro).slice(-2)}`;
+      const idxAtual = labels.indexOf(mesLabel);
+      const idx = idxAtual !== -1 ? idxAtual : labels.length - 1;
+      const barWidth = wrapper.scrollWidth / totalMeses;
+      wrapper.scrollLeft = Math.max(0, (idx - 2) * barWidth);
+    }
+  }
 };
 
 /* ========================================
@@ -1559,36 +1621,106 @@ document.addEventListener('DOMContentLoaded', () => {
     window.fecharEditorCartao();
   });
 
-  document
-    .getElementById('form-editar-transacao')
-    ?.addEventListener('submit', async (e) => {
+  document.getElementById('form-editar-transacao')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-      e.preventDefault();
+    const id = document.getElementById('edit-tx-id').value;
 
-      const id =
-        document.getElementById('edit-tx-id').value;
+    const tx = (window.transactions || []).find(t => t.id === id);
 
-      const paymentMethod =
-        document.getElementById('edit-tx-payment').value;
+    if (!tx) {
+      console.error('Transação não encontrada para edição:', id);
+      return;
+    }
 
-      const cardId =
-        document.getElementById('edit-tx-card').value || null;
+    const desc = document.getElementById('edit-tx-desc').value;
+    const val = Number(document.getElementById('edit-tx-val').value) || 0;
+    const paymentMethod = document.getElementById('edit-tx-payment').value;
+    const cardId = document.getElementById('edit-tx-card').value || null;
+
+    const fixedExpense =
+      document.getElementById('edit-tx-fixed')?.value === 'yes';
+
+    const fixedDuration =
+      document.getElementById('edit-tx-fixed-duration')?.value || 'limited';
+
+    const fixedMonths =
+      fixedDuration === 'indefinite'
+        ? 24
+        : Number(document.getElementById('edit-tx-fixed-months')?.value || 1);
+
+    await updateTransaction(id, {
+      desc,
+      val,
+      paymentMethod,
+      cardId,
+      fixedExpense,
+      fixedDuration: fixedExpense ? fixedDuration : null,
+      fixedIndefinite: fixedExpense && fixedDuration === 'indefinite',
+      totalFixedMonths:
+        fixedExpense && fixedDuration !== 'indefinite'
+          ? fixedMonths
+          : null
+    });
+
+    if (fixedExpense && !tx.fixedGroupId) {
+      const fixedGroupId = crypto.randomUUID();
 
       await updateTransaction(id, {
-        desc:
-          document.getElementById('edit-tx-desc').value,
-
-        val:
-          Number(
-            document.getElementById('edit-tx-val').value
-          ),
-
-        paymentMethod,
-        cardId
+        fixedGroupId,
+        fixedNumber: 1
       });
 
-      window.fecharModalEditarTx();
-    });
+      const baseDate =
+        tx.createdAt?.toDate
+          ? tx.createdAt.toDate()
+          : new Date(tx.createdAt);
+
+      for (let i = 1; i < fixedMonths; i++) {
+        const dataFixa = new Date(baseDate);
+        dataFixa.setMonth(baseDate.getMonth() + i);
+
+        await addTransaction({
+          desc:
+            fixedDuration === 'indefinite'
+              ? `${desc} (fixa)`
+              : `${desc} (${i + 1}/${fixedMonths})`,
+
+          val,
+          type: tx.type,
+          cat: tx.cat,
+
+          paymentMethod,
+          cardId,
+
+          purchaseDate: Timestamp.fromDate(dataFixa),
+          createdAt: Timestamp.fromDate(dataFixa),
+
+          fixedExpense: true,
+          fixedDuration,
+          fixedIndefinite: fixedDuration === 'indefinite',
+          fixedGroupId,
+          fixedNumber: i + 1,
+          totalFixedMonths:
+            fixedDuration === 'indefinite'
+              ? null
+              : fixedMonths
+        });
+      }
+    }
+
+    window.fecharModalEditarTx();
+  });
+
+  document.getElementById('input-fixed-expense')?.addEventListener('change', (e) => {
+    const fixedMonthsGroup = document.getElementById('fixed-months-group');
+
+    if (e.target.value === 'yes') {
+      fixedMonthsGroup?.classList.remove('hidden');
+    } else {
+      fixedMonthsGroup?.classList.add('hidden');
+    }
+  });
 
   /* TABS */
 
@@ -1621,36 +1753,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
       data: {
         labels: [],
-
         datasets: [
           {
             label: 'Receitas',
             data: [],
-            backgroundColor: 'rgba(0, 255, 178, 0.65)',
-            borderColor: '#00FFB2',
-            borderWidth: 1,
-            borderRadius: 8,
-            maxBarThickness: 42
+            backgroundColor: '#00FFB2',
+            borderRadius: 6,
+            stack: 'financeiro'
           },
-
           {
             label: 'Despesas',
             data: [],
-            backgroundColor: 'rgba(255, 107, 53, 0.65)',
-            borderColor: '#FF6B35',
-            borderWidth: 1,
-            borderRadius: 8,
-            maxBarThickness: 42
+            backgroundColor: '#FF6B35',
+            borderRadius: 6,
+            stack: 'financeiro'
           },
-
           {
             label: 'Caixinhas',
             data: [],
-            backgroundColor: 'rgba(0, 209, 255, 0.65)',
-            borderColor: '#00D1FF',
-            borderWidth: 1,
-            borderRadius: 8,
-            maxBarThickness: 42
+            backgroundColor: '#00D1FF',
+            borderRadius: 6,
+            stack: 'financeiro'
           }
         ]
       },
@@ -1660,37 +1783,95 @@ document.addEventListener('DOMContentLoaded', () => {
         maintainAspectRatio: false,
 
         plugins: {
-          legend: {
-            display: true,
+          datalabels: {
+            display: (context) => {
+              const value = Math.abs(context.dataset.data[context.dataIndex] || 0);
+              if (!value) return false;
 
+              const receitasDataset = context.chart.data.datasets[0];
+              const receita = Math.abs(receitasDataset.data[context.dataIndex] || 0);
+              if (!receita) return false;
+
+              const perc = Math.round((value / receita) * 100);
+              return perc >= 8;
+            },
+            color: (context) => {
+              const label = context.dataset.label;
+              if (label === 'Receitas') return '#003d2b';
+              if (label === 'Despesas') return '#4a1800';
+              return '#003d4a';
+            },
+            font: {
+              size: 10,
+              weight: '700'
+            },
+            formatter: (value, context) => {
+              const receitasDataset = context.chart.data.datasets[0];
+              const receita = Math.abs(receitasDataset.data[context.dataIndex] || 0);
+              if (!receita) return '';
+              const perc = Math.round((Math.abs(value) / receita) * 100);
+              return `${perc}%`;
+            },
+            anchor: 'center',
+            align: 'center',
+            clamp: true,
+            clip: true
+          },
+          legend: {
+            position: 'top',
             labels: {
               color: '#94a3b8',
               usePointStyle: true,
-              pointStyle: 'circle'
+              pointStyle: 'circle',
+              boxWidth: 8,
+              boxHeight: 8,
+              padding: 14,
+              font: { size: 11, weight: '600' }
+            }
+          },
+
+          tooltip: {
+            backgroundColor: '#0f172a',
+            titleColor: '#ffffff',
+            bodyColor: '#cbd5e1',
+            borderColor: '#1e2d40',
+            borderWidth: 1,
+            padding: 12,
+            callbacks: {
+              label: (context) => {
+                const value = Math.abs(Number(context.raw || 0));
+                return `${context.dataset.label}: ${value.toLocaleString('pt-BR', {
+                  style: 'currency', currency: 'BRL'
+                })}`;
+              }
             }
           }
         },
 
         scales: {
           x: {
-            grid: {
-              display: false
-            },
-
+            stacked: true,
+            grid: { display: false },
             ticks: {
-              color: '#94a3b8'
+              color: '#94a3b8',
+              maxRotation: 0,
+              minRotation: 0,
+              font: { size: 10 }
             }
           },
-
           y: {
-            beginAtZero: true,
-
-            grid: {
-              color: 'rgba(255,255,255,0.05)'
-            },
-
+            stacked: true,
+            grid: { color: 'rgba(255,255,255,0.05)' },
             ticks: {
-              color: '#94a3b8'
+              color: '#94a3b8',
+              autoSkip: false,
+              maxRotation: 0,
+              font: { size: 10, weight: '600' },
+              callback: (value) => {
+                const abs = Math.abs(value);
+                if (abs >= 1000) return `${value < 0 ? '-' : ''}${abs / 1000}k`;
+                return value;
+              }
             }
           }
         }
@@ -1702,10 +1883,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document
     .getElementById('filtro-mes')
-    ?.addEventListener(
-      'change',
-      window.atualizarDashboard
-    );
+    ?.addEventListener('change', () => {
+      window.atualizarDashboard();
+      if (window.meuGrafico && window.transactions?.length) {
+        window.atualizarGrafico(window.meuGrafico, window.transactions);
+      }
+    });
 
   /* FORM TRANSAÇÃO */
 
@@ -1723,8 +1906,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const [ano, mes, dia] =
           inputDataStr.split('-').map(Number);
 
-        dataCompra =
-          new Date(ano, mes - 1, dia);
+        dataCompra = new Date(ano, mes - 1, dia);
       }
 
       const tipo =
@@ -1734,15 +1916,36 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('input-cat').value;
 
       const paymentMethod =
-        document.getElementById('input-payment')?.value ||
-        'debit';
+        document.getElementById('input-payment')?.value || 'debit';
 
       const cardId =
-        document.getElementById('input-card')?.value ||
-        null;
+        document.getElementById('input-card')?.value || null;
 
       const cartao =
         (window.cards || []).find(card => card.id === cardId);
+
+      const valor =
+        Number(document.getElementById('input-val').value) || 0;
+
+      const descricao =
+        document.getElementById('input-desc').value;
+
+      const recurrence =
+        document.getElementById('input-recurrence')?.value || 'single';
+
+      const installments =
+        Number(document.getElementById('input-installments')?.value || 1);
+
+      const fixedExpense =
+        document.getElementById('input-fixed-expense')?.value === 'yes';
+
+      const fixedDuration =
+        document.getElementById('input-fixed-duration')?.value || 'limited';
+
+      const fixedMonths =
+        fixedDuration === 'indefinite'
+          ? 24
+          : Number(document.getElementById('input-fixed-months')?.value || 1);
 
       let dataLancamento = dataCompra;
 
@@ -1750,10 +1953,6 @@ document.addEventListener('DOMContentLoaded', () => {
         tipo === 'expense' &&
         paymentMethod === 'credit'
       ) {
-        const cartao =
-          (window.cards || [])
-            .find(card => card.id === cardId);
-
         if (!cartao) {
           alert('Selecione um cartão de crédito.');
           return;
@@ -1767,33 +1966,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const nova = {
-        desc:
-          document.getElementById('input-desc').value,
-
-        val:
-          parseFloat(
-            document.getElementById('input-val').value
-          ),
-
+        desc: descricao,
+        val: valor,
         type: tipo,
         cat: categoria,
 
         paymentMethod,
         cardId,
 
-        purchaseDate:
-          Timestamp.fromDate(dataCompra),
-
-        createdAt:
-          Timestamp.fromDate(dataLancamento)
+        purchaseDate: Timestamp.fromDate(dataCompra),
+        createdAt: Timestamp.fromDate(dataLancamento)
       };
 
-      const recurrence =
-        document.getElementById('input-recurrence')?.value || 'single';
-
-      const installments =
-        Number(document.getElementById('input-installments')?.value || 1);
-
+      /*
+        1. PARCELAMENTO NO CARTÃO
+      */
       if (
         tipo === 'expense' &&
         paymentMethod === 'credit' &&
@@ -1813,16 +2000,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
           await addTransaction({
             ...nova,
-            desc: `${nova.desc} (${i + 1}/${installments})`,
-            val: Number(nova.val) / installments,
+
+            desc: `${descricao} (${i + 1}/${installments})`,
+            val: valor / installments,
+
             purchaseDate: Timestamp.fromDate(dataParcela),
             createdAt: Timestamp.fromDate(dataFaturaParcela),
+
             installmentGroupId: groupId,
             installmentNumber: i + 1,
             totalInstallments: installments
           });
         }
-      } else {
+      }
+
+      /*
+        2. DESPESA FIXA NORMAL
+        Funciona para débito, pix, dinheiro e também crédito NÃO parcelado.
+      */
+      else if (
+        tipo === 'expense' &&
+        fixedExpense
+      ) {
+        const fixedGroupId = crypto.randomUUID();
+
+        for (let i = 0; i < fixedMonths; i++) {
+          const dataFixa = new Date(dataCompra);
+          dataFixa.setMonth(dataCompra.getMonth() + i);
+
+          let dataFaturaFixa = dataFixa;
+
+          if (paymentMethod === 'credit') {
+            dataFaturaFixa = calcularDataFatura(
+              dataFixa,
+              Number(cartao.closingDay),
+              Number(cartao.dueDay)
+            );
+          }
+
+          await addTransaction({
+            ...nova,
+
+            desc:
+              fixedDuration === 'indefinite'
+                ? `${descricao} (fixa)`
+                : `${descricao} (${i + 1}/${fixedMonths})`,
+
+            val: valor,
+
+            purchaseDate: Timestamp.fromDate(dataFixa),
+            createdAt: Timestamp.fromDate(dataFaturaFixa),
+
+            fixedExpense: true,
+            fixedDuration,
+            fixedIndefinite: fixedDuration === 'indefinite',
+            fixedGroupId,
+            fixedNumber: i + 1,
+            totalFixedMonths:
+              fixedDuration === 'indefinite'
+                ? null
+                : fixedMonths
+          });
+        }
+      }
+
+      /*
+        3. TRANSAÇÃO NORMAL
+      */
+      else {
         await addTransaction(nova);
       }
 
@@ -1834,6 +2079,47 @@ document.addEventListener('DOMContentLoaded', () => {
       document
         .getElementById('credit-card-group')
         ?.classList.add('hidden');
+
+      document
+        .getElementById('recurrence-group')
+        ?.classList.add('hidden');
+
+      document
+        .getElementById('installments-group')
+        ?.classList.add('hidden');
+
+      document
+        .getElementById('fixed-expense-group')
+        ?.classList.add('hidden');
+
+      document
+        .getElementById('fixed-duration-group')
+        ?.classList.add('hidden');
+
+      document
+        .getElementById('fixed-months-group')
+        ?.classList.add('hidden');
+
+      const recurrenceInput =
+        document.getElementById('input-recurrence');
+
+      const installmentsInput =
+        document.getElementById('input-installments');
+
+      const fixedExpenseInput =
+        document.getElementById('input-fixed-expense');
+
+      const fixedDurationInput =
+        document.getElementById('input-fixed-duration');
+
+      const fixedMonthsInput =
+        document.getElementById('input-fixed-months');
+
+      if (recurrenceInput) recurrenceInput.value = 'single';
+      if (installmentsInput) installmentsInput.value = 2;
+      if (fixedExpenseInput) fixedExpenseInput.value = 'no';
+      if (fixedDurationInput) fixedDurationInput.value = 'limited';
+      if (fixedMonthsInput) fixedMonthsInput.value = 12;
 
       window.fecharModal();
     });
@@ -1984,11 +2270,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.toggleMenuPanel();
   });
-});
 
-/* ========================================
-   POPULAR SELECT MESES
-======================================== */
+  document.getElementById('edit-tx-fixed')?.addEventListener('change', (e) => {
+    const durationGroup = document.getElementById('edit-fixed-duration-group');
+    const monthsGroup = document.getElementById('edit-fixed-months-group');
+
+    if (e.target.value === 'yes') {
+      durationGroup?.classList.remove('hidden');
+
+      const duration =
+        document.getElementById('edit-tx-fixed-duration')?.value || 'limited';
+
+      if (duration === 'limited') {
+        monthsGroup?.classList.remove('hidden');
+      }
+    } else {
+      durationGroup?.classList.add('hidden');
+      monthsGroup?.classList.add('hidden');
+    }
+  });
+
+  document.getElementById('edit-tx-fixed-duration')?.addEventListener('change', (e) => {
+    const monthsGroup = document.getElementById('edit-fixed-months-group');
+
+    if (e.target.value === 'limited') {
+      monthsGroup?.classList.remove('hidden');
+    } else {
+      monthsGroup?.classList.add('hidden');
+    }
+  });
+});
 
 function popularSelectMeses() {
   const select =
@@ -2023,8 +2334,6 @@ function popularSelectMeses() {
       </option>
     `).join('');
 }
-
-
 
 window.fecharBottomPanels = function () {
   document.querySelectorAll('.bottom-panel').forEach((panel) => {
@@ -2135,6 +2444,37 @@ document.addEventListener('click', (e) => {
 
   document.getElementById('edit-tx-payment').value =
     tx.paymentMethod || 'debit';
+
+  const editFixed = document.getElementById('edit-tx-fixed');
+  const editDurationGroup = document.getElementById('edit-fixed-duration-group');
+  const editMonthsGroup = document.getElementById('edit-fixed-months-group');
+  const editDuration = document.getElementById('edit-tx-fixed-duration');
+  const editMonths = document.getElementById('edit-tx-fixed-months');
+
+  if (editFixed) {
+    editFixed.value = tx.fixedExpense ? 'yes' : 'no';
+  }
+
+  if (editDuration) {
+    editDuration.value = tx.fixedDuration || 'limited';
+  }
+
+  if (editMonths) {
+    editMonths.value = tx.totalFixedMonths || 12;
+  }
+
+  if (tx.fixedExpense) {
+    editDurationGroup?.classList.remove('hidden');
+
+    if ((tx.fixedDuration || 'limited') === 'limited') {
+      editMonthsGroup?.classList.remove('hidden');
+    } else {
+      editMonthsGroup?.classList.add('hidden');
+    }
+  } else {
+    editDurationGroup?.classList.add('hidden');
+    editMonthsGroup?.classList.add('hidden');
+  }
 
   const selectCard =
     document.getElementById('edit-tx-card');
