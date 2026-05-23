@@ -133,6 +133,15 @@
           </select>
         </div>
 
+        <div class="form-group">
+          <label>Bloco financeiro</label>
+          <select id="edit-tx-financial-cat">
+            <option value="essencial">🏠 Essencial</option>
+            <option value="lazer">🎬 Lazer</option>
+            <option value="reserva">🎯 Reserva</option>
+          </select>
+        </div>
+
         <div class="form-group" id="edit-card-group">
           <label>Cartão</label>
 
@@ -361,11 +370,12 @@
 
       <div class="summary-grid">
         <article class="card balance" id="card-metas">
-          <header><span class="icon">🎯</span>
+          <header>
+            <span class="icon">🎯</span>
             <h3 id="titulo-regra-financeira">Regra 70/20/10</h3>
+            <span id="saude-financeira-badge" class="saude-badge"></span>
           </header>
-          <div id="metas-container">
-          </div>
+          <div id="metas-container"></div>
         </article>
 
         <article class="card wallet-card" id="card-carteira">
@@ -388,22 +398,23 @@
       </div>
 
       <section class="bottom-charts-grid">
+
         <article class="chart-card evolution">
           <header>
-            <h3>Evolução Mensal</h3>
-            <span class="chart-legend-hint">% calculado sobre a receita do mês</span>
+            <h3>Comparativo mensal</h3>
+            <span class="chart-legend-hint" id="comparativo-legenda"></span>
           </header>
-          <div class="canvas-wrapper">
-            <canvas id="mainEvolutionChart"></canvas>
-          </div>
+          <div id="comparativo-container" class="comparativo-container"></div>
         </article>
 
         <article class="chart-card categories">
           <header>
-            <h3>Por Categoria</h3>
+            <h3>Distribuição por bloco</h3>
           </header>
-          <div class="category-bars" id="categoryList">
+          <div class="donut-wrapper">
+            <canvas id="donutBlocoChart"></canvas>
           </div>
+          <div id="donut-legenda" class="donut-legenda"></div>
         </article>
       </section>
 
@@ -460,6 +471,15 @@
                 <option value="Reserva de Emergência">Reserva de Emergência</option>
                 <option value="Metas">Metas</option>
               </optgroup>
+            </select>
+          </div>
+
+          <div class="form-group hidden" id="financial-category-group">
+            <label for="input-financial-cat">Bloco financeiro</label>
+            <select id="input-financial-cat">
+              <option value="essencial">🏠 Essencial</option>
+              <option value="lazer">🎬 Lazer</option>
+              <option value="reserva">🎯 Reserva</option>
             </select>
           </div>
 
@@ -606,10 +626,19 @@
 
     <section class="tab-section" id="tab-transacoes">
       <div class="transacoes-container">
+
         <header class="section-header">
           <h3>Histórico de Transações</h3>
           <select id="filtro-mes" hidden></select>
         </header>
+
+        <div class="filtro-bloco-pills">
+          <button class="filtro-bloco-btn active" data-bloco="todos">Todos</button>
+          <button class="filtro-bloco-btn" data-bloco="essencial">🏠 Essenciais</button>
+          <button class="filtro-bloco-btn" data-bloco="lazer">🎬 Lazer</button>
+          <button class="filtro-bloco-btn" data-bloco="reserva">🎯 Reserva</button>
+        </div>
+
         <div class="top-cards-container">
           <article class="card-valor btn-receita">
             <p>↑ Receita</p>

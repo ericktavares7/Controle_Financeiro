@@ -13,6 +13,28 @@ import {
   calcularDataFatura
 } from './utils.js';
 
+import { CATS_LAZER } from './state.js';
+
+let filtroBloco = 'todos';
+
+export function getFiltroBloco() {
+  return filtroBloco;
+}
+
+export function iniciarFiltroBlocos() {
+  document.querySelectorAll('.filtro-bloco-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filtro-bloco-btn')
+        .forEach(b => b.classList.remove('active'));
+
+      btn.classList.add('active');
+      filtroBloco = btn.dataset.bloco;
+
+      window.atualizarDashboard?.();
+    });
+  });
+}
+
 export function renderListaTransacoes(lista) {
   const cRec = document.getElementById('lista-receitas-historico');
   const cDes = document.getElementById('lista-despesas-historico');
@@ -208,6 +230,12 @@ export function iniciarEdicaoTransacoes() {
       editMonthsGroup?.classList.add('hidden');
     }
 
+    const editFinCat = document.getElementById('edit-tx-financial-cat');
+    if (editFinCat) {
+      editFinCat.value = tx.financialCategory ||
+        (CATS_LAZER.includes(String(tx.cat || '').toLowerCase()) ? 'lazer' : 'essencial');
+    }
+
     document
       .getElementById('modal-editar-transacao')
       ?.classList.add('active');
@@ -245,18 +273,21 @@ export function iniciarEdicaoTransacoes() {
           ? 24
           : Number(document.getElementById('edit-tx-fixed-months')?.value || 1);
 
+
+      const financialCategory =
+        document.getElementById('edit-tx-financial-cat')?.value || 'essencial';
+
       await updateTransaction(id, {
         desc,
         val,
         paymentMethod,
         cardId,
+        financialCategory,
         fixedExpense,
         fixedDuration: fixedExpense ? fixedDuration : null,
         fixedIndefinite: fixedExpense && fixedDuration === 'indefinite',
         totalFixedMonths:
-          fixedExpense && fixedDuration !== 'indefinite'
-            ? fixedMonths
-            : null
+          fixedExpense && fixedDuration !== 'indefinite' ? fixedMonths : null
       });
 
       if (fixedExpense && !tx.fixedGroupId) {
@@ -416,15 +447,17 @@ export function iniciarFormularioTransacao() {
         );
       }
 
+      const financialCategory =
+        document.getElementById('input-financial-cat')?.value || 'essencial';
+
       const nova = {
         desc: descricao,
         val: valor,
         type: tipo,
         cat: categoria,
-
+        financialCategory,
         paymentMethod,
         cardId,
-
         purchaseDate: Timestamp.fromDate(dataCompra),
         createdAt: Timestamp.fromDate(dataLancamento)
       };
@@ -565,6 +598,14 @@ export function iniciarCamposTransacao() {
       recurrenceGroup?.classList.add('hidden');
       installmentsGroup?.classList.add('hidden');
     }
+  });
+
+  document.getElementById('input-cat')?.addEventListener('change', (e) => {
+    const catNorm = e.target.value.toLowerCase().trim();
+    const financialCatInput = document.getElementById('input-financial-cat');
+    if (!financialCatInput) return;
+
+    financialCatInput.value = CATS_LAZER.includes(catNorm) ? 'lazer' : 'essencial';
   });
 
   document.getElementById('input-recurrence')?.addEventListener('change', (e) => {

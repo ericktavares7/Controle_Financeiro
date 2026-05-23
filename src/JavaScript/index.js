@@ -94,8 +94,8 @@ import {
 import { atualizarDashboard } from './dashboard.js';
 
 import {
-  criarGraficoEvolucao,
-  atualizarGrafico
+  criarGraficoDonut,
+  atualizarComparativo
 } from './charts.js';
 
 import {
@@ -116,6 +116,8 @@ import {
   popularSelectMeses,
   iniciarMonthPicker
 } from './monthPicker.js';
+
+import { iniciarFiltroBlocos } from './transactions.js';
 
 window.cards = state.cards;
 window.transactions = state.transactions;
@@ -157,7 +159,6 @@ window.deletarTransacao = deletarTransacao;
 window.fecharModalEditarTx = fecharModalEditarTx;
 
 window.atualizarDashboard = atualizarDashboard;
-window.atualizarGrafico = atualizarGrafico;
 window.updateUserHeader = updateUserHeader;
 window.logOut = logOut;
 
@@ -275,121 +276,6 @@ function renderCategoriasGrafico(lista) {
 }
 
 
-/* ========================================
-   GRÁFICO EVOLUÇÃO
-======================================== */
-
-window.atualizarGrafico = (chart, todasTransactions) => {
-  if (!chart) return;
-
-  if (!todasTransactions || todasTransactions.length === 0) {
-    chart.data.labels = [];
-    chart.data.datasets.forEach(dataset => dataset.data = []);
-    chart.update();
-    return;
-  }
-
-  const mesesNomes = [
-    'Jan', 'Fev', 'Mar', 'Abr',
-    'Mai', 'Jun', 'Jul', 'Ago',
-    'Set', 'Out', 'Nov', 'Dez'
-  ];
-
-  const hoje = new Date();
-  const limite = new Date(hoje.getFullYear(), hoje.getMonth() + 12, 1);
-
-  let mesesChaves = [
-    ...new Set(
-      todasTransactions.map(t => {
-        const d = t.createdAt?.toDate
-          ? t.createdAt.toDate()
-          : new Date(t.createdAt);
-        return `${d.getFullYear()}-${d.getMonth()}`;
-      })
-    )
-  ].sort((a, b) => {
-    const [anoA, mesA] = a.split('-').map(Number);
-    const [anoB, mesB] = b.split('-').map(Number);
-    return new Date(anoA, mesA) - new Date(anoB, mesB);
-  }).filter(chave => {
-    const [ano, mes] = chave.split('-').map(Number);
-    return new Date(ano, mes, 1) <= limite;
-  });
-
-  const labels = [];
-  const receitasData = [];
-  const despesasData = [];
-  const caixinhasData = [];
-
-  mesesChaves.forEach(chave => {
-    const [ano, mes] = chave.split('-').map(Number);
-    labels.push(`${mesesNomes[mes]}/${ano.toString().slice(-2)}`);
-
-    let receitas = 0;
-    let despesas = 0;
-    let caixinhas = 0;
-
-    todasTransactions.forEach(t => {
-      const d = t.createdAt?.toDate
-        ? t.createdAt.toDate()
-        : new Date(t.createdAt);
-
-      if (d.getFullYear() === ano && d.getMonth() === mes) {
-        if (t.type === 'income') receitas += Number(t.val) || 0;
-        if (t.type === 'expense') despesas += Number(t.val) || 0;
-        if (t.type === 'goal') caixinhas += Number(t.val) || 0;
-      }
-    });
-
-    receitasData.push(receitas);
-    despesasData.push(-despesas);
-    caixinhasData.push(-caixinhas);
-  });
-
-  const totalMeses = labels.length;
-  const isMobile = window.innerWidth < 768;
-
-  chart.data.labels = labels;
-  chart.data.datasets[0].data = receitasData;
-  chart.data.datasets[1].data = despesasData;
-  chart.data.datasets[2].data = caixinhasData;
-
-  if (isMobile) {
-    const wrapper = document.querySelector('.chart-card.evolution .canvas-wrapper');
-    const canvas = document.getElementById('mainEvolutionChart');
-
-    if (wrapper && canvas) {
-      const largura = Math.max(totalMeses * 70, wrapper.clientWidth);
-      chart.canvas.style.width = largura + 'px';
-      chart.canvas.width = largura;
-      chart.options.responsive = false;
-      chart.resize(largura, 280);
-    }
-  } else {
-    chart.options.responsive = true;
-    chart.resize();
-  }
-
-  chart.update();
-
-  if (isMobile) {
-    const wrapper = document.querySelector('.chart-card.evolution .canvas-wrapper');
-    if (wrapper) {
-      const filtroVal = document.getElementById('filtro-mes')?.value || '';
-      const [anoFiltro, mesFiltro] = filtroVal.split('-').map(Number);
-      const mesLabel = `${mesesNomes[mesFiltro]}/${String(anoFiltro).slice(-2)}`;
-      const idxAtual = labels.indexOf(mesLabel);
-      const idx = idxAtual !== -1 ? idxAtual : labels.length - 1;
-      const barWidth = wrapper.scrollWidth / totalMeses;
-      wrapper.scrollLeft = Math.max(0, (idx - 2) * barWidth);
-    }
-  }
-};
-
-/* ========================================
-   FILTRO ORDEM
-======================================== */
-
 window.alternarOrdemFiltro = () => {
   window.ordemCrescente = !window.ordemCrescente;
 
@@ -428,9 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
   iniciarFormularioCategoria();
   iniciarBottomNav();
 
-  window.meuGrafico = criarGraficoEvolucao();
-
-  iniciarFiltroMes();
   iniciarFormularioCartao();
   iniciarEscape();
   iniciarAuth();
@@ -438,22 +321,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   iniciarModaisBase();
   iniciarConfirmacao();
+  iniciarFiltroBlocos();
+  criarGraficoDonut();
+
+  document.getElementById('filtro-mes')
+  ?.addEventListener('change', () => {
+    window.atualizarDashboard();
+  });
+
 });
-
-function iniciarFiltroMes() {
-  document
-    .getElementById('filtro-mes')
-    ?.addEventListener('change', () => {
-      window.atualizarDashboard();
-
-      if (window.meuGrafico && window.transactions?.length) {
-        window.atualizarGrafico(
-          window.meuGrafico,
-          window.transactions
-        );
-      }
-    });
-}
 
 function iniciarTabs() {
   document.querySelectorAll('.tab-btn').forEach(btn => {

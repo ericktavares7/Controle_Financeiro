@@ -29,6 +29,7 @@ body {
 .dashboard-container {
   width: 100%;
   padding: 20px;
+  padding-top: 90px;
 }
 
 /* =========================
@@ -79,6 +80,7 @@ body {
     justify-content: flex-end;
     gap: 12px;
     margin-bottom: 14px;
+    z-index: 100;
   }
 
   .summary-grid {

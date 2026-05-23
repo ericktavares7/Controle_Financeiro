@@ -2,13 +2,20 @@
    HEADER / TOPO DASHBOARD
 ========================= */
 .dashboard-header {
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9000;
 
   width: 100%;
-  padding: 78px 15px 15px !important;
+  padding: 16px 24px !important;
 
   background: #050810;
   border-bottom: 1px solid var(--border-color);
+
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
 }
 
 /* Container interno */

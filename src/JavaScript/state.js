@@ -1,3 +1,5 @@
+export const CATS_LAZER = ['lazer', 'entretenimento', 'hobbies'];
+
 export const state = {
   transactions: [],
   cards: [],

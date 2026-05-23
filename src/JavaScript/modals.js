@@ -1,4 +1,5 @@
 import { obterCategoriasDoTipo } from './categories.js';
+import { CATS_LAZER } from './state.js';
 
 export function abrirModalTransacao(tipo) {
   const modal = document.getElementById('modal-registro');
@@ -60,6 +61,18 @@ export function abrirModalTransacao(tipo) {
     fixedMonthsGroup?.classList.add('hidden');
 
     if (inputPayment) inputPayment.value = 'debit';
+  }
+  const financialGroup = document.getElementById('financial-category-group');
+  const financialCatInput = document.getElementById('input-financial-cat');
+
+  if (tipo === 'expense') {
+    financialGroup?.classList.remove('hidden');
+    if (financialCatInput) financialCatInput.value = 'essencial';
+  } else if (tipo === 'goal') {
+    financialGroup?.classList.remove('hidden');
+    if (financialCatInput) financialCatInput.value = 'reserva';
+  } else {
+    financialGroup?.classList.add('hidden');
   }
 
   modal.classList.add('active');

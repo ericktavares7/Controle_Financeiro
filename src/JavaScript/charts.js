@@ -3,118 +3,35 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 Chart.register(ChartDataLabels);
 
-export function criarGraficoEvolucao() {
-  const ctx =
-    document.getElementById('mainEvolutionChart');
+let donutBlocoChart = null;
 
+export function criarGraficoDonut() {
+  const ctx = document.getElementById('donutBlocoChart');
   if (!ctx) return null;
 
-  return new Chart(ctx, {
-    type: 'bar',
+  donutBlocoChart = new Chart(ctx, {
+    type: 'doughnut',
 
     data: {
-      labels: [],
-      datasets: [
-        {
-          label: 'Receitas',
-          data: [],
-          backgroundColor: '#00FFB2',
-          borderRadius: 6,
-          stack: 'financeiro'
-        },
-        {
-          label: 'Despesas',
-          data: [],
-          backgroundColor: '#FF6B35',
-          borderRadius: 6,
-          stack: 'financeiro'
-        },
-        {
-          label: 'Caixinhas',
-          data: [],
-          backgroundColor: '#00D1FF',
-          borderRadius: 6,
-          stack: 'financeiro'
-        }
-      ]
+      labels: ['Essenciais', 'Lazer', 'Reserva'],
+      datasets: [{
+        data: [0, 0, 0],
+        backgroundColor: ['#00FFB2', '#FFD700', '#00D1FF'],
+        borderColor: '#0f172a',
+        borderWidth: 3,
+        hoverOffset: 6
+      }]
     },
 
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      cutout: '70%',
 
       plugins: {
-        datalabels: {
-          display: (context) => {
-            const value =
-              Math.abs(context.dataset.data[context.dataIndex] || 0);
+        datalabels: { display: false },
 
-            if (!value) return false;
-
-            const receitasDataset =
-              context.chart.data.datasets[0];
-
-            const receita =
-              Math.abs(receitasDataset.data[context.dataIndex] || 0);
-
-            if (!receita) return false;
-
-            const perc =
-              Math.round((value / receita) * 100);
-
-            return perc >= 8;
-          },
-
-          color: (context) => {
-            const label = context.dataset.label;
-
-            if (label === 'Receitas') return '#003d2b';
-            if (label === 'Despesas') return '#4a1800';
-
-            return '#003d4a';
-          },
-
-          font: {
-            size: 10,
-            weight: '700'
-          },
-
-          formatter: (value, context) => {
-            const receitasDataset =
-              context.chart.data.datasets[0];
-
-            const receita =
-              Math.abs(receitasDataset.data[context.dataIndex] || 0);
-
-            if (!receita) return '';
-
-            const perc =
-              Math.round((Math.abs(value) / receita) * 100);
-
-            return `${perc}%`;
-          },
-
-          anchor: 'center',
-          align: 'center',
-          clamp: true,
-          clip: true
-        },
-
-        legend: {
-          position: 'top',
-          labels: {
-            color: '#94a3b8',
-            usePointStyle: true,
-            pointStyle: 'circle',
-            boxWidth: 8,
-            boxHeight: 8,
-            padding: 14,
-            font: {
-              size: 11,
-              weight: '600'
-            }
-          }
-        },
+        legend: { display: false },
 
         tooltip: {
           backgroundColor: '#0f172a',
@@ -126,230 +43,119 @@ export function criarGraficoEvolucao() {
 
           callbacks: {
             label: (context) => {
-              const value =
-                Math.abs(Number(context.raw || 0));
-
-              return `${context.dataset.label}: ${value.toLocaleString('pt-BR', {
+              const value = Number(context.raw || 0);
+              return ` ${value.toLocaleString('pt-BR', {
                 style: 'currency',
                 currency: 'BRL'
               })}`;
             }
           }
         }
-      },
-
-      scales: {
-        x: {
-          stacked: true,
-          grid: {
-            display: false
-          },
-          ticks: {
-            color: '#94a3b8',
-            maxRotation: 0,
-            minRotation: 0,
-            font: {
-              size: 10
-            }
-          }
-        },
-
-        y: {
-          stacked: true,
-          grid: {
-            color: 'rgba(255,255,255,0.05)'
-          },
-          ticks: {
-            color: '#94a3b8',
-            autoSkip: false,
-            maxRotation: 0,
-            font: {
-              size: 10,
-              weight: '600'
-            },
-            callback: (value) => {
-              const abs = Math.abs(value);
-
-              if (abs >= 1000) {
-                return `${value < 0 ? '-' : ''}${abs / 1000}k`;
-              }
-
-              return value;
-            }
-          }
-        }
       }
     }
   });
+
+  return donutBlocoChart;
 }
 
-export function atualizarGrafico(chart, todasTransactions) {
+export function atualizarGraficoDonut(essencial, lazer, reserva) {
+  const chart = donutBlocoChart;
   if (!chart) return;
 
-  if (!todasTransactions || todasTransactions.length === 0) {
-    chart.data.labels = [];
+  const total = essencial + lazer + reserva;
 
-    chart.data.datasets.forEach(dataset => {
-      dataset.data = [];
-    });
-
-    chart.update();
-    return;
-  }
-
-  const mesesNomes = [
-    'Jan', 'Fev', 'Mar', 'Abr',
-    'Mai', 'Jun', 'Jul', 'Ago',
-    'Set', 'Out', 'Nov', 'Dez'
-  ];
-
-  const hoje = new Date();
-
-  const limite =
-    new Date(
-      hoje.getFullYear(),
-      hoje.getMonth() + 12,
-      1
-    );
-
-  let mesesChaves = [
-    ...new Set(
-      todasTransactions.map(t => {
-        const d =
-          t.createdAt?.toDate
-            ? t.createdAt.toDate()
-            : new Date(t.createdAt);
-
-        return `${d.getFullYear()}-${d.getMonth()}`;
-      })
-    )
-  ]
-    .sort((a, b) => {
-      const [anoA, mesA] =
-        a.split('-').map(Number);
-
-      const [anoB, mesB] =
-        b.split('-').map(Number);
-
-      return new Date(anoA, mesA) -
-        new Date(anoB, mesB);
-    })
-    .filter(chave => {
-      const [ano, mes] =
-        chave.split('-').map(Number);
-
-      return new Date(ano, mes, 1) <= limite;
-    });
-
-  const labels = [];
-  const receitasData = [];
-  const despesasData = [];
-  const caixinhasData = [];
-
-  mesesChaves.forEach(chave => {
-    const [ano, mes] =
-      chave.split('-').map(Number);
-
-    labels.push(
-      `${mesesNomes[mes]}/${ano.toString().slice(-2)}`
-    );
-
-    let receitas = 0;
-    let despesas = 0;
-    let caixinhas = 0;
-
-    todasTransactions.forEach(t => {
-      const d =
-        t.createdAt?.toDate
-          ? t.createdAt.toDate()
-          : new Date(t.createdAt);
-
-      if (
-        d.getFullYear() === ano &&
-        d.getMonth() === mes
-      ) {
-        if (t.type === 'income') {
-          receitas += Number(t.val) || 0;
-        }
-
-        if (t.type === 'expense') {
-          despesas += Number(t.val) || 0;
-        }
-
-        if (t.type === 'goal') {
-          caixinhas += Number(t.val) || 0;
-        }
-      }
-    });
-
-    receitasData.push(receitas);
-    despesasData.push(-despesas);
-    caixinhasData.push(-caixinhas);
-  });
-
-  const totalMeses = labels.length;
-  const isMobile = window.innerWidth < 768;
-
-  chart.data.labels = labels;
-  chart.data.datasets[0].data = receitasData;
-  chart.data.datasets[1].data = despesasData;
-  chart.data.datasets[2].data = caixinhasData;
-
-  if (isMobile) {
-    const wrapper =
-      document.querySelector(
-        '.chart-card.evolution .canvas-wrapper'
-      );
-
-    const canvas =
-      document.getElementById('mainEvolutionChart');
-
-    if (wrapper && canvas) {
-      const largura =
-        Math.max(totalMeses * 70, wrapper.clientWidth);
-
-      chart.canvas.style.width = `${largura}px`;
-      chart.canvas.width = largura;
-
-      chart.options.responsive = false;
-      chart.resize(largura, 280);
-    }
-  } else {
-    chart.options.responsive = true;
-    chart.resize();
-  }
-
+  chart.data.datasets[0].data = [essencial, lazer, reserva];
   chart.update();
 
-  if (isMobile) {
-    const wrapper =
-      document.querySelector(
-        '.chart-card.evolution .canvas-wrapper'
-      );
+  const legenda = document.getElementById('donut-legenda');
+  if (!legenda) return;
 
-    if (wrapper && totalMeses > 0) {
-      const filtroVal =
-        document.getElementById('filtro-mes')?.value || '';
+  const itens = [
+    { label: 'Essenciais', valor: essencial, cor: '#00FFB2' },
+    { label: 'Lazer', valor: lazer, cor: '#FFD700' },
+    { label: 'Reserva', valor: reserva, cor: '#00D1FF' },
+  ];
 
-      const [anoFiltro, mesFiltro] =
-        filtroVal.split('-').map(Number);
+  legenda.innerHTML = itens.map(({ label, valor, cor }) => {
+    const perc = total > 0 ? ((valor / total) * 100).toFixed(0) : 0;
 
-      const mesLabel =
-        `${mesesNomes[mesFiltro]}/${String(anoFiltro).slice(-2)}`;
+    return `
+      <div class="donut-legenda-item">
+        <span class="donut-legenda-dot" style="background:${cor}"></span>
+        <span class="donut-legenda-nome">${label}</span>
+        <span class="donut-legenda-val">${valor.toLocaleString('pt-BR', {
+      style: 'currency', currency: 'BRL'
+    })}</span>
+        <span class="donut-legenda-perc">${perc}%</span>
+      </div>
+    `;
+  }).join('');
+}
 
-      const idxAtual =
-        labels.indexOf(mesLabel);
+export function atualizarComparativo(dadosMesAtual, dadosMesAnterior, nomeMesAtual, nomeMesAnterior) {
+  const container = document.getElementById('comparativo-container');
+  const legenda = document.getElementById('comparativo-legenda');
 
-      const idx =
-        idxAtual !== -1
-          ? idxAtual
-          : labels.length - 1;
+  if (!container) return;
 
-      const barWidth =
-        wrapper.scrollWidth / totalMeses;
-
-      wrapper.scrollLeft =
-        Math.max(0, (idx - 2) * barWidth);
-    }
+  if (legenda) {
+    legenda.textContent = `${nomeMesAnterior} vs ${nomeMesAtual}`;
   }
+
+  const itens = [
+    { label: 'Receita', atual: dadosMesAtual.rec, anterior: dadosMesAnterior.rec, cor: '#00FFB2' },
+    { label: 'Despesas', atual: dadosMesAtual.des, anterior: dadosMesAnterior.des, cor: '#FF6B35' },
+    { label: 'Reserva', atual: dadosMesAtual.res, anterior: dadosMesAnterior.res, cor: '#00D1FF' },
+    { label: 'Lazer', atual: dadosMesAtual.lazer, anterior: dadosMesAnterior.lazer, cor: '#FFD700' },
+  ];
+
+  const maiorValor = Math.max(
+    ...itens.map(i => Math.max(i.atual, i.anterior)), 1
+  );
+
+  container.innerHTML = itens.map(({ label, atual, anterior, cor }) => {
+    const porcAtual = ((atual / maiorValor) * 100).toFixed(1);
+    const porcAnterior = ((anterior / maiorValor) * 100).toFixed(1);
+
+    const diff = anterior > 0
+      ? Math.round(((atual - anterior) / anterior) * 100)
+      : null;
+
+    const diffHtml = diff !== null
+      ? `<span class="comp-diff ${diff > 0 ? 'comp-diff--up' : diff < 0 ? 'comp-diff--down' : 'comp-diff--eq'}">
+          ${diff > 0 ? '↑' : diff < 0 ? '↓' : '='} ${Math.abs(diff)}%
+        </span>`
+      : '';
+
+    return `
+      <div class="comp-row">
+        <div class="comp-label-group">
+          <span class="comp-label">${label}</span>
+          ${diffHtml}
+        </div>
+
+        <div class="comp-bars">
+          <div class="comp-bar-group">
+            <span class="comp-bar-hint">${nomeMesAnterior}</span>
+            <div class="comp-bar-track">
+              <div class="comp-bar-fill comp-bar-anterior"
+                style="width:${porcAnterior}%">
+              </div>
+            </div>
+            <span class="comp-bar-val">${anterior.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+          </div>
+
+          <div class="comp-bar-group">
+            <span class="comp-bar-hint">${nomeMesAtual}</span>
+            <div class="comp-bar-track">
+              <div class="comp-bar-fill"
+                style="width:${porcAtual}%; background:${cor}">
+              </div>
+            </div>
+            <span class="comp-bar-val">${atual.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
 }

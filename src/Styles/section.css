@@ -2192,3 +2192,105 @@ body.modal-open {
   background: rgba(0, 209, 255, 0.12);
   color: #00D1FF;
 }
+
+.meta-subcats {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.meta-subcat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.meta-subcat-nome {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.meta-subcat-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.meta-progress {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 4px 0;
+}
+
+.meta-progress div {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+.card balance header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.saude-badge {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+}
+
+.saude--verde {
+  background: rgba(0, 255, 178, 0.12);
+  color: #00FFB2;
+}
+
+.saude--amarelo {
+  background: rgba(255, 215, 0, 0.12);
+  color: #FFD700;
+}
+
+.saude--vermelho {
+  background: rgba(255, 107, 53, 0.12);
+  color: #FF6B35;
+}
+
+.filtro-bloco-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.filtro-bloco-btn {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filtro-bloco-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+
+.filtro-bloco-btn.active {
+  background: rgba(0, 255, 178, 0.1);
+  border-color: rgba(0, 255, 178, 0.3);
+  color: #00FFB2;
+}
