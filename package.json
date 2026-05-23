@@ -2,7 +2,7 @@
   "name": "finance-simplefy",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
+  "main": "./src/JavaScript/index.js",
   "scripts": {
     "start": "webpack serve --open",
     "build": "webpack",

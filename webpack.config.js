@@ -1,14 +1,14 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import CopyWebpackPlugin from 'copy-webpack-plugin'; // 1. ADICIONE AQUI
+import CopyWebpackPlugin from 'copy-webpack-plugin'; 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default {
   mode: 'development',
-  entry: './src/index.js',
+  entry: './src/JavaScript/index.js',
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
@@ -30,7 +30,6 @@ export default {
     new HtmlWebpackPlugin({
       template: './src/index.html',
     }),
-    // 2. ADICIONE ESTE BLOCO AQUI
     new CopyWebpackPlugin({
       patterns: [
         {
