@@ -191,6 +191,47 @@ function adicionarAoHistorico(role, content) {
   salvarHistorico(historico);
 }
 
+// Cria o botão de copiar e adiciona ao card da IA
+function criarBotaoCopiar(textoOriginal) {
+  const btn = document.createElement('button');
+  btn.className = 'btn-copiar-msg';
+  btn.title = 'Copiar mensagem';
+  btn.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+    </svg>
+    <span>Copiar</span>
+  `;
+
+  btn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(textoOriginal);
+      btn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span>Copiado!</span>
+      `;
+      btn.classList.add('btn-copiar-ok');
+      setTimeout(() => {
+        btn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span>Copiar</span>
+        `;
+        btn.classList.remove('btn-copiar-ok');
+      }, 2000);
+    } catch {
+      btn.querySelector('span').textContent = 'Erro';
+    }
+  });
+
+  return btn;
+}
+
 function adicionarMensagem(texto, tipo) {
   const chat = document.getElementById('chat-mensagens');
   if (!chat) return;
@@ -200,6 +241,8 @@ function adicionarMensagem(texto, tipo) {
 
   if (tipo === 'assistente') {
     div.innerHTML = marked.parse(texto);
+    // Adiciona botão de copiar abaixo do conteúdo
+    div.appendChild(criarBotaoCopiar(texto));
   } else {
     div.textContent = texto;
   }
@@ -325,7 +368,6 @@ export function iniciarChat() {
     const chat = document.getElementById('chat-mensagens');
     if (!chat || !historico.length) return;
 
-    // Remove a mensagem de boas-vindas padrão
     chat.innerHTML = '';
 
     historico.forEach(({ role, content }) => {
@@ -334,6 +376,7 @@ export function iniciarChat() {
 
       if (role === 'assistant') {
         div.innerHTML = marked.parse(content);
+        div.appendChild(criarBotaoCopiar(content));
       } else {
         div.textContent = content;
       }

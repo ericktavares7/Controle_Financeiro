@@ -510,3 +510,39 @@
   background: rgba(0, 255, 178, 0.2);
   margin: 0 0 14px 2px;
 }
+
+/* =========================
+   BOTÃO COPIAR MENSAGEM
+========================= */
+
+.btn-copiar-msg {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 12px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #64748b;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.btn-copiar-msg:hover {
+  background: rgba(0, 255, 178, 0.08);
+  border-color: rgba(0, 255, 178, 0.2);
+  color: #00FFB2;
+}
+
+.btn-copiar-msg.btn-copiar-ok {
+  background: rgba(0, 255, 178, 0.1);
+  border-color: rgba(0, 255, 178, 0.25);
+  color: #00FFB2;
+}
+
+.btn-copiar-msg svg {
+  flex-shrink: 0;
+}
