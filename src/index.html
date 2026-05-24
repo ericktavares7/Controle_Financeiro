@@ -680,43 +680,51 @@
     </section>
 
     <section class="tab-section" id="tab-ia">
-      <section class="add-transaction-section" id="chat-card">
+      <div class="chat-layout">
 
-        <div id="chat-header">
-          <span></span>
-          <h3>Assistente Financeiro com IA</h3>
-          <button type="button" class="btn-config-ia" onclick="window.toggleConfigIA()" title="Configurar chave de API">
-            <i class="ph ph-key"></i>
-          </button>
+        <div class="chat-topbar">
+          <div class="chat-topbar-info">
+            <div class="chat-avatar">✦</div>
+            <div>
+              <h3 class="chat-title">Assistente Financeiro</h3>
+              <span class="chat-subtitle">Análise em tempo real das suas finanças</span>
+            </div>
+          </div>
+          <div class="chat-topbar-actions">
+            <button type="button" class="btn-config-ia" onclick="window.toggleConfigIA()"
+              title="Configurar chave de API">
+              <i class="ph ph-key"></i>
+            </button>
+            <button type="button" class="btn-config-ia" onclick="window.limparHistoricoChat()" title="Limpar conversa">
+              <i class="ph ph-trash"></i>
+            </button>
+          </div>
         </div>
 
         <div id="config-ia-panel" class="config-ia-panel hidden">
-          <p class="config-ia-desc">
-            Insira sua chave de API da Anthropic. Ela fica salva apenas no seu navegador.
-          </p>
+          <p class="config-ia-desc">Insira sua chave de API da Anthropic. Ela fica salva apenas no seu navegador.</p>
           <div class="config-ia-row">
             <input type="password" id="input-api-key" placeholder="sk-ant-api03-..." autocomplete="off">
-            <button type="button" class="btn-save-key" onclick="window.salvarApiKey()">
-              Salvar
-            </button>
+            <button type="button" class="btn-save-key" onclick="window.salvarApiKey()">Salvar</button>
           </div>
           <p id="config-ia-status" class="config-ia-status"></p>
         </div>
 
-        <div id="chat-mensagens">
-          <div class="msg msg-assistente">
-            Olá! Analisei suas finanças e estou pronto para responder. Pergunte qualquer coisa!
+        <div id="chat-mensagens" class="chat-mensagens"></div>
+
+        <div class="chat-input-wrapper">
+          <div class="chat-input-box">
+            <input type="text" id="chat-input" placeholder="Pergunte sobre suas finanças...">
+            <button type="button" id="chat-enviar">
+              <i class="ph ph-paper-plane-tilt"></i>
+            </button>
           </div>
+          <p class="chat-disclaimer">A IA analisa os dados do mês selecionado no filtro.</p>
         </div>
 
-        <div id="chat-input-area">
-          <input type="text" id="chat-input" placeholder="Pergunte sobre suas finanças...">
-          <button type="button" id="chat-enviar">→</button>
-        </div>
-
-      </section>
+      </div>
     </section>
-
+    
     <nav class="mobile-bottom-nav">
       <button type="button" id="btn-bottom-actions" class="bottom-nav-btn" data-bottom="actions">
         <i class="ph ph-plus"></i>

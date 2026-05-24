@@ -1,3 +1,4 @@
+import { marked } from 'marked';
 const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 const API_URL = 'https://api.anthropic.com/v1/messages';
 
@@ -161,13 +162,33 @@ ${ctx.topCats || '  Nenhuma despesa registrada'}
 - Não invente dados que não estão acima`;
 }
 
-let historico = [];
+const HISTORICO_KEY = 'finance_chat_historico';
+
+function carregarHistorico() {
+  try {
+    const salvo = localStorage.getItem(HISTORICO_KEY);
+    return salvo ? JSON.parse(salvo) : [];
+  } catch {
+    return [];
+  }
+}
+
+function salvarHistorico(hist) {
+  try {
+    localStorage.setItem(HISTORICO_KEY, JSON.stringify(hist));
+  } catch {
+    console.warn('Não foi possível salvar histórico.');
+  }
+}
+
+let historico = carregarHistorico();
 
 function adicionarAoHistorico(role, content) {
   historico.push({ role, content });
-  if (historico.length > 20) {
-    historico = historico.slice(historico.length - 20);
+  if (historico.length > 40) {
+    historico = historico.slice(historico.length - 40);
   }
+  salvarHistorico(historico);
 }
 
 function adicionarMensagem(texto, tipo) {
@@ -176,7 +197,12 @@ function adicionarMensagem(texto, tipo) {
 
   const div = document.createElement('div');
   div.className = `msg msg-${tipo}`;
-  div.textContent = texto;
+
+  if (tipo === 'assistente') {
+    div.innerHTML = marked.parse(texto);
+  } else {
+    div.textContent = texto;
+  }
 
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
@@ -284,6 +310,8 @@ export function iniciarChat() {
 
   if (!btnEnviar || !input) return;
 
+  renderizarHistoricoSalvo();
+
   btnEnviar.addEventListener('click', enviarMensagem);
 
   input.addEventListener('keydown', (e) => {
@@ -292,6 +320,29 @@ export function iniciarChat() {
       enviarMensagem();
     }
   });
+
+  function renderizarHistoricoSalvo() {
+    const chat = document.getElementById('chat-mensagens');
+    if (!chat || !historico.length) return;
+
+    // Remove a mensagem de boas-vindas padrão
+    chat.innerHTML = '';
+
+    historico.forEach(({ role, content }) => {
+      const div = document.createElement('div');
+      div.className = `msg msg-${role === 'user' ? 'usuario' : 'assistente'}`;
+
+      if (role === 'assistant') {
+        div.innerHTML = marked.parse(content);
+      } else {
+        div.textContent = content;
+      }
+
+      chat.appendChild(div);
+    });
+
+    chat.scrollTop = chat.scrollHeight;
+  }
 
   const observer = new MutationObserver(() => {
     const nome = document.getElementById('header-user-name')?.textContent;
@@ -304,4 +355,18 @@ export function iniciarChat() {
 
   const headerNome = document.getElementById('header-user-name');
   if (headerNome) observer.observe(headerNome, { childList: true, subtree: true, characterData: true });
+}
+
+export function limparHistoricoChat() {
+  historico = [];
+  salvarHistorico([]);
+
+  const chat = document.getElementById('chat-mensagens');
+  if (chat) {
+    chat.innerHTML = `
+      <div class="msg msg-assistente">
+        Olá! Conversa reiniciada. Como posso ajudar?
+      </div>
+    `;
+  }
 }

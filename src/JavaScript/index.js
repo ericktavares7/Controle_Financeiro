@@ -119,7 +119,8 @@ import {
 
 import { iniciarFiltroBlocos } from './transactions.js';
 
-import { iniciarChat, toggleConfigIA, salvarApiKey } from './chat.js';
+import { iniciarChat, toggleConfigIA, salvarApiKey, limparHistoricoChat } from './chat.js';
+
 
 window.cards = state.cards;
 window.transactions = state.transactions;
@@ -175,6 +176,7 @@ window.fecharConfirmacao = fecharConfirmacao;
 
 window.toggleConfigIA = toggleConfigIA;
 window.salvarApiKey = salvarApiKey;
+window.limparHistoricoChat = limparHistoricoChat;
 
 
 window.ordemCrescente = false;
@@ -330,11 +332,11 @@ document.addEventListener('DOMContentLoaded', () => {
   iniciarFiltroBlocos();
   criarGraficoDonut();
   iniciarChat();
-  
+
   document.getElementById('filtro-mes')
-  ?.addEventListener('change', () => {
-    window.atualizarDashboard();
-  });
+    ?.addEventListener('change', () => {
+      window.atualizarDashboard();
+    });
 
 });
 
