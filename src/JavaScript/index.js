@@ -28,7 +28,7 @@ import {
   getMesSelecionado
 } from './utils.js';
 
-import { showToast } from './UI/toast.js';
+import { showToast } from './toast.js';
 
 import {
   aplicarTema,
