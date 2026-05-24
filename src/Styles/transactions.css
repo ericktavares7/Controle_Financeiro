@@ -1,113 +1,234 @@
-#transaction-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 12px;
-  max-height: 400px;
-  overflow-y: auto;
-}
+/* =========================
+   CONTAINER GERAL
+========================= */
 
-/* Container geral */
 .transacoes-container {
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 16px;
   width: 100%;
 }
 
-/* Header da seção */
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-bottom: 10px;
   flex-wrap: wrap;
 }
 
-/* Histórico lado a lado */
+/* =========================
+   SUMMARY CARDS (topo)
+========================= */
+
+.top-cards-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.card-valor {
+  background: #161b22;
+  border: 0.5px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.card-valor p {
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 6px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.card-valor h2 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.btn-receita h2 {
+  color: #00FFB2;
+}
+
+.btn-despesa h2 {
+  color: #FF6B35;
+}
+
+.insight-saldo {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 4px;
+  display: block;
+}
+
+/* =========================
+   PILLS FILTRO
+========================= */
+
+.filtro-bloco-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filtro-bloco-btn {
+  padding: 5px 13px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.filtro-bloco-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+}
+
+.filtro-bloco-btn.active {
+  background: rgba(0, 255, 178, 0.1);
+  border-color: rgba(0, 255, 178, 0.3);
+  color: #00FFB2;
+}
+
+/* =========================
+   DISTRIBUIÇÃO (barras)
+========================= */
+
+.card-header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-header-flex h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.btn-filter-icon {
+  background: rgba(255, 255, 255, 0.04);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  color: #64748b;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.btn-filter-icon:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+}
+
+.category-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* =========================
+   HISTÓRICO SEGMENTADO
+========================= */
+
 .historico-segmentado {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 14px;
   align-items: start;
 }
 
-/* MOBILE */
-@media (max-width: 850px) {
-  .historico-segmentado {
-    grid-template-columns: 1fr;
-  }
+.card-historico {
+  background: #161b22;
+  border: 0.5px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  overflow: hidden;
+}
 
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.titulo-receitas,
+.titulo-despesas {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 /* =========================
    ITEM DA TRANSAÇÃO
 ========================= */
 
+#transaction-list {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
 .tx-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-
-  padding: 12px;
-  border-radius: 12px;
-
-  border: 1px solid transparent;
-  border-bottom: 1px solid var(--border-color);
-
-  transition:
-    background 0.2s ease,
-    transform 0.2s ease,
-    border-color 0.2s ease;
-
+  gap: 10px;
+  padding: 9px 14px;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s;
   width: 100%;
   box-sizing: border-box;
 }
 
+.tx-item:last-child {
+  border-bottom: none;
+}
+
 .tx-item:hover {
-  background: rgba(255, 255, 255, 0.03);
-  transform: translateX(2px);
+  background: rgba(255, 255, 255, 0.025);
 }
 
 /* Ícone */
 .tx-icon {
-  width: 40px;
-  height: 40px;
-
-  border-radius: 12px;
-
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  font-size: 14px;
+  font-size: 13px;
   flex-shrink: 0;
 }
 
-/* Cores */
 .tx-icon--income {
-  background: rgba(0, 255, 178, 0.1);
-  color: var(--receita);
+  background: rgba(0, 255, 178, 0.08);
 }
 
 .tx-icon--expense {
-  background: rgba(255, 107, 53, 0.1);
-  color: var(--despesa);
+  background: rgba(255, 107, 53, 0.08);
 }
 
 .tx-icon--caixinha {
-  background: rgba(255, 230, 109, 0.15);
-  color: #FFE66D;
+  background: rgba(255, 230, 109, 0.1);
 }
 
 .tx-icon--cartao {
-  background: rgba(78, 205, 196, 0.15);
-  color: #4ECDC4;
+  background: rgba(78, 205, 196, 0.1);
 }
 
 /* =========================
@@ -117,28 +238,23 @@
 .tx-info {
   flex: 1;
   min-width: 0;
-
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
-/* Descrição */
 .tx-desc {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
-  color: #ffffff;
-
+  color: #e2e8f0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Meta */
 .tx-meta {
-  color: #94a3b8;
-  font-size: 12px;
-
+  color: #475569;
+  font-size: 11px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -151,93 +267,106 @@
 .tx-right {
   display: flex;
   align-items: center;
-  gap: 10px;
-
+  gap: 6px;
   flex-shrink: 0;
 }
 
-/* Valor */
 .tx-val {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
 }
 
 .tx-val--income {
-  color: var(--entradas);
+  color: #00FFB2;
 }
 
 .tx-val--expense {
-  color: var(--saidas);
-}
-
-/* Delete */
-.tx-delete {
-  background: none;
-  border: none;
-
-  color: var(--txt_secondario);
-
-  cursor: pointer;
-
-  font-size: 11px;
-
-  padding: 6px;
-  border-radius: 6px;
-
-  transition: all 0.2s ease;
-
-  line-height: 1;
-
-  flex-shrink: 0;
-}
-
-.tx-delete:hover {
-  background: rgba(255, 107, 53, 0.15);
-  color: var(--saidas);
-}
-
-/* =========================
-   MOBILE FINO
-========================= */
-
-@media (max-width: 480px) {
-
-  .tx-item {
-    gap: 10px;
-    padding: 10px;
-  }
-
-  .tx-icon {
-    width: 36px;
-    height: 36px;
-    font-size: 13px;
-  }
-
-  .tx-desc {
-    font-size: 14px;
-  }
-
-  .tx-meta {
-    font-size: 11px;
-  }
-
-  .tx-val {
-    font-size: 13px;
-  }
-
-  .tx-delete {
-    padding: 4px;
-  }
-}
-
-.tx-highlight-soft {
-  background: rgba(0, 255, 178, 0.08);
-  border-color: rgba(0, 255, 178, 0.35);
-  box-shadow: 0 0 18px rgba(0, 255, 178, 0.12);
-  transform: scale(1.01);
+  color: #FF6B35;
 }
 
 .tx-val--goal {
   color: #00D1FF;
+}
+
+/* Botões de ação */
+.tx-delete,
+.btn-edit-tx {
+  background: none;
+  border: none;
+  color: #334155;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 5px;
+  border-radius: 6px;
+  transition: all 0.15s;
+  line-height: 1;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-edit-tx:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+}
+
+.tx-delete:hover {
+  background: rgba(255, 107, 53, 0.1);
+  color: #FF6B35;
+}
+
+/* =========================
+   HIGHLIGHT
+========================= */
+
+.tx-highlight-soft {
+  background: rgba(0, 255, 178, 0.06);
+  border-color: rgba(0, 255, 178, 0.2);
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 850px) {
+  .historico-segmentado {
+    grid-template-columns: 1fr;
+  }
+
+  .top-cards-container {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .tx-item {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .tx-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .tx-desc {
+    font-size: 12px;
+  }
+
+  .tx-meta {
+    font-size: 10px;
+  }
+
+  .tx-val {
+    font-size: 12px;
+  }
 }

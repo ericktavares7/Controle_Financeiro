@@ -624,59 +624,102 @@
       </div>
     </div>
 
-    <section class="tab-section" id="tab-transacoes">
+    <section id="tab-transacoes" class="tab-section">
+
       <div class="transacoes-container">
 
-        <header class="section-header">
-          <h3>Histórico de Transações</h3>
-          <select id="filtro-mes" hidden></select>
-        </header>
+        <!-- HEADER -->
+        <div class="transactions-top-header">
 
-        <div class="filtro-bloco-pills">
-          <button class="filtro-bloco-btn active" data-bloco="todos">Todos</button>
-          <button class="filtro-bloco-btn" data-bloco="essencial">🏠 Essenciais</button>
-          <button class="filtro-bloco-btn" data-bloco="lazer">🎬 Lazer</button>
-          <button class="filtro-bloco-btn" data-bloco="reserva">🎯 Reserva</button>
-        </div>
+          <div>
+            <h2 class="transactions-title">
+              Histórico de Transações
+            </h2>
 
-        <div class="top-cards-container">
-          <article class="card-valor btn-receita">
-            <p>↑ Receita</p>
-            <h2 id="mes-receita">R$ 0,00</h2>
-          </article>
+            <p class="transactions-subtitle">
+              acompanhe receitas, despesas e reservas
+            </p>
+          </div>
 
-          <article class="card-valor btn-despesa">
-            <p>↓ Despesas</p>
-            <h2 id="mes-despesa">R$ 0,00</h2>
-          </article>
-
-          <article class="card-valor">
-            <p>◈ Saldo</p>
-            <h2 id="mes-saldo">R$ 0,00</h2>
-            <span id="insight-saldo" class="insight-saldo"></span>
-          </article>
-        </div>
-
-        <div class="card-header-flex">
-          <h3>Distribuição</h3>
-          <button id="btn-ordem" class="btn-filter-icon" onclick="window.alternarOrdemFiltro()">
-            <span id="sort-icon">⇅</span>
+          <button class="sort-btn" onclick="alternarOrdemFiltro()">
+            ⇅
           </button>
-        </div>
-        <div class="category-bars" id="mes-categorias"></div>
 
-        <div class="historico-segmentado">
-          <div class="card-historico">
-            <h4 class="titulo-receitas">💰 Receitas</h4>
-            <div id="lista-receitas-historico"></div>
+        </div>
+
+        <!-- CARDS RESUMO -->
+        <div class="tx-summary-grid">
+
+          <div class="tx-summary-card receita">
+            <span>↑ Receita</span>
+            <strong id="mes-receita">
+              R$ 0,00
+            </strong>
           </div>
 
-          <div class="card-historico">
-            <h4 class="titulo-despesas">💸 Despesas</h4>
-            <div id="lista-despesas-historico"></div>
+          <div class="tx-summary-card despesa">
+            <span>↓ Despesas</span>
+            <strong id="mes-despesa">
+              R$ 0,00
+            </strong>
           </div>
+
+          <div class="tx-summary-card saldo">
+            <span>◈ Saldo</span>
+            <strong id="mes-saldo">
+              R$ 0,00
+            </strong>
+          </div>
+
         </div>
+
+        <!-- FILTROS -->
+        <div class="tx-filters-wrapper">
+
+          <button class="tx-filter active">
+            Todos
+          </button>
+
+          <button class="tx-filter">
+            🏠 Essenciais
+          </button>
+
+          <button class="tx-filter">
+            🎬 Lazer
+          </button>
+
+          <button class="tx-filter">
+            🎯 Reserva
+          </button>
+
+        </div>
+
+        <!-- DISTRIBUIÇÃO -->
+        <div class="distribution-header">
+
+          <div>
+            <h3>Distribuição</h3>
+          </div>
+
+          <div class="distribution-legend">
+
+            <span class="legend-income">
+              💰 Receitas
+            </span>
+
+            <span class="legend-expense">
+              💸 Despesas
+            </span>
+
+          </div>
+
+        </div>
+
+        <!-- LISTA -->
+        <div id="transaction-list"></div>
+
       </div>
+
     </section>
 
     <section class="tab-section" id="tab-ia">
@@ -724,7 +767,7 @@
 
       </div>
     </section>
-    
+
     <nav class="mobile-bottom-nav">
       <button type="button" id="btn-bottom-actions" class="bottom-nav-btn" data-bottom="actions">
         <i class="ph ph-plus"></i>
