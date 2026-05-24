@@ -1,8 +1,3 @@
-/* =========================
-   RESPONSIVE.CSS
-   Ajustes responsivos finais
-========================= */
-
 *,
 *::before,
 *::after {
@@ -22,8 +17,11 @@ body {
   padding: 0;
 }
 
+
 /* =========================
-   CONTAINER
+   CONTAINER BASE
+   padding-top compensa o .dashboard-header fixed no desktop
+   (≈ 72px de altura do header + folga)
 ========================= */
 
 .dashboard-container {
@@ -31,6 +29,7 @@ body {
   padding: 20px;
   padding-top: 90px;
 }
+
 
 /* =========================
    AÇÕES DESKTOP
@@ -70,17 +69,18 @@ body {
   color: #00D1FF;
 }
 
+
 /* =========================
-   DESKTOP / TABLET GRANDE
+   DESKTOP / TABLET GRANDE — a partir de 769px
 ========================= */
 
 @media (min-width: 769px) {
+
   .desktop-actions-bar {
     display: flex !important;
     justify-content: flex-end;
     gap: 12px;
     margin-bottom: 14px;
-    z-index: 100;
   }
 
   .summary-grid {
@@ -97,7 +97,6 @@ body {
     display: grid !important;
     grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)) !important;
     gap: 16px !important;
-
     overflow: visible !important;
     padding: 16px 0 0 !important;
   }
@@ -119,6 +118,7 @@ body {
     color: #94a3b8;
   }
 
+  /* Menu panel fullscreen no desktop */
   #menu-panel.bottom-panel.active {
     display: flex !important;
     flex-direction: column !important;
@@ -146,34 +146,25 @@ body {
     z-index: 999999 !important;
   }
 
-  .metas-modal-card {
-    width: 100%;
-    max-width: 480px;
-
-    background: #0f172a;
-
-    border: 1px solid #1e2d40;
-    border-radius: 24px;
-
-    padding: 24px;
-
-    box-shadow:
-      0 24px 60px rgba(0, 0, 0, 0.45);
-  }
-
   #menu-panel>* {
     width: 100% !important;
     max-width: 420px !important;
   }
 
+  .metas-modal-card {
+    width: 100%;
+    max-width: 480px;
+    background: #0f172a;
+    border: 1px solid #1e2d40;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  }
+
+  /* Metas panel fullscreen no desktop */
   body #metas-panel.bottom-panel.active {
     position: fixed !important;
     inset: 0 !important;
-
-    left: 0 !important;
-    right: 0 !important;
-    top: 0 !important;
-    bottom: 0 !important;
 
     width: 100vw !important;
     height: 100vh !important;
@@ -190,7 +181,6 @@ body {
 
     border: none !important;
     border-radius: 0 !important;
-
     transform: none !important;
 
     z-index: 9999999 !important;
@@ -199,26 +189,28 @@ body {
   body #metas-panel.bottom-panel.active .metas-modal-card {
     width: 100% !important;
     max-width: 480px !important;
-
     margin: 0 auto !important;
-
     background: #0f172a !important;
     border: 1px solid #1e2d40 !important;
     border-radius: 24px !important;
-
     padding: 24px !important;
-
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45) !important;
   }
 }
 
+
 /* =========================
-   MOBILE / TABLET PEQUENO
+   MOBILE / TABLET PEQUENO — até 768px
+   Aqui o header sai do fixed, então o padding-top
+   do container pode ser menor (só a .main-nav fixa ≈ 52px)
 ========================= */
 
 @media (max-width: 768px) {
+
   .dashboard-container {
     padding: 14px;
+    padding-top: 20px;
+    /* header está no fluxo; .main-nav fixa já é compensada pelo padding-top do .dashboard-header */
     padding-bottom: calc(110px + env(safe-area-inset-bottom));
   }
 
@@ -251,17 +243,12 @@ body {
   .wallet-cards-list {
     display: flex !important;
     gap: 14px !important;
-
     overflow-x: auto !important;
     overflow-y: hidden !important;
-
     padding: 12px 2px 4px !important;
-
     scroll-snap-type: x mandatory;
-
     scrollbar-width: none;
     -ms-overflow-style: none;
-
     -webkit-overflow-scrolling: touch;
   }
 
@@ -293,10 +280,8 @@ body {
 
   .chart-card.evolution .canvas-wrapper {
     height: 300px !important;
-
     overflow-x: auto !important;
     overflow-y: hidden !important;
-
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -312,13 +297,16 @@ body {
   }
 }
 
+
 /* =========================
-   TELAS MUITO PEQUENAS
+   TELAS MUITO PEQUENAS — até 500px
 ========================= */
 
 @media (max-width: 500px) {
+
   .dashboard-container {
     padding: 12px;
+    padding-top: 20px;
     padding-bottom: calc(110px + env(safe-area-inset-bottom));
   }
 
@@ -334,6 +322,7 @@ body {
     max-width: 230px !important;
   }
 }
+
 
 /* =========================
    SAFE AREA IOS

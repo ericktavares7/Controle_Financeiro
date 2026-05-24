@@ -681,19 +681,39 @@
 
     <section class="tab-section" id="tab-ia">
       <section class="add-transaction-section" id="chat-card">
+
         <div id="chat-header">
           <span></span>
           <h3>Assistente Financeiro com IA</h3>
+          <button type="button" class="btn-config-ia" onclick="window.toggleConfigIA()" title="Configurar chave de API">
+            <i class="ph ph-key"></i>
+          </button>
         </div>
+
+        <div id="config-ia-panel" class="config-ia-panel hidden">
+          <p class="config-ia-desc">
+            Insira sua chave de API da Anthropic. Ela fica salva apenas no seu navegador.
+          </p>
+          <div class="config-ia-row">
+            <input type="password" id="input-api-key" placeholder="sk-ant-api03-..." autocomplete="off">
+            <button type="button" class="btn-save-key" onclick="window.salvarApiKey()">
+              Salvar
+            </button>
+          </div>
+          <p id="config-ia-status" class="config-ia-status"></p>
+        </div>
+
         <div id="chat-mensagens">
           <div class="msg msg-assistente">
             Olá! Analisei suas finanças e estou pronto para responder. Pergunte qualquer coisa!
           </div>
         </div>
+
         <div id="chat-input-area">
           <input type="text" id="chat-input" placeholder="Pergunte sobre suas finanças...">
           <button type="button" id="chat-enviar">→</button>
         </div>
+
       </section>
     </section>
 

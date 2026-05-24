@@ -1,0 +1,143 @@
+[33m1ccac86[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m .
+[33m44dbc73[m .
+[33m745a173[m imcorporando ia
+[33m313caa0[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m atualizacoes nos graficos
+[33mc2b738d[m estrutura de dados
+[33ma475fa5[m MENU
+[33m55d7667[m novo menu
+[33m94d3545[m .
+[33m95a3ca0[m att
+[33m73a1732[m .
+[33m08cadfc[m calendario estilizado
+[33m6a3181b[m .
+[33m4a0dcfc[m .
+[33m2ad1940[m .
+[33m0b5fc8f[m ATUALIZACOES
+[33m41635f3[m ATUALIZAÇÕES
+[33mc472673[m novo card
+[33me1dba50[m cartoes da carteira
+[33mf7db5fd[m aba carteira
+[33m3c00984[m ajustes gerais
+[33m9c080d7[m melhorando graficos
+[33m29780e2[m .
+[33m8f04ff4[m .
+[33ma5a9b1d[m registros no firebase
+[33m11485f5[m login /logout
+[33m2d33908[m logout
+[33m3b71962[m efeito loading
+[33mdc92d3d[m .
+[33md035085[m tela de login
+[33mfe7afb1[m login
+[33m0bd846a[m .
+[33m7b43240[m .
+[33m33b8fe1[m melhorando css
+[33m20e78a7[m arrumando css
+[33m4d79fe8[m .
+[33m5076d6a[m .
+[33m3aaefd1[m .
+[33m4c61b32[m .
+[33m8e6ee18[m .
+[33mf13f71b[m .
+[33m1b060b7[m .
+[33m7ae20a5[m .
+[33mb4ee6ed[m .
+[33md3f5488[m test
+[33mfd08cea[m test
+[33m67caa5f[m att mobile
+[33me2837e2[m atts
+[33m9c327af[m .
+[33m6992611[m .
+[33mca2ef87[m .
+[33m19b4cf2[m .
+[33mf031457[m .
+[33m4f50647[m .
+[33m8e2bd9d[m .
+[33meccd541[m .
+[33m8d3e40c[m .
+[33m592709b[m .
+[33me6e79a5[m .
+[33m39544c4[m .
+[33m4eaff4b[m .
+[33m847ca1a[m testes
+[33m2a10a4f[m .
+[33mcd9a994[m .
+[33m09df0b1[m .
+[33m5033266[m finais
+[33mf899db5[m att
+[33m6d2a3f8[m .
+[33m7e67d66[m .
+[33ma5a7298[m .
+[33m8ef9819[m .
+[33m515f19a[m .
+[33m2d6774c[m .
+[33m431da1f[m .
+[33meb90003[m .
+[33m12ce310[m ajuste de dealhes
+[33m8670070[m mobile-first
+[33m066cba1[m RESPONSIVIDADE
+[33md737296[m .
+[33m10af585[m .
+[33mc0db07b[m resolvendo bug de login
+[33m68d346a[m .
+[33m5cc7219[m .
+[33m4047f0e[m .
+[33m39a802f[m .
+[33me53f4f0[m teste login
+[33m7483adb[m .
+[33m6ee965b[m att de login
+[33m125dddd[m .
+[33m0005d6a[m .
+[33m9eaa79d[m .
+[33m2aea908[m add tela de logout
+[33mcfcfc5c[m Merge branch 'main' of https://github.com/ericktavares7/Controle_Financeiro
+[33mdedea0a[m testando tela de login
+[33mb63296e[m Add app access link to README
+[33m0346658[m Add initial README.md with project details
+[33md8398b9[m add mais uma info
+[33m8ba678b[m .
+[33mb690f52[m organizando resposive.css
+[33mc646405[m responsividade mobile
+[33mf9e5aa0[m ultimas styles
+[33m75861b4[m fontes
+[33m3b43f9c[m att 1.0
+[33mbf50a3e[m att
+[33m8ccf255[m att
+[33m299ae7e[m atualizacoes
+[33m83962a8[m .
+[33m0eeb4c7[m botoes
+[33mad3bfcf[m .
+[33mff2ebf8[m corrigindo erros
+[33m3d96360[m att para firerbase
+[33m89d487b[m .
+[33ma1b14ce[m teste
+[33m95f1c26[m .
+[33m4a4f268[m att
+[33m3737af0[m responsividade desktop
+[33m154ab10[m ajuste desktop
+[33m599d702[m estilizando responsividade desktop
+[33mce7ea67[m corrgindo error 404
+[33m7505cba[m att
+[33m923e711[m finalizando logo
+[33m4fc5580[m configurando icon
+[33ma530925[m adicionando favicon
+[33mc7d5ad5[m excluindo historico recente da aba geral
+[33m2df4b97[m testando
+[33m4b07424[m configurando mensagens motivadoras
+[33m627f507[m efeito timeout
+[33mae29910[m fazendo correções no dashbord
+[33m6362a59[m configurando os meses
+[33mf6080a4[m configuração da barra de categorias
+[33m2efcd60[m corrigindo atualização de valores e Ids
+[33m83439bb[m atualizando a funcao category
+[33m8029bba[m estilos dos cards
+[33m1083e07[m estilzando botoes
+[33md249323[m botao caixinha ativo
+[33m1d0f1b7[m correções
+[33m471e2e5[m correção
+[33m63d071f[m correçao de bugs no botao
+[33mba6ff0c[m correção de bugs
+[33mce21842[m correções de bugs nas sections
+[33mb242145[m ajuste de sintaxe e dependencias
+[33m3c85316[m incorporando vercel
+[33m695c183[m ultimas atualizacoes
+[33md36abae[m sistema_financeiro
