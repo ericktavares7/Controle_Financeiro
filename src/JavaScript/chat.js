@@ -1,6 +1,76 @@
 import { marked } from 'marked';
+import { db, auth } from './firebase.js';
+import {
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp
+} from 'firebase/firestore';
+
 const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 const API_URL = 'https://api.anthropic.com/v1/messages';
+const HISTORICO_KEY = 'finance_chat_historico';
+
+// =========================
+// STORAGE — Firestore + localStorage fallback
+// =========================
+
+function getUid() {
+  return auth?.currentUser?.uid || null;
+}
+
+async function carregarHistorico() {
+  const uid = getUid();
+
+  if (uid) {
+    try {
+      const ref = doc(db, 'usuarios', uid, 'chat', 'historico');
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        return snap.data().mensagens || [];
+      }
+      return [];
+    } catch (e) {
+      console.warn('Erro ao carregar histórico do Firestore:', e);
+    }
+  }
+
+  // fallback localStorage
+  try {
+    const salvo = localStorage.getItem(HISTORICO_KEY);
+    return salvo ? JSON.parse(salvo) : [];
+  } catch {
+    return [];
+  }
+}
+
+async function salvarHistorico(hist) {
+  const uid = getUid();
+
+  if (uid) {
+    try {
+      const ref = doc(db, 'usuarios', uid, 'chat', 'historico');
+      await setDoc(ref, {
+        mensagens: hist,
+        atualizadoEm: serverTimestamp()
+      });
+      return;
+    } catch (e) {
+      console.warn('Erro ao salvar histórico no Firestore:', e);
+    }
+  }
+
+  // fallback localStorage
+  try {
+    localStorage.setItem(HISTORICO_KEY, JSON.stringify(hist));
+  } catch {
+    console.warn('Não foi possível salvar histórico.');
+  }
+}
+
+// =========================
+// API KEY
+// =========================
 
 function getApiKey() {
   return localStorage.getItem('finance_api_key') || '';
@@ -47,6 +117,10 @@ export function salvarApiKey() {
   }, 1500);
 }
 
+// =========================
+// CONTEXTO FINANCEIRO
+// =========================
+
 function montarContextoFinanceiro() {
   const select = document.getElementById('filtro-mes');
   if (!select?.value) return null;
@@ -67,7 +141,6 @@ function montarContextoFinanceiro() {
 
   let receita = 0, despesa = 0, reserva = 0, lazer = 0;
   const categorias = {};
-
   const CATS_LAZER = ['lazer', 'entretenimento', 'festa', 'viagem', 'streaming'];
 
   txMes.forEach(t => {
@@ -162,36 +235,24 @@ ${ctx.topCats || '  Nenhuma despesa registrada'}
 - Não invente dados que não estão acima`;
 }
 
-const HISTORICO_KEY = 'finance_chat_historico';
+// =========================
+// HISTÓRICO EM MEMÓRIA
+// =========================
 
-function carregarHistorico() {
-  try {
-    const salvo = localStorage.getItem(HISTORICO_KEY);
-    return salvo ? JSON.parse(salvo) : [];
-  } catch {
-    return [];
-  }
-}
-
-function salvarHistorico(hist) {
-  try {
-    localStorage.setItem(HISTORICO_KEY, JSON.stringify(hist));
-  } catch {
-    console.warn('Não foi possível salvar histórico.');
-  }
-}
-
-let historico = carregarHistorico();
+let historico = [];
 
 function adicionarAoHistorico(role, content) {
   historico.push({ role, content });
   if (historico.length > 40) {
     historico = historico.slice(historico.length - 40);
   }
-  salvarHistorico(historico);
+  salvarHistorico(historico); // async, não bloqueia
 }
 
-// Cria o botão de copiar e adiciona ao card da IA
+// =========================
+// BOTÃO COPIAR
+// =========================
+
 function criarBotaoCopiar(textoOriginal) {
   const btn = document.createElement('button');
   btn.className = 'btn-copiar-msg';
@@ -232,6 +293,10 @@ function criarBotaoCopiar(textoOriginal) {
   return btn;
 }
 
+// =========================
+// MENSAGENS
+// =========================
+
 function adicionarMensagem(texto, tipo) {
   const chat = document.getElementById('chat-mensagens');
   if (!chat) return;
@@ -241,7 +306,6 @@ function adicionarMensagem(texto, tipo) {
 
   if (tipo === 'assistente') {
     div.innerHTML = marked.parse(texto);
-    // Adiciona botão de copiar abaixo do conteúdo
     div.appendChild(criarBotaoCopiar(texto));
   } else {
     div.textContent = texto;
@@ -272,6 +336,10 @@ function mostrarLoading() {
 function removerLoading() {
   document.getElementById('msg-loading')?.remove();
 }
+
+// =========================
+// CLAUDE API
+// =========================
 
 async function chamarClaude(mensagemUsuario) {
   if (!getApiKey()) throw new Error('SEM_CHAVE');
@@ -347,12 +415,18 @@ async function enviarMensagem() {
   }
 }
 
-export function iniciarChat() {
+// =========================
+// INICIAR CHAT
+// =========================
+
+export async function iniciarChat() {
   const btnEnviar = document.getElementById('chat-enviar');
   const input = document.getElementById('chat-input');
 
   if (!btnEnviar || !input) return;
 
+  // Carrega histórico (Firestore ou localStorage)
+  historico = await carregarHistorico();
   renderizarHistoricoSalvo();
 
   btnEnviar.addEventListener('click', enviarMensagem);
@@ -364,28 +438,13 @@ export function iniciarChat() {
     }
   });
 
-  function renderizarHistoricoSalvo() {
-    const chat = document.getElementById('chat-mensagens');
-    if (!chat || !historico.length) return;
-
-    chat.innerHTML = '';
-
-    historico.forEach(({ role, content }) => {
-      const div = document.createElement('div');
-      div.className = `msg msg-${role === 'user' ? 'usuario' : 'assistente'}`;
-
-      if (role === 'assistant') {
-        div.innerHTML = marked.parse(content);
-        div.appendChild(criarBotaoCopiar(content));
-      } else {
-        div.textContent = content;
-      }
-
-      chat.appendChild(div);
-    });
-
-    chat.scrollTop = chat.scrollHeight;
-  }
+  // Quando o usuário logar depois do chat já iniciado, recarrega histórico
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      historico = await carregarHistorico();
+      renderizarHistoricoSalvo();
+    }
+  });
 
   const observer = new MutationObserver(() => {
     const nome = document.getElementById('header-user-name')?.textContent;
@@ -400,9 +459,41 @@ export function iniciarChat() {
   if (headerNome) observer.observe(headerNome, { childList: true, subtree: true, characterData: true });
 }
 
-export function limparHistoricoChat() {
+function renderizarHistoricoSalvo() {
+  const chat = document.getElementById('chat-mensagens');
+  if (!chat) return;
+
+  chat.innerHTML = '';
+
+  if (!historico.length) {
+    chat.innerHTML = `<div class="msg msg-assistente">Olá! Estou pronto para analisar suas finanças. Pergunte qualquer coisa!</div>`;
+    return;
+  }
+
+  historico.forEach(({ role, content }) => {
+    const div = document.createElement('div');
+    div.className = `msg msg-${role === 'user' ? 'usuario' : 'assistente'}`;
+
+    if (role === 'assistant') {
+      div.innerHTML = marked.parse(content);
+      div.appendChild(criarBotaoCopiar(content));
+    } else {
+      div.textContent = content;
+    }
+
+    chat.appendChild(div);
+  });
+
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// =========================
+// LIMPAR HISTÓRICO
+// =========================
+
+export async function limparHistoricoChat() {
   historico = [];
-  salvarHistorico([]);
+  await salvarHistorico([]);
 
   const chat = document.getElementById('chat-mensagens');
   if (chat) {
