@@ -46,7 +46,6 @@ export function salvarApiKey() {
   }, 1500);
 }
 
-/* ── Monta o contexto financeiro do mês atual ── */
 function montarContextoFinanceiro() {
   const select = document.getElementById('filtro-mes');
   if (!select?.value) return null;
@@ -95,14 +94,12 @@ function montarContextoFinanceiro() {
   const reservaIdeal = receita * (regra.reserva / 100);
   const lazerIdeal = receita * (regra.lazer / 100);
 
-  // Saúde financeira
   let pontos = 0;
   if (essencial <= essencialIdeal) pontos++;
   if (lazer <= lazerIdeal) pontos++;
   if (reserva >= reservaIdeal) pontos++;
   const saude = pontos === 3 ? 'Saudável' : pontos === 2 ? 'Atenção' : 'Crítico';
 
-  // Top categorias
   const topCats = Object.entries(categorias)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
@@ -119,7 +116,6 @@ function montarContextoFinanceiro() {
   };
 }
 
-/* ── Formata o system prompt com dados reais ── */
 function montarSystemPrompt(ctx) {
   if (!ctx) {
     return `Você é um assistente financeiro pessoal inteligente e direto. 
@@ -165,18 +161,15 @@ ${ctx.topCats || '  Nenhuma despesa registrada'}
 - Não invente dados que não estão acima`;
 }
 
-/* ── Histórico de conversa ── */
 let historico = [];
 
 function adicionarAoHistorico(role, content) {
   historico.push({ role, content });
-  // Mantém no máximo 20 mensagens para não explodir o contexto
   if (historico.length > 20) {
     historico = historico.slice(historico.length - 20);
   }
 }
 
-/* ── Renderização das mensagens ── */
 function adicionarMensagem(texto, tipo) {
   const chat = document.getElementById('chat-mensagens');
   if (!chat) return;
@@ -211,87 +204,80 @@ function removerLoading() {
   document.getElementById('msg-loading')?.remove();
 }
 
-/* ── Chamada à API do Claude ── */
 async function chamarClaude(mensagemUsuario) {
+  if (!getApiKey()) throw new Error('SEM_CHAVE');
 
-  async function chamarClaude(mensagemUsuario) {
-    if (!getApiKey()) {
-      throw new Error('SEM_CHAVE');
-    }
+  const ctx = montarContextoFinanceiro();
+  const systemPrompt = montarSystemPrompt(ctx);
 
-    const ctx = montarContextoFinanceiro();
-    const systemPrompt = montarSystemPrompt(ctx);
+  adicionarAoHistorico('user', mensagemUsuario);
 
-    adicionarAoHistorico('user', mensagemUsuario);
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': getApiKey(),
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: CLAUDE_MODEL,
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: historico,
+    }),
+  });
 
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': getApiKey(),
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: CLAUDE_MODEL,
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: historico,
-      }),
-    });
-
-    if (!response.ok) {
-      const erro = await response.json().catch(() => ({}));
-      throw new Error(erro?.error?.message || `Erro ${response.status}`);
-    }
-
-    const data = await response.json();
-    const resposta = data.content?.[0]?.text || 'Não consegui gerar uma resposta.';
-
-    adicionarAoHistorico('assistant', resposta);
-    return resposta;
+  if (!response.ok) {
+    const erro = await response.json().catch(() => ({}));
+    throw new Error(erro?.error?.message || `Erro ${response.status}`);
   }
 
-  /* ── Envio de mensagem ── */
-  async function enviarMensagem() {
-    const input = document.getElementById('chat-input');
-    const btnEnviar = document.getElementById('chat-enviar');
+  const data = await response.json();
+  const resposta = data.content?.[0]?.text || 'Não consegui gerar uma resposta.';
 
-    const texto = input?.value?.trim();
-    if (!texto) return;
+  adicionarAoHistorico('assistant', resposta);
+  return resposta;
+}
 
-    input.value = '';
-    input.disabled = true;
-    btnEnviar.disabled = true;
+async function enviarMensagem() {
+  const input = document.getElementById('chat-input');
+  const btnEnviar = document.getElementById('chat-enviar');
 
-    adicionarMensagem(texto, 'usuario');
-    const loading = mostrarLoading();
+  const texto = input?.value?.trim();
+  if (!texto) return;
 
-    try {
-      const resposta = await chamarClaude(texto);
-      removerLoading();
-      adicionarMensagem(resposta, 'assistente');
-    } catch (err) {
-      removerLoading();
-      console.error('Erro na IA:', err);
+  input.value = '';
+  input.disabled = true;
+  btnEnviar.disabled = true;
 
-      const msgErro = err.message?.includes('SEM_CHAVE')
-        ? 'Configure sua chave de API nas configurações da IA.'
-        : err.message?.includes('401')
-          ? 'Chave de API inválida.'
-          : err.message?.includes('429')
-            ? 'Limite atingido. Tente em instantes.'
-            : 'Erro ao conectar com a IA.';
-      adicionarMensagem(msgErro, 'assistente');
-    } finally {
-      input.disabled = false;
-      btnEnviar.disabled = false;
-      input.focus();
-    }
+  adicionarMensagem(texto, 'usuario');
+  mostrarLoading();
+
+  try {
+    const resposta = await chamarClaude(texto);
+    removerLoading();
+    adicionarMensagem(resposta, 'assistente');
+  } catch (err) {
+    removerLoading();
+    console.error('Erro na IA:', err);
+
+    const msgErro = err.message?.includes('SEM_CHAVE')
+      ? 'Configure sua chave de API clicando no ícone 🔑 acima.'
+      : err.message?.includes('401')
+        ? 'Chave de API inválida.'
+        : err.message?.includes('429')
+          ? 'Limite atingido. Tente em instantes.'
+          : 'Erro ao conectar com a IA.';
+
+    adicionarMensagem(msgErro, 'assistente');
+  } finally {
+    input.disabled = false;
+    btnEnviar.disabled = false;
+    input.focus();
   }
 }
 
-/* ── Inicialização ── */
 export function iniciarChat() {
   const btnEnviar = document.getElementById('chat-enviar');
   const input = document.getElementById('chat-input');
@@ -307,7 +293,6 @@ export function iniciarChat() {
     }
   });
 
-  // Atualiza a mensagem de boas-vindas com o nome do usuário quando disponível
   const observer = new MutationObserver(() => {
     const nome = document.getElementById('header-user-name')?.textContent;
     const bemVindo = document.querySelector('#chat-mensagens .msg-assistente');
