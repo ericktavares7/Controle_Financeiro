@@ -302,6 +302,7 @@
         </nav>
 
         <div class="header-actions">
+          <select id="filtro-mes" hidden></select>
 
           <div class="month-picker-wrapper">
             <button type="button" id="btn-open-month-picker" class="month-bubble">
@@ -515,19 +516,19 @@
             </div>
           </div>
 
-          <div class="form-group hidden" id="edit-fixed-duration-group">
+          <div class="form-group hidden" id="fixed-duration-group">
             <label>Duração</label>
 
-            <select id="edit-tx-fixed-duration">
+            <select id="input-fixed-duration">
               <option value="limited">Por quantidade de meses</option>
               <option value="indefinite">Tempo indeterminado</option>
             </select>
           </div>
 
-          <div class="form-group hidden" id="edit-fixed-months-group">
+          <div class="form-group hidden" id="fixed-months-group">
             <label>Por quantos meses?</label>
 
-            <input type="number" id="edit-tx-fixed-months" min="2" max="120" value="12">
+            <input type="number" id="input-fixed-months" min="2" max="120" value="12">
           </div>
 
           <input type="hidden" id="input-tipo" value="expense">
@@ -629,94 +630,137 @@
       <div class="transacoes-container">
 
         <!-- HEADER -->
-        <div class="transactions-top-header">
+        <div class="section-header">
 
           <div>
-            <h2 class="transactions-title">
-              Histórico de Transações
-            </h2>
+            <h3>Histórico de Transações</h3>
 
-            <p class="transactions-subtitle">
+            <span class="tx-meta">
               acompanhe receitas, despesas e reservas
-            </p>
+            </span>
           </div>
 
-          <button class="sort-btn" onclick="alternarOrdemFiltro()">
+          <div class="tx-desktop-actions">
+            <button class="action-pill action-income" onclick="window.abrirModal('income')">
+              <i class="ph ph-plus"></i>
+              Receita
+            </button>
+
+            <button class="action-pill action-expense" onclick="window.abrirModal('expense')">
+              <i class="ph ph-minus"></i>
+              Despesa
+            </button>
+
+            <button class="action-pill action-goal" onclick="window.abrirModal('goal')">
+              <i class="ph ph-rocket-launch"></i>
+              Caixinha
+            </button>
+          </div>
+          <div class="filtro-bloco-pills">
+
+            <button class="filtro-bloco-btn active" data-bloco="todos">
+              Todos
+            </button>
+
+            <button class="filtro-bloco-btn" data-bloco="essencial">
+              🏠 Essenciais
+            </button>
+
+            <button class="filtro-bloco-btn" data-bloco="lazer">
+              🎬 Lazer
+            </button>
+
+            <button class="filtro-bloco-btn" data-bloco="reserva">
+              🎯 Reserva
+            </button>
+
+          </div>
+
+        </div>
+
+        <!-- RESUMO -->
+        <div class="top-cards-container">
+
+          <!-- RECEITA -->
+          <div class="card-valor btn-receita">
+
+            <p>↑ Receita</p>
+
+            <h2 id="mes-receita">
+              R$ 0,00
+            </h2>
+
+          </div>
+
+          <!-- DESPESA -->
+          <div class="card-valor btn-despesa">
+
+            <p>↓ Despesas</p>
+
+            <h2 id="mes-despesa">
+              R$ 0,00
+            </h2>
+
+          </div>
+
+          <!-- SALDO -->
+          <div class="card-valor">
+
+            <p>◈ Saldo</p>
+
+            <h2 id="mes-saldo">
+              R$ 0,00
+            </h2>
+
+            <span id="insight-saldo" class="insight-saldo">
+            </span>
+
+          </div>
+
+        </div>
+
+        <!-- DISTRIBUIÇÃO -->
+        <div class="card-header-flex">
+
+          <h3>Distribuição</h3>
+
+          <button class="btn-filter-icon" onclick="alternarOrdemFiltro()">
             ⇅
           </button>
 
         </div>
 
-        <!-- CARDS RESUMO -->
-        <div class="tx-summary-grid">
+        <!-- BARRAS -->
+        <div class="category-bars" id="mes-categorias"></div>
 
-          <div class="tx-summary-card receita">
-            <span>↑ Receita</span>
-            <strong id="mes-receita">
-              R$ 0,00
-            </strong>
+        <!-- HISTÓRICO -->
+        <div class="historico-segmentado">
+
+          <!-- RECEITAS -->
+          <div class="card-historico">
+
+            <div class="titulo-receitas">
+              <span>💰 Receitas</span>
+              <strong id="total-receitas-lista">+ R$ 0,00</strong>
+            </div>
+
+            <div id="lista-receitas-historico"></div>
+
           </div>
 
-          <div class="tx-summary-card despesa">
-            <span>↓ Despesas</span>
-            <strong id="mes-despesa">
-              R$ 0,00
-            </strong>
-          </div>
+          <!-- DESPESAS -->
+          <div class="card-historico">
 
-          <div class="tx-summary-card saldo">
-            <span>◈ Saldo</span>
-            <strong id="mes-saldo">
-              R$ 0,00
-            </strong>
-          </div>
+            <div class="titulo-despesas">
+              <span>💸 Despesas</span>
+              <strong id="total-despesas-lista">- R$ 0,00</strong>
+            </div>
 
-        </div>
-
-        <!-- FILTROS -->
-        <div class="tx-filters-wrapper">
-
-          <button class="tx-filter active">
-            Todos
-          </button>
-
-          <button class="tx-filter">
-            🏠 Essenciais
-          </button>
-
-          <button class="tx-filter">
-            🎬 Lazer
-          </button>
-
-          <button class="tx-filter">
-            🎯 Reserva
-          </button>
-
-        </div>
-
-        <!-- DISTRIBUIÇÃO -->
-        <div class="distribution-header">
-
-          <div>
-            <h3>Distribuição</h3>
-          </div>
-
-          <div class="distribution-legend">
-
-            <span class="legend-income">
-              💰 Receitas
-            </span>
-
-            <span class="legend-expense">
-              💸 Despesas
-            </span>
+            <div id="lista-despesas-historico"></div>
 
           </div>
 
         </div>
-
-        <!-- LISTA -->
-        <div id="transaction-list"></div>
 
       </div>
 

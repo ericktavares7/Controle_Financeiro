@@ -1,15 +1,15 @@
 /* =========================
-   CONTAINER GERAL
+   TRANSAÇÕES - ESCOPO LOCAL
 ========================= */
 
-.transacoes-container {
+#tab-transacoes .transacoes-container {
   display: flex;
   flex-direction: column;
   gap: 16px;
   width: 100%;
 }
 
-.section-header {
+#tab-transacoes .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -18,46 +18,51 @@
 }
 
 /* =========================
-   SUMMARY CARDS (topo)
+   SUMMARY CARDS
 ========================= */
 
-.top-cards-container {
+#tab-transacoes .top-cards-container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
 
-.card-valor {
+#tab-transacoes .card-valor {
   background: #161b22;
   border: 0.5px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
   padding: 14px 16px;
 }
 
-.card-valor p {
+#tab-transacoes .card-valor p {
   font-size: 11px;
   color: #64748b;
-  margin-bottom: 6px;
+  margin: 0 0 6px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
-.card-valor h2 {
+#tab-transacoes .card-valor h2 {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.5px;
+  margin: 0;
 }
 
-.btn-receita h2 {
+#tab-transacoes .btn-receita h2 {
   color: #00FFB2;
 }
 
-.btn-despesa h2 {
+#tab-transacoes .btn-despesa h2 {
   color: #FF6B35;
 }
 
-.insight-saldo {
+#tab-transacoes #mes-saldo {
+  color: #00D1FF;
+}
+
+#tab-transacoes .insight-saldo {
   font-size: 11px;
   color: #64748b;
   margin-top: 4px;
@@ -68,13 +73,13 @@
    PILLS FILTRO
 ========================= */
 
-.filtro-bloco-pills {
+#tab-transacoes .filtro-bloco-pills {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
 }
 
-.filtro-bloco-btn {
+#tab-transacoes .filtro-bloco-btn {
   padding: 5px 13px;
   border-radius: 20px;
   font-size: 12px;
@@ -87,36 +92,37 @@
   font-family: inherit;
 }
 
-.filtro-bloco-btn:hover {
+#tab-transacoes .filtro-bloco-btn:hover {
   background: rgba(255, 255, 255, 0.06);
   color: #94a3b8;
 }
 
-.filtro-bloco-btn.active {
+#tab-transacoes .filtro-bloco-btn.active {
   background: rgba(0, 255, 178, 0.1);
   border-color: rgba(0, 255, 178, 0.3);
   color: #00FFB2;
 }
 
 /* =========================
-   DISTRIBUIÇÃO (barras)
+   DISTRIBUIÇÃO
 ========================= */
 
-.card-header-flex {
+#tab-transacoes .card-header-flex {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.card-header-flex h3 {
+#tab-transacoes .card-header-flex h3 {
   font-size: 13px;
   font-weight: 700;
   color: #94a3b8;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  margin: 0;
 }
 
-.btn-filter-icon {
+#tab-transacoes .btn-filter-icon {
   background: rgba(255, 255, 255, 0.04);
   border: 0.5px solid rgba(255, 255, 255, 0.08);
   color: #64748b;
@@ -131,37 +137,39 @@
   transition: all 0.15s;
 }
 
-.btn-filter-icon:hover {
+#tab-transacoes .btn-filter-icon:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #94a3b8;
 }
 
-.category-bars {
+#tab-transacoes .category-bars {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
 /* =========================
-   HISTÓRICO SEGMENTADO
+   HISTÓRICO
 ========================= */
 
-.historico-segmentado {
+#tab-transacoes .historico-segmentado {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
   align-items: start;
 }
 
-.card-historico {
+#tab-transacoes .card-historico {
   background: #161b22;
   border: 0.5px solid rgba(255, 255, 255, 0.06);
   border-radius: 14px;
   overflow: hidden;
+  padding: 0;
+  margin: 0;
 }
 
-.titulo-receitas,
-.titulo-despesas {
+#tab-transacoes .titulo-receitas,
+#tab-transacoes .titulo-despesas {
   font-size: 13px;
   font-weight: 700;
   color: #fff;
@@ -173,18 +181,22 @@
 }
 
 /* =========================
-   ITEM DA TRANSAÇÃO
+   LISTAS
 ========================= */
 
-#transaction-list {
+#tab-transacoes #lista-receitas-historico,
+#tab-transacoes #lista-despesas-historico {
   display: flex;
   flex-direction: column;
-  margin-top: 12px;
   max-height: 400px;
   overflow-y: auto;
 }
 
-.tx-item {
+/* =========================
+   ITEM TRANSAÇÃO
+========================= */
+
+#tab-transacoes .tx-item {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -195,47 +207,15 @@
   box-sizing: border-box;
 }
 
-.tx-item:last-child {
+#tab-transacoes .tx-item:last-child {
   border-bottom: none;
 }
 
-.tx-item:hover {
+#tab-transacoes .tx-item:hover {
   background: rgba(255, 255, 255, 0.025);
 }
 
-/* Ícone */
-.tx-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  flex-shrink: 0;
-}
-
-.tx-icon--income {
-  background: rgba(0, 255, 178, 0.08);
-}
-
-.tx-icon--expense {
-  background: rgba(255, 107, 53, 0.08);
-}
-
-.tx-icon--caixinha {
-  background: rgba(255, 230, 109, 0.1);
-}
-
-.tx-icon--cartao {
-  background: rgba(78, 205, 196, 0.1);
-}
-
-/* =========================
-   INFO
-========================= */
-
-.tx-info {
+#tab-transacoes .tx-info {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -243,7 +223,7 @@
   gap: 2px;
 }
 
-.tx-desc {
+#tab-transacoes .tx-desc {
   font-size: 13px;
   font-weight: 600;
   color: #e2e8f0;
@@ -252,7 +232,7 @@
   white-space: nowrap;
 }
 
-.tx-meta {
+#tab-transacoes .tx-meta {
   color: #475569;
   font-size: 11px;
   overflow: hidden;
@@ -260,70 +240,96 @@
   white-space: nowrap;
 }
 
-/* =========================
-   DIREITA
-========================= */
 
-.tx-right {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.tx-val {
+#tab-transacoes .tx-val {
   font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
 }
 
-.tx-val--income {
+#tab-transacoes .tx-val--income {
   color: #00FFB2;
 }
 
-.tx-val--expense {
+#tab-transacoes .tx-val--expense {
   color: #FF6B35;
 }
 
-.tx-val--goal {
+#tab-transacoes .tx-val--goal {
   color: #00D1FF;
 }
 
-/* Botões de ação */
-.tx-delete,
-.btn-edit-tx {
-  background: none;
-  border: none;
-  color: #334155;
-  cursor: pointer;
-  font-size: 12px;
-  padding: 5px;
-  border-radius: 6px;
-  transition: all 0.15s;
-  line-height: 1;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-edit-tx:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: #94a3b8;
-}
-
-.tx-delete:hover {
-  background: rgba(255, 107, 53, 0.1);
-  color: #FF6B35;
-}
 
 /* =========================
    HIGHLIGHT
 ========================= */
 
-.tx-highlight-soft {
+#tab-transacoes .tx-highlight-soft {
   background: rgba(0, 255, 178, 0.06);
   border-color: rgba(0, 255, 178, 0.2);
+}
+
+/* =========================
+   DESKTOP REFINEMENT
+========================= */
+
+@media (min-width: 851px) {
+  #tab-transacoes .transacoes-container {
+    max-width: 1180px;
+    margin: 0 auto;
+    gap: 20px;
+  }
+
+  #tab-transacoes .card-valor {
+    padding: 18px 20px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #161b22, #101722);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
+  }
+
+  #tab-transacoes .card-valor h2 {
+    font-size: 26px;
+  }
+
+  #tab-transacoes .filtro-bloco-pills {
+    padding: 4px;
+    width: fit-content;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  #tab-transacoes .filtro-bloco-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  #tab-transacoes .historico-segmentado {
+    gap: 18px;
+  }
+
+  #tab-transacoes .card-historico {
+    border-radius: 18px;
+    background: linear-gradient(180deg, #161b22, #101722);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+  }
+
+  #tab-transacoes .titulo-receitas,
+  #tab-transacoes .titulo-despesas {
+    padding: 16px 18px;
+    font-size: 14px;
+  }
+
+  #tab-transacoes .tx-item {
+    padding: 12px 16px;
+  }
+
+  #tab-transacoes .tx-desc,
+  #tab-transacoes .tx-val {
+    font-size: 14px;
+  }
 }
 
 /* =========================
@@ -331,42 +337,191 @@
 ========================= */
 
 @media (max-width: 850px) {
-  .historico-segmentado {
+  #tab-transacoes .historico-segmentado {
     grid-template-columns: 1fr;
   }
 
-  .top-cards-container {
+  #tab-transacoes .top-cards-container {
     grid-template-columns: 1fr;
     gap: 8px;
   }
 
-  .section-header {
+  #tab-transacoes .section-header {
     flex-direction: column;
     align-items: flex-start;
   }
 }
 
 @media (max-width: 480px) {
-  .tx-item {
+  #tab-transacoes .tx-item {
     padding: 8px 12px;
     gap: 8px;
   }
 
-  .tx-icon {
-    width: 28px;
-    height: 28px;
+  #tab-transacoes .tx-desc {
     font-size: 12px;
   }
 
-  .tx-desc {
-    font-size: 12px;
-  }
-
-  .tx-meta {
+  #tab-transacoes .tx-meta {
     font-size: 10px;
   }
 
-  .tx-val {
+  #tab-transacoes .tx-val {
     font-size: 12px;
+  }
+}
+
+#tab-transacoes #lista-receitas-historico,
+#tab-transacoes #lista-despesas-historico {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 80px;
+}
+
+#tab-transacoes .tx-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  min-height: 58px;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+#tab-transacoes .tx-info {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1;
+  min-width: 0;
+}
+
+
+#tab-transacoes .tx-desc {
+  display: block !important;
+  color: #e2e8f0 !important;
+}
+
+#tab-transacoes .tx-meta {
+  display: block !important;
+  color: #94a3b8 !important;
+}
+
+#tab-transacoes .tx-val {
+  display: inline-block !important;
+}
+
+#tab-transacoes .titulo-receitas strong {
+  color: #00FFB2;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+#tab-transacoes .titulo-despesas strong {
+  color: #FF6B35;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* =========================
+   AÇÕES TRANSAÇÃO
+========================= */
+
+#tab-transacoes .tx-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#tab-transacoes .btn-edit-tx,
+#tab-transacoes .tx-delete {
+  width: 32px;
+  height: 32px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border-radius: 50%;
+
+  flex-shrink: 0;
+
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+
+  backdrop-filter: blur(8px);
+}
+
+#tab-transacoes .btn-edit-tx {
+  color: #1d8cff;
+  border: 1px solid rgba(29, 140, 255, 0.35);
+  background: rgba(29, 140, 255, 0.08);
+}
+
+#tab-transacoes .btn-edit-tx:hover {
+  background: rgba(29, 140, 255, 0.16);
+  border-color: rgba(29, 140, 255, 0.55);
+
+  transform: scale(1.05);
+}
+
+#tab-transacoes .tx-delete {
+  color: #ff4d6d;
+  border: 1px solid rgba(255, 77, 109, 0.35);
+  background: rgba(255, 77, 109, 0.08);
+}
+
+#tab-transacoes .tx-delete:hover {
+  background: rgba(255, 77, 109, 0.16);
+  border-color: rgba(255, 77, 109, 0.55);
+
+  transform: scale(1.05);
+}
+
+#tab-transacoes .btn-edit-tx i,
+#tab-transacoes .tx-delete i {
+  font-size: 15px;
+  line-height: 1;
+}
+
+#tab-transacoes .btn-edit-tx:active,
+#tab-transacoes .tx-delete:active {
+  transform: scale(0.94);
+}
+
+#tab-transacoes .btn-edit-tx:hover,
+#tab-transacoes .tx-delete:hover {
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.02),
+    0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+#tab-transacoes .tx-desktop-actions {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  #tab-transacoes .section-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+  }
+
+  #tab-transacoes .tx-desktop-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 995px) {
+  #tab-transacoes .section-header {
+    grid-template-columns: 1fr;
+  }
+
+  #tab-transacoes .tx-desktop-actions {
+    justify-content: flex-start;
   }
 }

@@ -264,18 +264,44 @@ body {
   }
 
   .tx-item {
-    align-items: flex-start;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 12px;
+  }
+
+  .tx-info {
+    min-width: 0;
   }
 
   .tx-right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
   }
 
   .tx-val {
+    min-width: 88px;
+    text-align: right;
     font-size: 14px;
+  }
+
+  .btn-edit-tx,
+  .tx-delete {
+    width: 32px;
+    height: 32px;
+
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    border-radius: 50%;
+
+    flex-shrink: 0;
   }
 
   .chart-card.evolution .canvas-wrapper {
@@ -295,14 +321,15 @@ body {
     min-width: 760px !important;
     max-width: none !important;
   }
-}
 
+
+}
 
 /* =========================
    TELAS MUITO PEQUENAS — até 500px
 ========================= */
 
-@media (max-width: 500px) {
+@media (max-width: 480px) {
 
   .dashboard-container {
     padding: 12px;
@@ -321,6 +348,21 @@ body {
     min-width: 230px !important;
     max-width: 230px !important;
   }
+
+  .tx-item {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .tx-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .tx-val {
+    text-align: left;
+    min-width: 0;
+  }
 }
 
 
@@ -332,5 +374,35 @@ body {
   body {
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* =========================
+   TABLET / DESKTOP PEQUENO
+   769px até 995px
+========================= */
+
+@media (min-width: 769px) and (max-width: 995px) {
+  .dashboard-container {
+    padding-top: 128px;
+  }
+
+  .dashboard-header {
+    min-height: 104px;
+  }
+
+  .header-container {
+    flex-wrap: wrap;
+    row-gap: 14px;
+  }
+
+  .main-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .header-actions {
+    margin-left: auto;
   }
 }

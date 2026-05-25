@@ -7,27 +7,8 @@ import '../Styles/transactions.css';
 import '../Styles/auth.css';
 import '../Styles/responsive.css';
 
-import { auth } from './firebase.js';
-
-import {
-  login,
-  register,
-  resetPassword,
-  observeAuthState
-} from './services/authService.js';
-
-import { deleteDoc, doc, Timestamp } from "firebase/firestore";
-import { signOut, updateProfile } from "firebase/auth";
-
 import { state } from './state.js';
-
-import {
-  formatBRL,
-  formatDate,
-  calcularDataFatura,
-  getMesSelecionado
-} from './utils.js';
-
+import { formatBRL } from './utils.js';
 import { showToast } from './toast.js';
 
 import {
@@ -45,12 +26,10 @@ import {
 } from './modals.js';
 
 import {
-  categoriasPorTipo,
   abrirCategorias,
   fecharCategorias,
   renderCategoriasCustom,
   removerCategoria,
-  obterCategoriasDoTipo,
   iniciarFormularioCategoria
 } from './categories.js';
 
@@ -65,7 +44,6 @@ import {
 import {
   abrirEditarNome,
   fecharEditarNome,
-  salvarNomeUsuario,
   enviarResetSenha,
   abrirRegraFinanceira,
   salvarRegraFinanceira,
@@ -88,21 +66,20 @@ import {
   fecharModalEditarTx,
   iniciarEdicaoTransacoes,
   iniciarFormularioTransacao,
-  iniciarCamposTransacao
+  iniciarCamposTransacao,
+  iniciarFiltroBlocos
 } from './transactions.js';
 
 import { atualizarDashboard } from './dashboard.js';
 
 import {
-  criarGraficoDonut,
-  atualizarComparativo
+  criarGraficoDonut
 } from './charts.js';
 
 import {
   iniciarAuth,
   updateUserHeader,
   logOut,
-  iniciarAuthStateObserver
 } from './auth.js';
 
 import {
@@ -117,17 +94,26 @@ import {
   iniciarMonthPicker
 } from './monthPicker.js';
 
-import { iniciarFiltroBlocos } from './transactions.js';
+import {
+  iniciarChat,
+  toggleConfigIA,
+  salvarApiKey,
+  limparHistoricoChat
+} from './chat.js';
 
-import { iniciarChat, toggleConfigIA, salvarApiKey, limparHistoricoChat } from './chat.js';
-
+/* ========================================
+   ESTADO GLOBAL TEMPORÁRIO
+======================================== */
 
 window.cards = state.cards;
 window.transactions = state.transactions;
 window.regraFinanceira = state.regraFinanceira;
 window.categoriasCustom = state.categoriasCustom;
-
 window.ordemCrescente = false;
+
+/* ========================================
+   EXPOSIÇÃO TEMPORÁRIA NO WINDOW
+======================================== */
 
 window.showToast = showToast;
 
@@ -178,8 +164,9 @@ window.toggleConfigIA = toggleConfigIA;
 window.salvarApiKey = salvarApiKey;
 window.limparHistoricoChat = limparHistoricoChat;
 
-
-window.ordemCrescente = false;
+/* ========================================
+   CATEGORIAS / DISTRIBUIÇÃO
+======================================== */
 
 window.destacarCategoria = (nomeCat) => {
   const btnTransacoes =
@@ -283,6 +270,11 @@ function renderCategoriasGrafico(lista) {
   });
 }
 
+window.renderCategoriasGrafico = renderCategoriasGrafico;
+
+/* ========================================
+   FILTRO DE ORDEM
+======================================== */
 
 window.alternarOrdemFiltro = () => {
   window.ordemCrescente = !window.ordemCrescente;
@@ -290,74 +282,87 @@ window.alternarOrdemFiltro = () => {
   const btn = document.getElementById('btn-ordem');
 
   if (btn) {
-    btn.innerHTML = ordemCrescente ? '▲' : '▼';
+    btn.innerHTML = window.ordemCrescente ? '▲' : '▼';
   }
 
-  try {
-    window.atualizarDashboard();
-  } catch (e) {
-    console.error(e);
-  }
+  window.atualizarDashboard?.();
 };
 
-const authTitle = document.getElementById('auth-title');
-const authSubtitle = document.getElementById('auth-subtitle');
-const toggleText = document.getElementById('toggle-auth-text');
-const authExtras = document.querySelectorAll('.auth-extra');
-const authButton = document.getElementById('btn-auth-primary');
+/* ========================================
+   DOM READY
+======================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
   carregarTemaLocal();
 
   popularSelectMeses();
-
   iniciarMonthPicker();
+
   iniciarAuth();
+
   iniciarTabs();
 
   iniciarEventosCartoes();
+  iniciarFormularioCartao();
+
   iniciarEdicaoTransacoes();
   iniciarFormularioTransacao();
   iniciarCamposTransacao();
+  iniciarFiltroBlocos();
+
   iniciarFormularioCategoria();
+
   iniciarBottomNav();
-
-  iniciarFormularioCartao();
-  iniciarEscape();
-  iniciarAuth();
-  iniciarAuthStateObserver();
-
   iniciarModaisBase();
   iniciarConfirmacao();
-  iniciarFiltroBlocos();
+
   criarGraficoDonut();
+
   iniciarChat();
 
-  document.getElementById('filtro-mes')
-    ?.addEventListener('change', () => {
-      window.atualizarDashboard();
-    });
-
+  iniciarFiltroMes();
+  iniciarEscape();
 });
 
 function iniciarTabs() {
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      window.fecharBottomPanels?.();
+  const botoes = document.querySelectorAll('.tab-btn');
+  const secoes = document.querySelectorAll('.tab-section');
 
+  botoes.forEach(btn => {
+    btn.addEventListener('click', () => {
       const target = btn.dataset.tab;
 
-      document
-        .querySelectorAll('.tab-section, .tab-btn')
-        .forEach(el => el.classList.remove('active'));
+      if (!target) return;
 
-      document
-        .getElementById(`tab-${target}`)
-        ?.classList.add('active');
+      window.fecharBottomPanels?.();
+
+      botoes.forEach(b => b.classList.remove('active'));
+      secoes.forEach(sec => sec.classList.remove('active'));
 
       btn.classList.add('active');
+
+      const secao = document.getElementById(`tab-${target}`);
+
+      if (!secao) {
+        console.error(`Seção não encontrada: tab-${target}`);
+        return;
+      }
+
+      secao.classList.add('active');
+
+      if (target === 'transacoes') {
+        window.atualizarDashboard?.();
+      }
     });
   });
+}
+
+function iniciarFiltroMes() {
+  document
+    .getElementById('filtro-mes')
+    ?.addEventListener('change', () => {
+      window.atualizarDashboard?.();
+    });
 }
 
 function iniciarEscape() {
@@ -378,274 +383,17 @@ function iniciarEscape() {
       document.querySelector('.bottom-panel.active');
 
     if (bottomPanel) {
-      window.fecharBottomPanels();
+      window.fecharBottomPanels?.();
       return;
     }
 
     if (modalRegistro) {
-      window.fecharModal();
+      window.fecharModal?.();
       return;
     }
 
     if (modalCartao) {
-      window.fecharModalCartao();
+      window.fecharModalCartao?.();
     }
   });
 }
-
-window.fecharBottomPanels = function () {
-  document.querySelectorAll('.bottom-panel').forEach((panel) => {
-    panel.classList.remove('active');
-  });
-
-  document.querySelectorAll('.bottom-nav-btn').forEach((btn) => {
-    btn.classList.remove('active');
-  });
-};
-
-window.fecharModalEditarTx = () => {
-  document
-    .getElementById('modal-editar-transacao')
-    ?.classList.remove('active');
-};
-
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('.btn-edit-tx');
-
-  if (!btn) return;
-
-  const txId = btn.dataset.txId;
-
-  const tx = (window.transactions || [])
-    .find(t => t.id === txId);
-
-  if (!tx) return;
-
-  document.getElementById('edit-tx-id').value = tx.id;
-  document.getElementById('edit-tx-desc').value = tx.desc || '';
-  document.getElementById('edit-tx-val').value = tx.val || '';
-
-  document.getElementById('edit-tx-payment').value =
-    tx.paymentMethod || 'debit';
-
-  const editFixed = document.getElementById('edit-tx-fixed');
-  const editDurationGroup = document.getElementById('edit-fixed-duration-group');
-  const editMonthsGroup = document.getElementById('edit-fixed-months-group');
-  const editDuration = document.getElementById('edit-tx-fixed-duration');
-  const editMonths = document.getElementById('edit-tx-fixed-months');
-
-  if (editFixed) {
-    editFixed.value = tx.fixedExpense ? 'yes' : 'no';
-  }
-
-  if (editDuration) {
-    editDuration.value = tx.fixedDuration || 'limited';
-  }
-
-  if (editMonths) {
-    editMonths.value = tx.totalFixedMonths || 12;
-  }
-
-  if (tx.fixedExpense) {
-    editDurationGroup?.classList.remove('hidden');
-
-    if ((tx.fixedDuration || 'limited') === 'limited') {
-      editMonthsGroup?.classList.remove('hidden');
-    } else {
-      editMonthsGroup?.classList.add('hidden');
-    }
-  } else {
-    editDurationGroup?.classList.add('hidden');
-    editMonthsGroup?.classList.add('hidden');
-  }
-
-  const selectCard =
-    document.getElementById('edit-tx-card');
-
-  selectCard.innerHTML = `
-    <option value="">Selecione</option>
-
-    ${(window.cards || []).map(card => `
-      <option
-        value="${card.id}"
-        ${tx.cardId === card.id ? 'selected' : ''}
-      >
-        ${card.name}
-      </option>
-    `).join('')}
-  `;
-  const modal =
-    document.getElementById('modal-editar-transacao');
-
-  requestAnimationFrame(() => {
-    modal?.classList.add('active');
-  });
-});
-
-const MONTHS = [
-  'Jan', 'Fev', 'Mar',
-  'Abr', 'Mai', 'Jun',
-  'Jul', 'Ago', 'Set',
-  'Out', 'Nov', 'Dez'
-];
-
-window.currentPickerYear =
-  new Date().getFullYear();
-
-
-
-window.abrirMenuConfig = (secao) => {
-  const modal = document.getElementById('modal-config');
-  if (!modal) return;
-
-  document.querySelectorAll('.config-section').forEach(s => s.classList.add('hidden'));
-
-  const alvo = document.getElementById(`config-${secao}`);
-  if (alvo) alvo.classList.remove('hidden');
-
-  if (secao === 'regras') {
-    document.getElementById('config-meta-essencial').value = window.regraFinanceira.essencial;
-    document.getElementById('config-meta-reserva').value = window.regraFinanceira.reserva;
-    document.getElementById('config-meta-lazer').value = window.regraFinanceira.lazer;
-  }
-
-  if (secao === 'categorias') {
-    window.renderCategoriasConfig();
-  }
-
-  if (secao === 'tema') {
-    const temaAtual = document.body.classList.contains('tema-claro') ? 'light' : 'dark';
-    document.querySelectorAll('.tema-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelector(`.tema-btn[onclick*="${temaAtual}"]`)?.classList.add('active');
-  }
-
-  window.fecharBottomPanels();
-  requestAnimationFrame(() => modal.classList.add('active'));
-};
-
-window.fecharModalConfig = () => {
-  document.getElementById('modal-config')?.classList.remove('active');
-};
-
-window.salvarNome = async () => {
-  const novoNome = document.getElementById('input-novo-nome')?.value?.trim();
-  if (!novoNome) return;
-
-  try {
-    await updateProfile(auth.currentUser, { displayName: novoNome });
-    window.updateUserHeader(auth.currentUser);
-    window.fecharModalConfig();
-  } catch (e) {
-    console.error('Erro ao salvar nome:', e);
-  }
-};
-
-window.salvarRegrasConfig = async () => {
-  const essencial = Number(document.getElementById('config-meta-essencial')?.value || 70);
-  const reserva = Number(document.getElementById('config-meta-reserva')?.value || 20);
-  const lazer = Number(document.getElementById('config-meta-lazer')?.value || 10);
-
-  if (essencial + reserva + lazer !== 100) {
-    alert('A soma precisa ser 100%.');
-    return;
-  }
-
-  window.regraFinanceira = { essencial, reserva, lazer };
-
-  await saveUserSettings({ regraFinanceira: window.regraFinanceira });
-
-  window.atualizarDashboard?.();
-  window.fecharModalConfig();
-};
-
-window.setTema = async (tema) => {
-  if (tema === 'light') {
-    document.body.classList.add('tema-claro');
-  } else {
-    document.body.classList.remove('tema-claro');
-  }
-
-  document.querySelectorAll('.tema-btn').forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`.tema-btn[onclick*="${tema}"]`)?.classList.add('active');
-
-  await saveUserSettings({ tema });
-};
-
-window.salvarCategoria = async () => {
-  const tipo = document.getElementById('config-cat-tipo')?.value;
-  const nome = document.getElementById('config-cat-nome')?.value?.trim();
-
-  if (!nome) return;
-
-  if (!categoriasPorTipo[tipo].includes(nome)) {
-    categoriasPorTipo[tipo].push(nome);
-  }
-
-  await saveUserSettings({ categorias: categoriasPorTipo });
-
-  document.getElementById('config-cat-nome').value = '';
-  window.renderCategoriasConfig();
-};
-
-window.removerCategoria = async (tipo, nome) => {
-  categoriasPorTipo[tipo] = categoriasPorTipo[tipo].filter(c => c !== nome);
-  await saveUserSettings({ categorias: categoriasPorTipo });
-  window.renderCategoriasConfig();
-};
-
-window.renderCategoriasConfig = () => {
-  const lista = document.getElementById('config-cat-lista');
-  if (!lista) return;
-
-  const tipos = { expense: 'Despesas', income: 'Receitas', goal: 'Caixinhas' };
-
-  lista.innerHTML = Object.entries(categoriasPorTipo).map(([tipo, cats]) => `
-    <p style="font-size:11px; color:#64748b; text-transform:uppercase; margin:12px 0 6px;">${tipos[tipo]}</p>
-    <div>
-      ${cats.map(cat => `
-        <span class="cat-tag">
-          ${cat}
-          <button onclick="window.removerCategoria('${tipo}', '${cat}')">✕</button>
-        </span>
-      `).join('')}
-    </div>
-  `).join('');
-};
-
-window.renderMonthPicker = () => {
-  const grid =
-    document.getElementById('months-grid');
-
-  const yearLabel =
-    document.getElementById('month-picker-year');
-
-  if (!grid || !yearLabel) return;
-
-  yearLabel.textContent =
-    window.currentPickerYear;
-
-  const filtro =
-    document.getElementById('filtro-mes');
-
-  const valorAtual =
-    filtro?.value || '';
-
-  grid.innerHTML = MONTHS.map((mes, index) => {
-
-    const value =
-      `${window.currentPickerYear}-${String(index + 1).padStart(2, '0')}`;
-
-    const active =
-      value === valorAtual;
-
-    return `
-      <button
-        type="button"
-        class="month-item ${active ? 'active' : ''}"
-        data-value="${value}"
-      >
-        ${mes}
-      </button>
-    `;
-  }).join('');
-};

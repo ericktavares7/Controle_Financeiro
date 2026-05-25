@@ -76,19 +76,6 @@ body {
   margin: 10px 0;
 }
 
-/* =========================================
-   CARD HISTÓRICO
-========================================= */
-
-.card-historico {
-  background: #161626;
-  border-radius: 16px;
-  padding: 15px;
-  margin-bottom: 15px;
-  width: 100%;
-  min-width: 0;
-}
-
 .card-header-flex {
   display: flex;
   justify-content: space-between;
@@ -518,51 +505,6 @@ body.modal-open {
   border-radius: 999px;
 }
 
-/* =========================================
-   HISTÓRICO
-========================================= */
-
-.historico-segmentado {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-top: 30px;
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-  .historico-segmentado {
-    grid-template-columns: 1fr;
-  }
-}
-
-.tx-item {
-  width: 100%;
-  box-sizing: border-box;
-  transition: all 0.5s ease;
-}
-
-.tx-item.destaque-categoria {
-  border-left: 6px solid #00FFB2;
-  background: rgba(0, 255, 178, 0.1);
-
-  transform: scale(1.02);
-
-  z-index: 10;
-}
-
-.tx-info {
-  min-width: 0;
-}
-
-.tx-desc {
-  overflow-wrap: break-word;
-  word-break: break-word;
-}
-
-.tx-right {
-  flex-shrink: 0;
-}
 
 /* =========================================
    CATEGORY BAR
@@ -856,7 +798,6 @@ body.modal-open {
 .card,
 .chart-card,
 .card-kpi,
-.card-historico,
 .action-card {
   width: 100%;
   min-width: 0;
@@ -867,7 +808,6 @@ body.modal-open {
   .summary-grid,
   .dashboard-top-cards,
   .top-cards-container,
-  .historico-segmentado,
   .top-actions-grid,
   .bottom-charts-grid {
     display: flex;
@@ -882,17 +822,6 @@ body.modal-open {
   .chart-card,
   .card-kpi {
     padding: 18px;
-  }
-
-  .tx-item {
-    align-items: flex-start;
-  }
-
-  .tx-right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
   }
 
   .tx-val {
@@ -1409,30 +1338,6 @@ body.modal-open {
 #modal-editar-transacao.active .modal-content {
   transform: translateY(0) scale(1);
   opacity: 1;
-}
-
-#mes-receita {
-  color: #00FFB2 !important;
-}
-
-#mes-despesa {
-  color: #FF5A5A !important;
-}
-
-#mes-saldo {
-  color: #00D1FF !important;
-}
-
-.tx-val--income {
-  color: #00FFB2 !important;
-}
-
-.tx-val--expense {
-  color: #FF5A5A !important;
-}
-
-.tx-val--goal {
-  color: #00D1FF !important;
 }
 
 .confirm-modal {
@@ -2233,7 +2138,7 @@ body.modal-open {
   transition: width 0.5s ease;
 }
 
-.card balance header {
+.card.balance header {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -2262,35 +2167,4 @@ body.modal-open {
 .saude--vermelho {
   background: rgba(255, 107, 53, 0.12);
   color: #FF6B35;
-}
-
-.filtro-bloco-pills {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
-}
-
-.filtro-bloco-btn {
-  height: 32px;
-  padding: 0 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
-  color: #94a3b8;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.filtro-bloco-btn:hover {
-  background: rgba(255, 255, 255, 0.07);
-  color: #fff;
-}
-
-.filtro-bloco-btn.active {
-  background: rgba(0, 255, 178, 0.1);
-  border-color: rgba(0, 255, 178, 0.3);
-  color: #00FFB2;
 }

@@ -82,19 +82,23 @@ export function renderListaTransacoes(lista) {
             ${sinal} ${formatBRL(t.val)}
           </span>
 
-          <button
-            class="btn-edit-tx"
-            data-tx-id="${t.id}"
-          >
-            <i class="ph ph-pencil-simple"></i>
-          </button>
+<button
+  type="button"
+  class="btn-edit-tx"
+  data-tx-id="${t.id}"
+  aria-label="Editar transação"
+>
+  <i class="ph ph-pencil-simple"></i>
+</button>
 
-          <button
-            class="tx-delete"
-            onclick="window.deletarTransacao('${t.id}')"
-          >
-            ✕
-          </button>
+<button
+  type="button"
+  class="tx-delete"
+  onclick="window.deletarTransacao('${t.id}')"
+  aria-label="Remover transação"
+>
+  <i class="ph ph-trash"></i>
+</button>
         </div>
       </div>
     `;
@@ -105,6 +109,27 @@ export function renderListaTransacoes(lista) {
 
   const despesas =
     lista.filter(t => t.type !== 'income');
+
+  const totalReceitas = receitas.reduce(
+    (acc, t) => acc + (Number(t.val) || 0),
+    0
+  );
+
+  const totalDespesas = despesas.reduce(
+    (acc, t) => acc + (Number(t.val) || 0),
+    0
+  );
+
+  const totalReceitasEl = document.getElementById('total-receitas-lista');
+  const totalDespesasEl = document.getElementById('total-despesas-lista');
+
+  if (totalReceitasEl) {
+    totalReceitasEl.textContent = `+ ${formatBRL(totalReceitas)}`;
+  }
+
+  if (totalDespesasEl) {
+    totalDespesasEl.textContent = `- ${formatBRL(totalDespesas)}`;
+  }
 
   cRec.innerHTML =
     receitas.length

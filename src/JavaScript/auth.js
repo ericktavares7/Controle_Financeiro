@@ -18,75 +18,6 @@ import {
 
 let unsubscribeTransactions = null;
 
-export function iniciarAuthStateObserver() {
-  observeAuthState((user) => {
-    const authContainer = document.getElementById('auth-container');
-    const app = document.getElementById('app');
-
-    if (user) {
-      console.log('Usuário logado:', user.email);
-
-      window.updateUserHeader?.(user);
-
-      if (authContainer) {
-        authContainer.classList.add('fade-out');
-
-        setTimeout(() => {
-          authContainer.style.display = 'none';
-        }, 300);
-      }
-
-      if (app) {
-        app.style.display = 'block';
-      }
-
-      document.body.classList.add('logged-in');
-
-      if (location.hash !== '#app') {
-        history.pushState({ app: true }, '', '#app');
-      }
-
-      if (unsubscribeTransactions) {
-        unsubscribeTransactions();
-      }
-
-      unsubscribeTransactions = listenTransactions(user.uid, (txs) => {
-        window.transactions = txs;
-
-        window.atualizarDashboard?.();
-
-        if (window.meuGrafico && window.atualizarGrafico) {
-          window.atualizarGrafico(window.meuGrafico, txs);
-        }
-      });
-
-      window.initCardsListener?.(user.uid);
-      window.carregarConfiguracoesUsuario?.(user.uid);
-
-      return;
-    }
-
-    console.log('Nenhum usuário logado.');
-
-    if (authContainer) {
-      authContainer.classList.remove('fade-out');
-      authContainer.style.display = 'flex';
-    }
-
-    if (app) {
-      app.style.display = 'none';
-    }
-
-    document.body.classList.remove('logged-in');
-
-    window.transactions = [];
-
-    if (unsubscribeTransactions) {
-      unsubscribeTransactions();
-      unsubscribeTransactions = null;
-    }
-  });
-}
 
 function showAuthMessage(message, type = 'error') {
   const container = document.getElementById('auth-message');
@@ -403,6 +334,9 @@ observeAuthState((user) => {
         );
       }
     });
+
+    window.initCardsListener?.(user.uid);
+    window.carregarConfiguracoesUsuario?.(user.uid);
 
     if (window.carregarConfiguracoesUsuario) {
       window.carregarConfiguracoesUsuario(user.uid);
