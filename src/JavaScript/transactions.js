@@ -17,6 +17,72 @@ import { CATS_LAZER } from './state.js';
 
 let filtroBloco = 'todos';
 
+
+function criarDataLocal(value) {
+  if (!value) return new Date();
+
+  const [ano, mes, dia] = value.split('-').map(Number);
+
+  return new Date(ano, mes - 1, dia, 12, 0, 0);
+}
+
+function adicionarMeses(data, qtd) {
+  return new Date(
+    data.getFullYear(),
+    data.getMonth() + qtd,
+    data.getDate(),
+    12,
+    0,
+    0
+  );
+}
+
+function calcularDadosFaturaCartao(dataCompra, cartao) {
+  const closingDay = Number(cartao.closingDay);
+  const dueDay = Number(cartao.dueDay);
+
+  let anoFechamento = dataCompra.getFullYear();
+  let mesFechamento = dataCompra.getMonth();
+
+  if (dataCompra.getDate() > closingDay) {
+    mesFechamento++;
+
+    if (mesFechamento > 11) {
+      mesFechamento = 0;
+      anoFechamento++;
+    }
+  }
+
+  let anoVencimento = anoFechamento;
+  let mesVencimento = mesFechamento;
+
+  if (dueDay <= closingDay) {
+    mesVencimento++;
+
+    if (mesVencimento > 11) {
+      mesVencimento = 0;
+      anoVencimento++;
+    }
+  }
+
+  const invoiceDueDate = new Date(
+    anoVencimento,
+    mesVencimento,
+    dueDay,
+    12,
+    0,
+    0
+  );
+
+  return {
+    invoiceYear: invoiceDueDate.getFullYear(),
+    invoiceMonth: invoiceDueDate.getMonth(),
+    invoiceDueDate: Timestamp.fromDate(invoiceDueDate),
+    cardClosingDay: closingDay,
+    cardDueDay: dueDay
+  };
+}
+
 export function getFiltroBloco() {
   return filtroBloco;
 }
@@ -341,6 +407,7 @@ export function iniciarEdicaoTransacoes() {
             val,
             type: tx.type,
             cat: tx.cat,
+            financialCategory,
 
             paymentMethod,
             cardId,
@@ -403,14 +470,7 @@ export function iniciarFormularioTransacao() {
       const inputDataStr =
         document.getElementById('input-data')?.value;
 
-      let dataCompra = new Date();
-
-      if (inputDataStr) {
-        const [ano, mes, dia] =
-          inputDataStr.split('-').map(Number);
-
-        dataCompra = new Date(ano, mes - 1, dia);
-      }
+      const dataCompra = criarDataLocal(inputDataStr);
 
       const tipo =
         document.getElementById('input-tipo').value;
@@ -450,30 +510,30 @@ export function iniciarFormularioTransacao() {
           ? 24
           : Number(document.getElementById('input-fixed-months')?.value || 1);
 
-      let dataLancamento = dataCompra;
+      const financialCategory =
+        document.getElementById('input-financial-cat')?.value || 'essencial';
+
 
       if (
         tipo === 'expense' &&
-        paymentMethod === 'credit'
+        paymentMethod === 'credit' &&
+        !cartao
       ) {
-        if (!cartao) {
-          window.showToast?.({
-            type: 'error',
-            title: 'Cartão obrigatório',
-            message: 'Selecione um cartão de crédito.'
-          });
-          return;
-        }
+        window.showToast?.({
+          type: 'error',
+          title: 'Cartão obrigatório',
+          message: 'Selecione um cartão de crédito.'
+        });
 
-        dataLancamento = calcularDataFatura(
-          dataCompra,
-          Number(cartao.closingDay),
-          Number(cartao.dueDay)
-        );
+        return;
       }
 
-      const financialCategory =
-        document.getElementById('input-financial-cat')?.value || 'essencial';
+      const dadosFatura =
+        tipo === 'expense' &&
+          paymentMethod === 'credit' &&
+          cartao
+          ? calcularDadosFaturaCartao(dataCompra, cartao)
+          : {};
 
       const nova = {
         desc: descricao,
@@ -483,8 +543,12 @@ export function iniciarFormularioTransacao() {
         financialCategory,
         paymentMethod,
         cardId,
+
         purchaseDate: Timestamp.fromDate(dataCompra),
-        createdAt: Timestamp.fromDate(dataLancamento)
+
+        createdAt: Timestamp.fromDate(dataCompra),
+
+        ...dadosFatura
       };
 
       if (
@@ -495,23 +559,24 @@ export function iniciarFormularioTransacao() {
         const groupId = crypto.randomUUID();
 
         for (let i = 0; i < installments; i++) {
-          const dataParcela = new Date(dataCompra);
-          dataParcela.setMonth(dataCompra.getMonth() + i);
+          const dataParcela =
+            adicionarMeses(dataCompra, i);
 
-          const dataFaturaParcela = calcularDataFatura(
-            dataParcela,
-            Number(cartao.closingDay),
-            Number(cartao.dueDay)
-          );
+          const dadosFaturaParcela =
+            calcularDadosFaturaCartao(
+              dataParcela,
+              cartao
+            );
 
           await addTransaction({
             ...nova,
+            ...dadosFaturaParcela,
 
             desc: `${descricao} (${i + 1}/${installments})`,
             val: valor / installments,
 
             purchaseDate: Timestamp.fromDate(dataParcela),
-            createdAt: Timestamp.fromDate(dataFaturaParcela),
+            createdAt: Timestamp.fromDate(dataParcela),
 
             installmentGroupId: groupId,
             installmentNumber: i + 1,
@@ -527,21 +592,16 @@ export function iniciarFormularioTransacao() {
         const fixedGroupId = crypto.randomUUID();
 
         for (let i = 0; i < fixedMonths; i++) {
-          const dataFixa = new Date(dataCompra);
-          dataFixa.setMonth(dataCompra.getMonth() + i);
+          const dataFixa = adicionarMeses(dataCompra, i);
 
-          let dataFaturaFixa = dataFixa;
-
-          if (paymentMethod === 'credit') {
-            dataFaturaFixa = calcularDataFatura(
-              dataFixa,
-              Number(cartao.closingDay),
-              Number(cartao.dueDay)
-            );
-          }
+          const dadosFaturaFixa =
+            paymentMethod === 'credit'
+              ? calcularDadosFaturaCartao(dataFixa, cartao)
+              : {};
 
           await addTransaction({
             ...nova,
+            ...dadosFaturaFixa,
 
             desc:
               fixedDuration === 'indefinite'
@@ -551,7 +611,7 @@ export function iniciarFormularioTransacao() {
             val: valor,
 
             purchaseDate: Timestamp.fromDate(dataFixa),
-            createdAt: Timestamp.fromDate(dataFaturaFixa),
+            createdAt: Timestamp.fromDate(dataFixa),
 
             fixedExpense: true,
             fixedDuration,

@@ -327,6 +327,10 @@ observeAuthState((user) => {
 
       window.atualizarDashboard?.();
 
+      if (window.cards?.length) {
+        window.atualizarCartoesNaTela?.(window.cards);
+      }
+      
       if (window.meuGrafico && window.atualizarGrafico) {
         window.atualizarGrafico(
           window.meuGrafico,
