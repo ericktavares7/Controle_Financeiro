@@ -288,6 +288,54 @@ window.alternarOrdemFiltro = () => {
   window.atualizarDashboard?.();
 };
 
+
+function iniciarSwipeTabsMobile() {
+  if (window.innerWidth > 768) return;
+
+  const tabs = ['overview', 'transacoes', 'ia'];
+
+  let startX = 0;
+  let startY = 0;
+
+  document.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+
+    const diffX = startX - endX;
+    const diffY = startY - endY;
+
+    if (Math.abs(diffX) < 70) return;
+    if (Math.abs(diffY) > 60) return;
+
+    const activeBtn = document.querySelector('.tab-btn.active');
+    const activeTab = activeBtn?.dataset.tab;
+
+    const currentIndex = tabs.indexOf(activeTab);
+
+    if (currentIndex === -1) return;
+
+    let nextIndex = currentIndex;
+
+    if (diffX > 0) {
+      nextIndex = Math.min(currentIndex + 1, tabs.length - 1);
+    } else {
+      nextIndex = Math.max(currentIndex - 1, 0);
+    }
+
+    if (nextIndex === currentIndex) return;
+
+    document
+      .querySelector(`[data-tab="${tabs[nextIndex]}"]`)
+      ?.click();
+  }, { passive: true });
+}
+
+
 /* ========================================
    DOM READY
 ======================================== */
@@ -322,6 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   iniciarFiltroMes();
   iniciarEscape();
+  iniciarSwipeTabsMobile();
 });
 
 function iniciarTabs() {
