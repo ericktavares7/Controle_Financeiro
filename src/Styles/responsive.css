@@ -210,6 +210,21 @@ body {
 ========================= */
 
 @media (max-width: 768px) {
+
+  .tab-section {
+    opacity: 0;
+    transform: translate3d(16px, 0, 0) scale(0.985);
+    transition:
+      opacity 0.24s ease,
+      transform 0.24s cubic-bezier(.2, .8, .2, 1);
+    will-change: opacity, transform;
+  }
+
+  .tab-section.active {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
   .dashboard-container {
     padding: 14px;
     padding-top: 20px;
