@@ -138,9 +138,12 @@ export function atualizarComparativo(dadosMesAtual, dadosMesAnterior, nomeMesAtu
           <div class="comp-bar-group">
             <span class="comp-bar-hint">${nomeMesAnterior}</span>
             <div class="comp-bar-track">
-              <div class="comp-bar-fill comp-bar-anterior"
-                style="width:${porcAnterior}%">
-              </div>
+             <div class="comp-bar-fill comp-bar-anterior"
+  style="
+  width:${porcAnterior}%;
+  background: ${cor}55;
+">
+</div>
             </div>
             <span class="comp-bar-val">${anterior.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
           </div>

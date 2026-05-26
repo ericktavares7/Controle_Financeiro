@@ -17,6 +17,7 @@ body {
   padding: 0;
 }
 
+
 .dashboard-container {
   width: 100%;
   padding: 20px;
@@ -58,7 +59,6 @@ body {
 }
 
 @media (min-width: 769px) {
-
   .desktop-actions-bar {
     display: flex !important;
     justify-content: flex-end;
@@ -101,14 +101,16 @@ body {
     color: #94a3b8;
   }
 
-  /* Menu panel fullscreen no desktop */
   #menu-panel.bottom-panel.active {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
-
     position: fixed !important;
     inset: 0 !important;
+    z-index: 999999 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
 
     width: 100vw !important;
     max-width: none !important;
@@ -116,17 +118,12 @@ body {
 
     padding: 24px !important;
 
-    align-items: center !important;
-    justify-content: center !important;
-
     background: rgba(0, 0, 0, 0.62) !important;
     -webkit-backdrop-filter: blur(10px) !important;
     backdrop-filter: blur(10px) !important;
 
     border: none !important;
     border-radius: 0 !important;
-
-    z-index: 999999 !important;
   }
 
   #menu-panel>* {
@@ -144,10 +141,10 @@ body {
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
   }
 
-  /* Metas panel fullscreen no desktop */
   body #metas-panel.bottom-panel.active {
     position: fixed !important;
     inset: 0 !important;
+    z-index: 9999999 !important;
 
     width: 100vw !important;
     height: 100vh !important;
@@ -165,8 +162,6 @@ body {
     border: none !important;
     border-radius: 0 !important;
     transform: none !important;
-
-    z-index: 9999999 !important;
   }
 
   body #metas-panel.bottom-panel.active .metas-modal-card {
@@ -181,12 +176,43 @@ body {
   }
 }
 
-@media (max-width: 768px) {
+/* =========================
+   TABLET / DESKTOP PEQUENO
+========================= */
 
+@media (min-width: 769px) and (max-width: 995px) {
+  .dashboard-container {
+    padding-top: 128px;
+  }
+
+  .dashboard-header {
+    min-height: 104px;
+  }
+
+  .header-container {
+    flex-wrap: wrap;
+    row-gap: 14px;
+  }
+
+  .main-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .header-actions {
+    margin-left: auto;
+  }
+}
+
+/* =========================
+   MOBILE / TABLET PEQUENO
+========================= */
+
+@media (max-width: 768px) {
   .dashboard-container {
     padding: 14px;
     padding-top: 20px;
-    /* header está no fluxo; .main-nav fixa já é compensada pelo padding-top do .dashboard-header */
     padding-bottom: calc(110px + env(safe-area-inset-bottom));
   }
 
@@ -203,13 +229,25 @@ body {
     gap: 16px;
   }
 
+  .historico-segmentado {
+    gap: 22px !important;
+  }
+
   .card,
   .chart-card,
   .card-kpi,
   .card-historico {
-    padding: 18px;
     width: 100%;
     min-width: 0;
+    padding: 18px;
+  }
+
+  .card-historico {
+    border-radius: 22px;
+    background:
+      linear-gradient(180deg,
+        rgba(15, 23, 42, 0.96),
+        rgba(10, 15, 28, 0.98));
   }
 
   .tab-section.active {
@@ -255,7 +293,7 @@ body {
   #tab-transacoes .tx-right {
     width: 100%;
     display: grid !important;
-    grid-template-columns: 1fr 32px 32px;
+    grid-template-columns: 1fr 34px 34px;
     align-items: center;
     gap: 8px;
   }
@@ -266,19 +304,16 @@ body {
     font-size: 14px;
   }
 
-  .btn-edit-tx,
-  .tx-delete {
-    width: 32px;
-    height: 32px;
-
+  #tab-transacoes .btn-edit-tx,
+  #tab-transacoes .tx-delete {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 50%;
+    flex-shrink: 0;
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
-
-    padding: 0;
-    border-radius: 50%;
-
-    flex-shrink: 0;
   }
 
   .chart-card.evolution .canvas-wrapper {
@@ -298,31 +333,52 @@ body {
     min-width: 760px !important;
     max-width: none !important;
   }
-
-  .historico-segmentado {
-    gap: 22px !important;
-  }
-
-  .card-historico {
-    border-radius: 22px;
-    background:
-      linear-gradient(180deg,
-        rgba(15, 23, 42, 0.96),
-        rgba(10, 15, 28, 0.98));
-  }
-
 }
 
-@media (max-width: 480px) {
+/* =========================
+   CELULARES MÉDIOS
+   481px até 768px
+========================= */
 
+@media (min-width: 481px) and (max-width: 768px) {
   .historico-segmentado {
-    gap: 16px !important;
+    gap: 20px !important;
   }
 
+  #tab-transacoes .tx-item {
+    min-height: 112px;
+    gap: 8px;
+    padding: 16px 14px;
+  }
+
+  #tab-transacoes .tx-right {
+    grid-template-columns: 1fr auto auto !important;
+    column-gap: 8px !important;
+  }
+
+  #tab-transacoes .tx-val {
+    justify-self: start !important;
+  }
+
+  #tab-transacoes .btn-edit-tx,
+  #tab-transacoes .tx-delete {
+    justify-self: end !important;
+  }
+}
+
+/* =========================
+   CELULARES PEQUENOS
+========================= */
+
+@media (max-width: 480px) {
   .dashboard-container {
     padding: 12px;
     padding-top: 20px;
     padding-bottom: calc(110px + env(safe-area-inset-bottom));
+  }
+
+  .historico-segmentado {
+    gap: 16px !important;
   }
 
   .card,
@@ -349,11 +405,8 @@ body {
   .glass-modal {
     width: 100%;
     max-width: 100%;
-
     max-height: calc(100vh - 24px);
-
     overflow-y: auto;
-
     border-radius: 20px;
   }
 
@@ -367,12 +420,9 @@ body {
   .modal-footer {
     position: sticky;
     bottom: 0;
-
     background: inherit;
-
     padding-top: 12px;
     padding-bottom: 4px;
-
     z-index: 3;
   }
 
@@ -385,9 +435,7 @@ body {
   #form-transacao button[type="submit"] {
     width: 100%;
     min-height: 52px;
-
     border-radius: 14px;
-
     position: sticky;
     bottom: 8px;
   }
@@ -398,33 +446,15 @@ body {
   }
 
   #tab-transacoes .tx-item {
-    display: flex !important;
-    flex-direction: column !important;
-
-    align-items: stretch !important;
-    justify-content: center !important;
-
-    gap: 14px;
-
-    padding: 16px 14px;
-
     min-height: 118px;
-  }
-
-  #tab-transacoes .tx-info {
-    width: 100% !important;
+    gap: 14px;
+    padding: 16px 14px;
+    justify-content: center !important;
   }
 
   #tab-transacoes .tx-right {
-    width: 100%;
-
-    display: grid !important;
-    grid-template-columns: 1fr 42px 42px;
-
-    align-items: center;
-
+    grid-template-columns: 1fr 42px 42px !important;
     gap: 12px;
-
     margin-top: 2px;
   }
 
@@ -432,6 +462,8 @@ body {
     justify-self: start !important;
     text-align: left !important;
     min-width: 0 !important;
+    font-size: 15px;
+    font-weight: 800;
   }
 
   #tab-transacoes .btn-edit-tx,
@@ -439,76 +471,41 @@ body {
     width: 42px;
     height: 42px;
   }
-
 }
 
-@media (min-width: 481px) and (max-width: 768px) {
+/* =========================
+   CELULARES MUITO PEQUENOS
+========================= */
 
+@media (max-width: 380px) {
   .historico-segmentado {
-    gap: 20px !important;
+    gap: 12px !important;
+  }
+
+  .card-historico {
+    border-radius: 18px;
   }
 
   #tab-transacoes .tx-item {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 8px;
-    padding: 16px 14px;
     min-height: 112px;
+    padding: 14px 12px;
   }
 
   #tab-transacoes .tx-right {
-    display: grid !important;
-    grid-template-columns: 1fr auto auto !important;
-    column-gap: 8px !important;
-    align-items: center !important;
-    width: 100% !important;
+    grid-template-columns: 1fr 38px 38px !important;
+    gap: 10px;
   }
 
-  #tab-transacoes .tx-actions {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  #tab-transacoes .tx-val {
-    justify-self: start !important;
-  }
-
-  #tab-transacoes .btn-edit-tx {
-    justify-self: end !important;
-  }
-
+  #tab-transacoes .btn-edit-tx,
   #tab-transacoes .tx-delete {
-    justify-self: end !important;
-  }
-
-}
-
-@media (min-width: 769px) and (max-width: 995px) {
-  .dashboard-container {
-    padding-top: 128px;
-  }
-
-  .dashboard-header {
-    min-height: 104px;
-  }
-
-  .header-container {
-    flex-wrap: wrap;
-    row-gap: 14px;
-  }
-
-  .main-nav {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-  }
-
-  .header-actions {
-    margin-left: auto;
+    width: 38px;
+    height: 38px;
   }
 }
+
+/* =========================
+   SAFE AREA IOS
+========================= */
 
 @supports (padding: max(0px)) {
   body {

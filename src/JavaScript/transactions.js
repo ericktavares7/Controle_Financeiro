@@ -271,6 +271,16 @@ export function iniciarEdicaoTransacoes() {
     document.getElementById('edit-tx-desc').value = tx.desc || '';
     document.getElementById('edit-tx-val').value = tx.val || '';
 
+    const dataTx =
+      tx.purchaseDate?.toDate
+        ? tx.purchaseDate.toDate()
+        : tx.createdAt?.toDate
+          ? tx.createdAt.toDate()
+          : new Date(tx.createdAt);
+
+    document.getElementById('edit-tx-date').value =
+      dataTx.toISOString().split('T')[0];
+
     document.getElementById('edit-tx-payment').value =
       tx.paymentMethod || 'debit';
 
@@ -350,6 +360,8 @@ export function iniciarEdicaoTransacoes() {
 
       const desc = document.getElementById('edit-tx-desc').value;
       const val = Number(document.getElementById('edit-tx-val').value) || 0;
+      const dataEditada =
+        criarDataLocal(document.getElementById('edit-tx-date')?.value);
       const paymentMethod = document.getElementById('edit-tx-payment').value;
       const cardId = document.getElementById('edit-tx-card').value || null;
 
@@ -368,15 +380,38 @@ export function iniciarEdicaoTransacoes() {
       const financialCategory =
         document.getElementById('edit-tx-financial-cat')?.value || 'essencial';
 
+
+      const cartaoEditado =
+        (window.cards || []).find(c => c.id === cardId);
+
+      const dadosFatura =
+        paymentMethod === 'credit' && cartaoEditado
+          ? calcularDadosFaturaCartao(dataEditada, cartaoEditado)
+          : {
+            invoiceYear: null,
+            invoiceMonth: null,
+            invoiceDueDate: null,
+            cardClosingDay: null,
+            cardDueDay: null
+          };
+
       await updateTransaction(id, {
         desc,
         val,
         paymentMethod,
         cardId,
         financialCategory,
+
+        purchaseDate: Timestamp.fromDate(dataEditada),
+        createdAt: Timestamp.fromDate(dataEditada),
+
+        ...dadosFatura,
+
         fixedExpense,
         fixedDuration: fixedExpense ? fixedDuration : null,
+
         fixedIndefinite: fixedExpense && fixedDuration === 'indefinite',
+
         totalFixedMonths:
           fixedExpense && fixedDuration !== 'indefinite' ? fixedMonths : null
       });
