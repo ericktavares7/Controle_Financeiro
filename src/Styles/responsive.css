@@ -17,23 +17,11 @@ body {
   padding: 0;
 }
 
-
-/* =========================
-   CONTAINER BASE
-   padding-top compensa o .dashboard-header fixed no desktop
-   (≈ 72px de altura do header + folga)
-========================= */
-
 .dashboard-container {
   width: 100%;
   padding: 20px;
   padding-top: 90px;
 }
-
-
-/* =========================
-   AÇÕES DESKTOP
-========================= */
 
 .desktop-actions-bar {
   display: none;
@@ -68,11 +56,6 @@ body {
 .action-goal i {
   color: #00D1FF;
 }
-
-
-/* =========================
-   DESKTOP / TABLET GRANDE — a partir de 769px
-========================= */
 
 @media (min-width: 769px) {
 
@@ -198,13 +181,6 @@ body {
   }
 }
 
-
-/* =========================
-   MOBILE / TABLET PEQUENO — até 768px
-   Aqui o header sai do fixed, então o padding-top
-   do container pode ser menor (só a .main-nav fixa ≈ 52px)
-========================= */
-
 @media (max-width: 768px) {
 
   .dashboard-container {
@@ -263,29 +239,30 @@ body {
     scroll-snap-align: start;
   }
 
-  .tx-item {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
+  #tab-transacoes .tx-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
     gap: 10px;
     padding: 14px 12px;
   }
 
-  .tx-info {
+  #tab-transacoes .tx-info {
+    width: 100%;
     min-width: 0;
   }
 
-  .tx-right {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end;
+  #tab-transacoes .tx-right {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: 1fr 32px 32px;
+    align-items: center;
     gap: 8px;
-    flex-shrink: 0;
   }
 
-  .tx-val {
-    min-width: 88px;
-    text-align: right;
+  #tab-transacoes .tx-val {
+    min-width: 0;
+    text-align: left;
     font-size: 14px;
   }
 
@@ -322,14 +299,25 @@ body {
     max-width: none !important;
   }
 
+  .historico-segmentado {
+    gap: 22px !important;
+  }
+
+  .card-historico {
+    border-radius: 22px;
+    background:
+      linear-gradient(180deg,
+        rgba(15, 23, 42, 0.96),
+        rgba(10, 15, 28, 0.98));
+  }
 
 }
 
-/* =========================
-   TELAS MUITO PEQUENAS — até 500px
-========================= */
-
 @media (max-width: 480px) {
+
+  .historico-segmentado {
+    gap: 16px !important;
+  }
 
   .dashboard-container {
     padding: 12px;
@@ -349,38 +337,153 @@ body {
     max-width: 230px !important;
   }
 
-  .tx-item {
-    grid-template-columns: 1fr;
-    gap: 10px;
+  .modal-overlay {
+    padding: 12px;
+    align-items: center;
+    justify-content: center;
   }
 
-  .tx-right {
+  .modal,
+  .modal-content,
+  .modal-box,
+  .glass-modal {
     width: 100%;
-    justify-content: space-between;
+    max-width: 100%;
+
+    max-height: calc(100vh - 24px);
+
+    overflow-y: auto;
+
+    border-radius: 20px;
   }
 
-  .tx-val {
-    text-align: left;
-    min-width: 0;
+  .modal-body,
+  .modal-scroll {
+    overflow-y: auto;
+    max-height: calc(100vh - 180px);
   }
+
+  .modal-actions,
+  .modal-footer {
+    position: sticky;
+    bottom: 0;
+
+    background: inherit;
+
+    padding-top: 12px;
+    padding-bottom: 4px;
+
+    z-index: 3;
+  }
+
+  #form-transacao {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  #form-transacao button[type="submit"] {
+    width: 100%;
+    min-height: 52px;
+
+    border-radius: 14px;
+
+    position: sticky;
+    bottom: 8px;
+  }
+
+  #form-transacao input,
+  #form-transacao select {
+    min-height: 48px;
+  }
+
+  #tab-transacoes .tx-item {
+    display: flex !important;
+    flex-direction: column !important;
+
+    align-items: stretch !important;
+    justify-content: center !important;
+
+    gap: 14px;
+
+    padding: 16px 14px;
+
+    min-height: 118px;
+  }
+
+  #tab-transacoes .tx-info {
+    width: 100% !important;
+  }
+
+  #tab-transacoes .tx-right {
+    width: 100%;
+
+    display: grid !important;
+    grid-template-columns: 1fr 42px 42px;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-top: 2px;
+  }
+
+  #tab-transacoes .tx-val {
+    justify-self: start !important;
+    text-align: left !important;
+    min-width: 0 !important;
+  }
+
+  #tab-transacoes .btn-edit-tx,
+  #tab-transacoes .tx-delete {
+    width: 42px;
+    height: 42px;
+  }
+
 }
 
+@media (min-width: 481px) and (max-width: 768px) {
 
-/* =========================
-   SAFE AREA IOS
-========================= */
-
-@supports (padding: max(0px)) {
-  body {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+  .historico-segmentado {
+    gap: 20px !important;
   }
-}
 
-/* =========================
-   TABLET / DESKTOP PEQUENO
-   769px até 995px
-========================= */
+  #tab-transacoes .tx-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px;
+    padding: 16px 14px;
+    min-height: 112px;
+  }
+
+  #tab-transacoes .tx-right {
+    display: grid !important;
+    grid-template-columns: 1fr auto auto !important;
+    column-gap: 8px !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+
+  #tab-transacoes .tx-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  #tab-transacoes .tx-val {
+    justify-self: start !important;
+  }
+
+  #tab-transacoes .btn-edit-tx {
+    justify-self: end !important;
+  }
+
+  #tab-transacoes .tx-delete {
+    justify-self: end !important;
+  }
+
+}
 
 @media (min-width: 769px) and (max-width: 995px) {
   .dashboard-container {
@@ -404,5 +507,12 @@ body {
 
   .header-actions {
     margin-left: auto;
+  }
+}
+
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 }
