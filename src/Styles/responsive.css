@@ -556,8 +556,35 @@
   }
 
   body:has(#tab-ia.tab-section.active) #tab-ia.tab-section.active {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    z-index: 8999 !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
+  }
+
+  body:has(#tab-ia.tab-section.active) #tab-ia.tab-section.active .chat-layout {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  body:has(#tab-ia.tab-section.active) #tab-ia.tab-section.active .chat-mensagens {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+  }
+
+  body:has(#tab-ia.tab-section.active) #tab-ia.tab-section.active .chat-input-wrapper {
+    flex-shrink: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
   }
 }
 
