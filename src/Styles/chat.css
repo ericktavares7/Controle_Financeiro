@@ -472,6 +472,76 @@
   }
 }
 
+@media (min-width: 769px) {
+  .chat-layout {
+    height: calc(100vh - 80px);
+    /* era 120px */
+    max-width: 680px;
+    /* era 780px — padrão Claude */
+    padding: 0 16px;
+  }
+
+  .chat-topbar {
+    padding: 12px 0 10px;
+    /* era 16px 0 12px */
+    margin-bottom: 4px;
+    /* era 8px */
+  }
+
+  .chat-mensagens {
+    gap: 16px;
+    /* era 20px */
+    padding: 16px 0 24px;
+    /* era 20px 4px */
+  }
+
+  .msg-usuario {
+    max-width: 70%;
+    /* limita no desktop igual ao Claude */
+  }
+
+  .config-ia-panel,
+  .btn-config-ia {
+    display: none;
+  }
+
+  /* Layout — largura e altura ajustadas */
+  .chat-layout {
+    height: calc(100vh - 80px);
+    max-width: 680px;
+    padding: 0 16px;
+  }
+
+  /* Topbar mais compacta */
+  .chat-topbar {
+    padding: 12px 0 10px;
+    margin-bottom: 4px;
+  }
+
+  /* Mensagens — gap e padding menores */
+  .chat-mensagens {
+    gap: 16px;
+    padding: 16px 0 24px;
+  }
+
+  /* Bubble do usuário — largura limitada */
+  .msg-usuario {
+    max-width: 70%;
+  }
+
+  /* Input com mais respiro embaixo */
+  .chat-input-wrapper {
+    padding: 8px 0 12px;
+  }
+
+  /* Botão de scroll reposicionado */
+  .btn-scroll-bottom {
+    bottom: 80px;
+    right: 16px;
+  }
+}
+
+
 /* =========================
    MOBILE
 ========================= */

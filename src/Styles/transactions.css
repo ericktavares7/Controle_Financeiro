@@ -240,7 +240,6 @@
   white-space: nowrap;
 }
 
-
 #tab-transacoes .tx-val {
   font-size: 13px;
   font-weight: 700;
@@ -258,7 +257,6 @@
 #tab-transacoes .tx-val--goal {
   color: #00D1FF;
 }
-
 
 /* =========================
    HIGHLIGHT
@@ -394,7 +392,6 @@
   min-width: 0;
 }
 
-
 #tab-transacoes .tx-desc {
   display: block !important;
   color: #e2e8f0 !important;
@@ -435,22 +432,16 @@
 #tab-transacoes .tx-delete {
   width: 32px;
   height: 32px;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   padding: 0;
-
   border-radius: 50%;
-
   flex-shrink: 0;
-
   transition:
     transform 0.15s ease,
     background 0.15s ease,
     border-color 0.15s ease;
-
   backdrop-filter: blur(8px);
 }
 
@@ -463,7 +454,6 @@
 #tab-transacoes .btn-edit-tx:hover {
   background: rgba(29, 140, 255, 0.16);
   border-color: rgba(29, 140, 255, 0.55);
-
   transform: scale(1.05);
 }
 
@@ -476,7 +466,6 @@
 #tab-transacoes .tx-delete:hover {
   background: rgba(255, 77, 109, 0.16);
   border-color: rgba(255, 77, 109, 0.55);
-
   transform: scale(1.05);
 }
 
@@ -497,6 +486,10 @@
     0 0 0 4px rgba(255, 255, 255, 0.02),
     0 6px 18px rgba(0, 0, 0, 0.25);
 }
+
+/* =========================
+   ACTION PILLS — Transações + Visão Geral
+========================= */
 
 #tab-transacoes .tx-desktop-actions {
   display: none;
@@ -526,7 +519,8 @@
   }
 }
 
-#tab-transacoes .tx-desktop-actions .action-pill {
+#tab-transacoes .tx-desktop-actions .action-pill,
+#tab-overview .desktop-actions-bar .action-pill {
   height: 48px;
   padding: 0 16px;
   display: inline-flex;
@@ -542,18 +536,27 @@
   transition: opacity 0.2s;
 }
 
-#tab-transacoes .tx-desktop-actions .action-pill:hover {
+#tab-transacoes .tx-desktop-actions .action-pill:hover,
+#tab-overview .desktop-actions-bar .action-pill:hover {
   opacity: 0.8;
 }
 
-#tab-transacoes .tx-desktop-actions .action-income i {
+#tab-transacoes .tx-desktop-actions .action-income i,
+#tab-overview .desktop-actions-bar .action-income i {
   color: #00FFB2;
 }
 
-#tab-transacoes .tx-desktop-actions .action-expense i {
+#tab-transacoes .tx-desktop-actions .action-expense i,
+#tab-overview .desktop-actions-bar .action-expense i {
   color: #FF6B35;
 }
 
-#tab-transacoes .tx-desktop-actions .action-goal i {
+#tab-transacoes .tx-desktop-actions .action-goal i,
+#tab-overview .desktop-actions-bar .action-goal i {
   color: #00d2ff;
+}
+
+#tab-transacoes .tx-desktop-actions .action-menu i,
+#tab-overview .desktop-actions-bar .action-menu i {
+  color: #94a3b8;
 }
