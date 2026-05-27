@@ -545,6 +545,20 @@
     min-width: 760px !important;
     max-width: none !important;
   }
+
+  /* ── IA Financeira: tela cheia no mobile ── */
+  #tab-ia.tab-section.active~nav.mobile-bottom-nav {
+    display: none !important;
+  }
+
+  body:has(#tab-ia.tab-section.active) .dashboard-header {
+    display: none !important;
+  }
+
+  body:has(#tab-ia.tab-section.active) #tab-ia.tab-section.active {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
 }
 
 /* =========================
