@@ -1596,6 +1596,10 @@ body.modal-open {
   transform: translateY(0);
 }
 
+.month-picker-wrapper {
+  position: relative;
+}
+
 .month-picker-card {
   padding: 18px;
 

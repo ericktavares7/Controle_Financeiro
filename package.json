@@ -30,6 +30,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "firebase": "^12.13.0",
-    "marked": "^18.0.4"
+    "marked": "^18.0.4",
+    "react-pluggy-connect": "^2.12.0"
   }
 }

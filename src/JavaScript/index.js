@@ -426,13 +426,13 @@ function iniciarSwipeTabsMobile() {
    DOM READY
 ======================================== */
 
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('load', () => {
   carregarTemaLocal();
 
   popularSelectMeses();
-  iniciarMonthPicker();
 
   iniciarAuth();
+  iniciarMonthPicker();
 
   iniciarTabs();
 

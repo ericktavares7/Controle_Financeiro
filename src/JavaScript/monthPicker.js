@@ -32,6 +32,8 @@ export function popularSelectMeses() {
 }
 
 export function iniciarMonthPicker() {
+
+
   const mesesPicker = [
     'Jan', 'Fev', 'Mar',
     'Abr', 'Mai', 'Jun',
@@ -94,8 +96,15 @@ export function iniciarMonthPicker() {
     e.preventDefault();
     e.stopPropagation();
 
+    const isActive = monthModal.classList.contains('active');
     monthModal.classList.toggle('active');
-    renderMonthPicker();
+
+    if (!isActive) {
+      requestAnimationFrame(() => {
+        monthModal.classList.add('active');
+        renderMonthPicker();
+      });
+    }
   });
 
   prevYearBtn?.addEventListener('click', (e) => {
