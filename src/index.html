@@ -804,7 +804,11 @@
         </div>
 
         <div id="chat-mensagens" class="chat-mensagens"></div>
-
+        <button type="button" id="btn-scroll-bottom" class="btn-scroll-bottom"
+          onclick="document.getElementById('chat-mensagens').scrollTo({top: 999999, behavior: 'smooth'})">
+          <i class="ph ph-arrow-down"></i>
+        </button>
+        
         <div class="chat-input-wrapper">
           <div class="chat-input-box">
             <input type="text" id="chat-input" placeholder="Pergunte sobre suas finanças...">

@@ -546,3 +546,28 @@
 .btn-copiar-msg svg {
   flex-shrink: 0;
 }
+
+.btn-scroll-bottom {
+  position: absolute;
+  bottom: 90px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: opacity 0.2s, transform 0.2s;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.btn-scroll-bottom.visible {
+  opacity: 1;
+  pointer-events: auto;
+}

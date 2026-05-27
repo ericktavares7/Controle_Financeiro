@@ -415,6 +415,7 @@ async function enviarMensagem() {
   }
 }
 
+
 // =========================
 // INICIAR CHAT
 // =========================
@@ -455,9 +456,21 @@ export async function iniciarChat() {
     }
   });
 
+  // ── Scroll para o fim do chat ──
+  const chatMensagens = document.getElementById('chat-mensagens');
+  const btnScroll = document.getElementById('btn-scroll-bottom');
+
+  if (chatMensagens && btnScroll) {
+    chatMensagens.addEventListener('scroll', () => {
+      const distanciaDoFim = chatMensagens.scrollHeight - chatMensagens.scrollTop - chatMensagens.clientHeight;
+      btnScroll.classList.toggle('visible', distanciaDoFim > 100);
+    });
+  }
+
   const headerNome = document.getElementById('header-user-name');
   if (headerNome) observer.observe(headerNome, { childList: true, subtree: true, characterData: true });
 }
+
 
 function renderizarHistoricoSalvo() {
   const chat = document.getElementById('chat-mensagens');
