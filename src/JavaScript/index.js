@@ -411,6 +411,11 @@ function iniciarSwipeTabsMobile() {
     );
 
     setTimeout(() => {
+      /* Remove as classes de swipe antes de trocar */
+      currentSection?.classList.remove('swipe-out-left', 'swipe-out-right');
+      currentSection.style.transform = '';
+      currentSection.style.opacity = '';
+
       document.querySelector(`[data-tab="${tabs[nextIndex]}"]`)?.click();
     }, 120);
 
@@ -461,22 +466,24 @@ function iniciarTabs() {
   botoes.forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.tab;
-
       if (!target) return;
 
       window.fecharBottomPanels?.();
 
       botoes.forEach(b => b.classList.remove('active'));
-      secoes.forEach(sec => sec.classList.remove('active'));
+
+      secoes.forEach(sec => {
+        sec.classList.remove('active');
+        /* Limpa qualquer transform/opacity residual do swipe */
+        sec.style.transform = '';
+        sec.style.opacity = '';
+        sec.classList.remove('swipe-out-left', 'swipe-out-right');
+      });
 
       btn.classList.add('active');
 
       const secao = document.getElementById(`tab-${target}`);
-
-      if (!secao) {
-        console.error(`Seção não encontrada: tab-${target}`);
-        return;
-      }
+      if (!secao) return;
 
       secao.classList.add('active');
 
