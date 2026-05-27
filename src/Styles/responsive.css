@@ -289,10 +289,24 @@
     opacity: 0;
   }
 
-  /* ── Container ── */
+  .header-container {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-areas: "actions" !important;
+    gap: 0 !important;
+  }
+
+  .main-nav {
+    display: none !important;
+  }
+
+  .brand-group {
+    display: none !important;
+  }
+
   .dashboard-container {
     padding: 14px;
-    padding-top: 180px;
+    padding-top: 80px;
     padding-bottom: calc(110px + env(safe-area-inset-bottom));
   }
 
@@ -310,34 +324,6 @@
     backdrop-filter: none !important;
   }
 
-  .header-container {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    grid-template-areas:
-      "nav"
-      "actions"
-      "brand" !important;
-    align-items: unset !important;
-    gap: 10px !important;
-    padding: 0 !important;
-    max-width: unset !important;
-    margin: 0 !important;
-  }
-
-  /* ── Nav ── */
-  .main-nav {
-    grid-area: nav;
-    position: static !important;
-    background: transparent !important;
-    border-bottom: none !important;
-    box-shadow: none !important;
-    -webkit-backdrop-filter: none !important;
-    backdrop-filter: none !important;
-    padding: 0 !important;
-    width: 100%;
-    order: unset !important;
-    justify-content: unset !important;
-  }
 
   .main-nav ul {
     display: grid !important;
@@ -406,21 +392,6 @@
     padding: 6px 8px;
     border-radius: 14px;
     justify-content: center;
-  }
-
-  /* ── Brand ── */
-  .brand-group {
-    grid-area: brand;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 12px !important;
-    width: 100%;
-    padding: 12px 14px;
-    background: rgba(15, 23, 42, 0.45);
-    border: 1px solid rgba(30, 45, 64, 0.7);
-    border-radius: 18px;
   }
 
   .logo-img {
@@ -583,7 +554,7 @@
 @media (min-width: 481px) and (max-width: 768px) {
 
   .dashboard-container {
-    padding-top: 210px;
+    padding-top: 80px;
   }
 
   .historico-segmentado {
@@ -619,7 +590,7 @@
 
   .dashboard-container {
     padding: 12px;
-    padding-top: 210px;
+    padding-top: 80px;
     padding-bottom: calc(110px + env(safe-area-inset-bottom));
   }
 
