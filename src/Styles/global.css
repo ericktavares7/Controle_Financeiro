@@ -321,3 +321,24 @@ body.light-mode #chat-enviar {
   box-shadow:
     0 10px 24px rgba(0, 210, 255, 0.18);
 }
+
+#modal-registro .modal-content {
+  display: flex;
+  flex-direction: column;
+  max-height: 90dvh;
+  overflow: hidden;
+}
+
+#modal-registro .modal-header {
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: inherit;
+}
+
+#modal-registro form#form-transacao {
+  overflow-y: auto;
+  flex: 1;
+  padding-bottom: 16px;
+}
