@@ -342,3 +342,18 @@ body.light-mode #chat-enviar {
   flex: 1;
   padding-bottom: 16px;
 }
+
+/* =========================
+   HIDE ALL SCROLLBARS
+========================= */
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}

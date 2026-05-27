@@ -185,6 +185,7 @@
     max-width: 420px !important;
   }
 
+
   .metas-modal-card {
     width: 100%;
     max-width: 480px;
@@ -621,6 +622,7 @@
   #tab-transacoes .tx-delete {
     justify-self: end !important;
   }
+
 }
 
 /* =========================
@@ -729,6 +731,13 @@
     width: 42px;
     height: 42px;
   }
+
+  .modal-body,
+  .modal-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
 }
 
 /* =========================
@@ -760,6 +769,13 @@
     width: 38px;
     height: 38px;
   }
+
+  .modal-body,
+  .modal-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
 }
 
 /* =========================
@@ -771,4 +787,27 @@
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
+}
+
+/* =========================
+   SCROLLBAR HIDDEN — MODAIS
+========================= */
+
+.modal,
+.modal-body,
+.modal-scroll,
+.modal-content,
+.modal-box,
+.glass-modal {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.modal::-webkit-scrollbar,
+.modal-body::-webkit-scrollbar,
+.modal-scroll::-webkit-scrollbar,
+.modal-content::-webkit-scrollbar,
+.modal-box::-webkit-scrollbar,
+.glass-modal::-webkit-scrollbar {
+  display: none;
 }

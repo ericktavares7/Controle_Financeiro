@@ -812,23 +812,16 @@
             </div>
           </div>
           <div class="chat-topbar-actions">
+
             <button type="button" class="btn-config-ia" onclick="window.toggleConfigIA()"
               title="Configurar chave de API">
               <i class="ph ph-key"></i>
             </button>
+
             <button type="button" class="btn-config-ia" onclick="window.limparHistoricoChat()" title="Limpar conversa">
               <i class="ph ph-trash"></i>
             </button>
           </div>
-        </div>
-
-        <div id="config-ia-panel" class="config-ia-panel hidden">
-          <p class="config-ia-desc">Insira sua chave de API da Anthropic. Ela fica salva apenas no seu navegador.</p>
-          <div class="config-ia-row">
-            <input type="password" id="input-api-key" placeholder="sk-ant-api03-..." autocomplete="off">
-            <button type="button" class="btn-save-key" onclick="window.salvarApiKey()">Salvar</button>
-          </div>
-          <p id="config-ia-status" class="config-ia-status"></p>
         </div>
 
         <div id="chat-mensagens" class="chat-mensagens"></div>
@@ -964,9 +957,46 @@
         <i class="ph ph-caret-right"></i>
       </button>
 
+      <button class="menu-option-btn"
+        onclick="window.fecharBottomPanels?.(); setTimeout(() => window.toggleConfigIA?.(), 100);">
+        <i class="ph ph-key"></i>
+        <div>
+          <strong>Chave da IA</strong>
+          <small>Configurar API Key da Anthropic</small>
+        </div>
+        <i class="ph ph-caret-right"></i>
+      </button>
+
       <button type="button" class="btn-danger" onclick="window.logOut()">
         <i class="ph ph-sign-out"></i> Sair da conta
       </button>
+    </div>
+
+    <div id="config-ia-panel" class="config-ia-panel hidden">
+      <div class="config-ia-card">
+
+        <div class="config-ia-header">
+          <div>
+            <h3>Chave da IA</h3>
+            <p>Configure sua API Key da Anthropic.</p>
+          </div>
+
+          <button type="button" class="config-ia-close" onclick="window.toggleConfigIA()">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+
+        <div class="config-ia-row">
+          <input type="password" id="input-api-key" placeholder="sk-ant-api03-..." autocomplete="off">
+
+          <button type="button" class="btn-save-key" onclick="window.salvarApiKey()">
+            Salvar
+          </button>
+        </div>
+
+        <p id="config-ia-status" class="config-ia-status"></p>
+
+      </div>
     </div>
 
   </main>

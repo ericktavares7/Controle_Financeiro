@@ -641,3 +641,88 @@
   opacity: 1;
   pointer-events: auto;
 }
+
+#config-ia-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 99999999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(12px);
+}
+
+#config-ia-panel.hidden {
+  display: none !important;
+}
+
+.config-ia-card {
+  width: 100%;
+  max-width: 460px;
+  padding: 22px;
+
+  border-radius: 24px;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, .08);
+}
+
+.config-ia-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.config-ia-header h3 {
+  margin: 0 0 4px;
+  color: #fff;
+}
+
+.config-ia-header p,
+.config-ia-status {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.config-ia-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .08);
+  background: rgba(255, 255, 255, .04);
+  color: #00FFB2;
+  cursor: pointer;
+}
+
+.config-ia-row {
+  display: flex;
+  gap: 10px;
+}
+
+.config-ia-row input {
+  flex: 1;
+}
+
+.btn-save-key {
+  padding: 0 18px;
+  border: none;
+  border-radius: 14px;
+  background: #00FFB2;
+  color: #001b13;
+  font-weight: 900;
+}
+
+.status-ok {
+  margin-top: 12px;
+  color: #00FFB2;
+}
+
+.status-erro {
+  margin-top: 12px;
+  color: #ff6b6b;
+}
