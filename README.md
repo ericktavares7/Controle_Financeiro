@@ -10,6 +10,13 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=flat&logo=javascript)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![Firebase](https://img.shields.io/badge/Firebase-Firestore-orange?style=flat&logo=firebase)](https://firebase.google.com/)
 
+## 🔐 Acesso Demo
+
+> Não quer criar uma conta? Use o acesso de demonstração:
+
+ **Email:** `demo@financesimplefy.com`
+ **Senha:** `demo123456`
+
 [▶ Acessar o app](https://financesimplefy-git-main-ericktavares7s-projects.vercel.app/)
 
 </div>
