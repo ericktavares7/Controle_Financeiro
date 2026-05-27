@@ -497,209 +497,216 @@ export function iniciarEdicaoTransacoes() {
 }
 
 export function iniciarFormularioTransacao() {
-  document
-    .getElementById('form-transacao')
-    ?.addEventListener('submit', async (e) => {
-      e.preventDefault();
 
-      const inputDataStr =
-        document.getElementById('input-data')?.value;
+  const form = document.getElementById('form-transacao');
 
-      const dataCompra = criarDataLocal(inputDataStr);
+  if (!form) return;
 
-      const tipo =
-        document.getElementById('input-tipo').value;
+  if (form.dataset.listenerAttached === 'true') return;
 
-      const categoria =
-        document.getElementById('input-cat').value;
+  form.dataset.listenerAttached = 'true';
 
-      const paymentMethod =
-        document.getElementById('input-payment')?.value || 'debit';
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-      const cardId =
-        document.getElementById('input-card')?.value || null;
+    const inputDataStr =
+      document.getElementById('input-data')?.value;
 
-      const cartao =
-        (window.cards || []).find(card => card.id === cardId);
+    const dataCompra = criarDataLocal(inputDataStr);
 
-      const valor =
-        Number(document.getElementById('input-val').value) || 0;
+    const tipo =
+      document.getElementById('input-tipo').value;
 
-      const descricao =
-        document.getElementById('input-desc').value;
+    const categoria =
+      document.getElementById('input-cat').value;
 
-      const recurrence =
-        document.getElementById('input-recurrence')?.value || 'single';
+    const paymentMethod =
+      document.getElementById('input-payment')?.value || 'debit';
 
-      const installments =
-        Number(document.getElementById('input-installments')?.value || 1);
+    const cardId =
+      document.getElementById('input-card')?.value || null;
 
-      const fixedExpense =
-        document.getElementById('input-fixed-expense')?.value === 'yes';
+    const cartao =
+      (window.cards || []).find(card => card.id === cardId);
 
-      const fixedDuration =
-        document.getElementById('input-fixed-duration')?.value || 'limited';
+    const valor =
+      Number(document.getElementById('input-val').value) || 0;
 
-      const fixedMonths =
-        fixedDuration === 'indefinite'
-          ? 24
-          : Number(document.getElementById('input-fixed-months')?.value || 1);
+    const descricao =
+      document.getElementById('input-desc').value;
 
-      const financialCategory =
-        document.getElementById('input-financial-cat')?.value || 'essencial';
+    const recurrence =
+      document.getElementById('input-recurrence')?.value || 'single';
+
+    const installments =
+      Number(document.getElementById('input-installments')?.value || 1);
+
+    const fixedExpense =
+      document.getElementById('input-fixed-expense')?.value === 'yes';
+
+    const fixedDuration =
+      document.getElementById('input-fixed-duration')?.value || 'limited';
+
+    const fixedMonths =
+      fixedDuration === 'indefinite'
+        ? 24
+        : Number(document.getElementById('input-fixed-months')?.value || 1);
+
+    const financialCategory =
+      document.getElementById('input-financial-cat')?.value || 'essencial';
 
 
-      if (
-        tipo === 'expense' &&
+    if (
+      tipo === 'expense' &&
+      paymentMethod === 'credit' &&
+      !cartao
+    ) {
+      window.showToast?.({
+        type: 'error',
+        title: 'Cartão obrigatório',
+        message: 'Selecione um cartão de crédito.'
+      });
+
+      return;
+    }
+
+    const dadosFatura =
+      tipo === 'expense' &&
         paymentMethod === 'credit' &&
-        !cartao
-      ) {
-        window.showToast?.({
-          type: 'error',
-          title: 'Cartão obrigatório',
-          message: 'Selecione um cartão de crédito.'
+        cartao
+        ? calcularDadosFaturaCartao(dataCompra, cartao)
+        : {};
+
+    const nova = {
+      desc: descricao,
+      val: valor,
+      type: tipo,
+      cat: categoria,
+      financialCategory,
+      paymentMethod,
+      cardId,
+
+      purchaseDate: Timestamp.fromDate(dataCompra),
+
+      createdAt: Timestamp.fromDate(dataCompra),
+
+      ...dadosFatura
+    };
+
+    if (
+      tipo === 'expense' &&
+      paymentMethod === 'credit' &&
+      recurrence === 'installment'
+    ) {
+      const groupId = crypto.randomUUID();
+
+      for (let i = 0; i < installments; i++) {
+        const dataParcela =
+          adicionarMeses(dataCompra, i);
+
+        const dadosFaturaParcela =
+          calcularDadosFaturaCartao(
+            dataParcela,
+            cartao
+          );
+
+        await addTransaction({
+          ...nova,
+          ...dadosFaturaParcela,
+
+          desc: `${descricao} (${i + 1}/${installments})`,
+          val: valor / installments,
+
+          purchaseDate: Timestamp.fromDate(dataParcela),
+          createdAt: Timestamp.fromDate(dataParcela),
+
+          installmentGroupId: groupId,
+          installmentNumber: i + 1,
+          totalInstallments: installments
         });
-
-        return;
       }
+    }
 
-      const dadosFatura =
-        tipo === 'expense' &&
-          paymentMethod === 'credit' &&
-          cartao
-          ? calcularDadosFaturaCartao(dataCompra, cartao)
-          : {};
+    else if (
+      tipo === 'expense' &&
+      fixedExpense
+    ) {
+      const fixedGroupId = crypto.randomUUID();
 
-      const nova = {
-        desc: descricao,
-        val: valor,
-        type: tipo,
-        cat: categoria,
-        financialCategory,
-        paymentMethod,
-        cardId,
+      for (let i = 0; i < fixedMonths; i++) {
+        const dataFixa = adicionarMeses(dataCompra, i);
 
-        purchaseDate: Timestamp.fromDate(dataCompra),
+        const dadosFaturaFixa =
+          paymentMethod === 'credit'
+            ? calcularDadosFaturaCartao(dataFixa, cartao)
+            : {};
 
-        createdAt: Timestamp.fromDate(dataCompra),
+        await addTransaction({
+          ...nova,
+          ...dadosFaturaFixa,
 
-        ...dadosFatura
-      };
+          desc:
+            fixedDuration === 'indefinite'
+              ? `${descricao} (fixa)`
+              : `${descricao} (${i + 1}/${fixedMonths})`,
 
-      if (
-        tipo === 'expense' &&
-        paymentMethod === 'credit' &&
-        recurrence === 'installment'
-      ) {
-        const groupId = crypto.randomUUID();
+          val: valor,
 
-        for (let i = 0; i < installments; i++) {
-          const dataParcela =
-            adicionarMeses(dataCompra, i);
+          purchaseDate: Timestamp.fromDate(dataFixa),
+          createdAt: Timestamp.fromDate(dataFixa),
 
-          const dadosFaturaParcela =
-            calcularDadosFaturaCartao(
-              dataParcela,
-              cartao
-            );
-
-          await addTransaction({
-            ...nova,
-            ...dadosFaturaParcela,
-
-            desc: `${descricao} (${i + 1}/${installments})`,
-            val: valor / installments,
-
-            purchaseDate: Timestamp.fromDate(dataParcela),
-            createdAt: Timestamp.fromDate(dataParcela),
-
-            installmentGroupId: groupId,
-            installmentNumber: i + 1,
-            totalInstallments: installments
-          });
-        }
+          fixedExpense: true,
+          fixedDuration,
+          fixedIndefinite: fixedDuration === 'indefinite',
+          fixedGroupId,
+          fixedNumber: i + 1,
+          totalFixedMonths:
+            fixedDuration === 'indefinite'
+              ? null
+              : fixedMonths
+        });
       }
+    }
 
-      else if (
-        tipo === 'expense' &&
-        fixedExpense
-      ) {
-        const fixedGroupId = crypto.randomUUID();
+    else {
+      await addTransaction(nova);
+    }
 
-        for (let i = 0; i < fixedMonths; i++) {
-          const dataFixa = adicionarMeses(dataCompra, i);
+    e.target.reset();
 
-          const dadosFaturaFixa =
-            paymentMethod === 'credit'
-              ? calcularDadosFaturaCartao(dataFixa, cartao)
-              : {};
+    document.getElementById('input-payment').value = 'debit';
+    document.getElementById('input-card').value = '';
 
-          await addTransaction({
-            ...nova,
-            ...dadosFaturaFixa,
+    document.getElementById('credit-card-group')?.classList.add('hidden');
+    document.getElementById('recurrence-group')?.classList.add('hidden');
+    document.getElementById('installments-group')?.classList.add('hidden');
+    document.getElementById('fixed-expense-group')?.classList.add('hidden');
+    document.getElementById('fixed-duration-group')?.classList.add('hidden');
+    document.getElementById('fixed-months-group')?.classList.add('hidden');
 
-            desc:
-              fixedDuration === 'indefinite'
-                ? `${descricao} (fixa)`
-                : `${descricao} (${i + 1}/${fixedMonths})`,
+    const recurrenceInput =
+      document.getElementById('input-recurrence');
 
-            val: valor,
+    const installmentsInput =
+      document.getElementById('input-installments');
 
-            purchaseDate: Timestamp.fromDate(dataFixa),
-            createdAt: Timestamp.fromDate(dataFixa),
+    const fixedExpenseInput =
+      document.getElementById('input-fixed-expense');
 
-            fixedExpense: true,
-            fixedDuration,
-            fixedIndefinite: fixedDuration === 'indefinite',
-            fixedGroupId,
-            fixedNumber: i + 1,
-            totalFixedMonths:
-              fixedDuration === 'indefinite'
-                ? null
-                : fixedMonths
-          });
-        }
-      }
+    const fixedDurationInput =
+      document.getElementById('input-fixed-duration');
 
-      else {
-        await addTransaction(nova);
-      }
+    const fixedMonthsInput =
+      document.getElementById('input-fixed-months');
 
-      e.target.reset();
+    if (recurrenceInput) recurrenceInput.value = 'single';
+    if (installmentsInput) installmentsInput.value = 2;
+    if (fixedExpenseInput) fixedExpenseInput.value = 'no';
+    if (fixedDurationInput) fixedDurationInput.value = 'limited';
+    if (fixedMonthsInput) fixedMonthsInput.value = 12;
 
-      document.getElementById('input-payment').value = 'debit';
-      document.getElementById('input-card').value = '';
-
-      document.getElementById('credit-card-group')?.classList.add('hidden');
-      document.getElementById('recurrence-group')?.classList.add('hidden');
-      document.getElementById('installments-group')?.classList.add('hidden');
-      document.getElementById('fixed-expense-group')?.classList.add('hidden');
-      document.getElementById('fixed-duration-group')?.classList.add('hidden');
-      document.getElementById('fixed-months-group')?.classList.add('hidden');
-
-      const recurrenceInput =
-        document.getElementById('input-recurrence');
-
-      const installmentsInput =
-        document.getElementById('input-installments');
-
-      const fixedExpenseInput =
-        document.getElementById('input-fixed-expense');
-
-      const fixedDurationInput =
-        document.getElementById('input-fixed-duration');
-
-      const fixedMonthsInput =
-        document.getElementById('input-fixed-months');
-
-      if (recurrenceInput) recurrenceInput.value = 'single';
-      if (installmentsInput) installmentsInput.value = 2;
-      if (fixedExpenseInput) fixedExpenseInput.value = 'no';
-      if (fixedDurationInput) fixedDurationInput.value = 'limited';
-      if (fixedMonthsInput) fixedMonthsInput.value = 12;
-
-      window.fecharModal?.();
-    });
+    window.fecharModal?.();
+  });
 }
 
 export function iniciarCamposTransacao() {
