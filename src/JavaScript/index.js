@@ -289,17 +289,17 @@ window.alternarOrdemFiltro = () => {
 };
 
 function iniciarSwipeTabsMobile() {
-
   if (window.innerWidth > 768) return;
 
   const tabs = ['overview', 'transacoes', 'ia'];
 
   let startX = 0;
+  let startY = 0;
   let currentX = 0;
   let dragging = false;
+  let isHorizontal = null;
 
-  const tabSections =
-    document.querySelectorAll('.tab-section');
+  const tabSections = document.querySelectorAll('.tab-section');
 
   function resetTabsTransition() {
     tabSections.forEach(section => {
@@ -308,14 +308,19 @@ function iniciarSwipeTabsMobile() {
     });
   }
 
-  document.addEventListener('touchstart', (e) => {
+  function resetActiveSection() {
+    tabSections.forEach(section => {
+      section.style.transform = '';
+      section.style.opacity = '';
+    });
+  }
 
+  document.addEventListener('touchstart', (e) => {
     const touchTarget = e.target;
 
-    const insideHorizontalScroll =
-      touchTarget.closest(
-        '.wallet-cards-list, .canvas-wrapper'
-      );
+    const insideHorizontalScroll = touchTarget.closest(
+      '.wallet-cards-list, .canvas-wrapper'
+    );
 
     if (insideHorizontalScroll) {
       dragging = false;
@@ -323,8 +328,10 @@ function iniciarSwipeTabsMobile() {
     }
 
     startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
     currentX = startX;
     dragging = true;
+    isHorizontal = null;
 
     tabSections.forEach(section => {
       section.style.transition = 'none';
@@ -333,102 +340,81 @@ function iniciarSwipeTabsMobile() {
   }, { passive: true });
 
   document.addEventListener('touchmove', (e) => {
-
     if (!dragging) return;
 
     currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
 
     const diffX = currentX - startX;
+    const diffY = currentY - startY;
+
+    /* Define na primeira movimentação se é horizontal ou vertical */
+    if (isHorizontal === null) {
+      if (Math.abs(diffX) > Math.abs(diffY) + 5) {
+        isHorizontal = true;
+      } else if (Math.abs(diffY) > Math.abs(diffX) + 5) {
+        isHorizontal = false;
+        /* É scroll vertical — cancela o swipe e restaura */
+        dragging = false;
+        resetTabsTransition();
+        resetActiveSection();
+        return;
+      } else {
+        return;
+      }
+    }
+
+    if (!isHorizontal) return;
 
     tabSections.forEach(section => {
+      if (!section.classList.contains('active')) return;
 
-      if (!section.classList.contains('active'))
-        return;
-
-      section.style.transform =
-        `translateX(${diffX * 0.22}px)`;
-
-      section.style.opacity =
-        `${1 - Math.min(Math.abs(diffX) / 300, 0.35)}`;
-
+      section.style.transform = `translateX(${diffX * 0.22}px)`;
+      section.style.opacity = `${1 - Math.min(Math.abs(diffX) / 300, 0.35)}`;
     });
 
   }, { passive: true });
 
   document.addEventListener('touchend', () => {
-
     if (!dragging) return;
 
     const diffX = currentX - startX;
 
     resetTabsTransition();
+    resetActiveSection();
 
-    tabSections.forEach(section => {
+    dragging = false;
 
-      if (!section.classList.contains('active'))
-        return;
+    /* Ignora se não foi horizontal ou foi curto demais */
+    if (!isHorizontal || Math.abs(diffX) < 80) return;
 
-      section.style.transform = '';
-      section.style.opacity = '';
+    const activeBtn = document.querySelector('.tab-btn.active');
+    const activeTab = activeBtn?.dataset.tab;
+    const currentIndex = tabs.indexOf(activeTab);
 
-    });
-
-    if (Math.abs(diffX) < 80) {
-      dragging = false;
-      return;
-    }
-
-    const activeBtn =
-      document.querySelector('.tab-btn.active');
-
-    const activeTab =
-      activeBtn?.dataset.tab;
-
-    const currentIndex =
-      tabs.indexOf(activeTab);
-
-    if (currentIndex === -1) {
-      dragging = false;
-      return;
-    }
+    if (currentIndex === -1) return;
 
     let nextIndex = currentIndex;
 
     if (diffX < 0) {
-      nextIndex =
-        Math.min(currentIndex + 1, tabs.length - 1);
+      nextIndex = Math.min(currentIndex + 1, tabs.length - 1);
     } else {
-      nextIndex =
-        Math.max(currentIndex - 1, 0);
+      nextIndex = Math.max(currentIndex - 1, 0);
     }
 
-    if (nextIndex !== currentIndex) {
+    if (nextIndex === currentIndex) return;
 
-      const currentSection =
-        document.querySelector('.tab-section.active');
+    const currentSection = document.querySelector('.tab-section.active');
 
-      currentSection?.classList.add(
-        diffX < 0
-          ? 'swipe-out-left'
-          : 'swipe-out-right'
-      );
+    currentSection?.classList.add(
+      diffX < 0 ? 'swipe-out-left' : 'swipe-out-right'
+    );
 
-      setTimeout(() => {
-
-        document
-          .querySelector(
-            `[data-tab="${tabs[nextIndex]}"]`
-          )
-          ?.click();
-
-      }, 120);
-
-    }
-
-    dragging = false;
+    setTimeout(() => {
+      document.querySelector(`[data-tab="${tabs[nextIndex]}"]`)?.click();
+    }, 120);
 
   }, { passive: true });
-
 }
 
 /* ========================================
