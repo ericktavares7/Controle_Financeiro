@@ -160,9 +160,17 @@ export function atualizarDashboard() {
 
   atualizarInsightSaldo(select, rec, des, res);
 
+  atualizarInsightsTopo({
+    rec,
+    des,
+    res,
+    lazer
+  });
+  
   atualizarMetasIA(rec, des, res, lazer, dadosExibicao);
   atualizarCartoesNaTela(window.cards || []);
   atualizarPoupanca(rec, des, res);
+
 }
 
 function atualizarInsightSaldo(select, rec, des, res) {
@@ -516,4 +524,162 @@ function atualizarMetasIA(
     subcats: montarSubcategorias(dadosExibicao, 'lazer')
   })}
 `;
+}
+
+const alertasDismissed = new Set();
+let alertDrawerOpen = false;
+
+window.toggleAlertDrawer = function () {
+  alertDrawerOpen = !alertDrawerOpen;
+  const wrap = document.getElementById('alertDrawer');
+  const btn  = document.getElementById('bellBtn');
+  if (!wrap || !btn) return;
+  wrap.classList.toggle('open', alertDrawerOpen);
+  btn.setAttribute('aria-expanded', alertDrawerOpen);
+  wrap.setAttribute('aria-hidden', !alertDrawerOpen);
+};
+
+window.clearAllAlerts = function () {
+  const list = document.getElementById('alertList');
+  if (!list) return;
+  list.querySelectorAll('.alert-item').forEach(el => {
+    alertasDismissed.add(el.dataset.id);
+    _dismissItem(el);
+  });
+  _syncBadge(0);
+};
+
+function _dismissItem(el) {
+  el.style.opacity = '0';
+  el.style.maxHeight = el.offsetHeight + 'px';
+  requestAnimationFrame(() => {
+    el.style.maxHeight = '0';
+    el.style.paddingTop = '0';
+    el.style.paddingBottom = '0';
+  });
+  setTimeout(() => el.remove(), 280);
+}
+
+function _syncBadge(count) {
+  const badge = document.getElementById('alertBadge');
+  const label = document.getElementById('alertDrawerLabel');
+  const empty = document.getElementById('alertEmpty');
+  const list  = document.getElementById('alertList');
+
+  if (badge) {
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'inline-block' : 'none';
+  }
+
+  if (label) {
+    label.textContent = count > 0
+      ? `${count} alerta${count > 1 ? 's' : ''} ativo${count > 1 ? 's' : ''}`
+      : 'Sem alertas';
+  }
+
+  // Mostra ou oculta o estado vazio
+  if (empty && list) {
+    const temItens = list.querySelectorAll('.alert-item').length > 0;
+    empty.style.display = temItens ? 'none' : 'flex';
+  }
+}
+
+function _renderAlertItem({ id, texto, severity }) {
+  const list = document.getElementById('alertList');
+  if (!list) return;
+
+  // Já existe? Atualiza só o texto (evita flicker)
+  const existing = list.querySelector(`[data-id="${id}"]`);
+  if (existing) {
+    const textEl = existing.querySelector('.alert-item-text');
+    if (textEl) textEl.textContent = texto;
+    return;
+  }
+
+  // Ignorado pelo usuário nesta sessão?
+  if (alertasDismissed.has(id)) return;
+
+  const chipClass  = severity === 'danger' ? 'danger' : 'warn';
+  const chipLabel  = severity === 'danger' ? 'Crítico' : 'Atenção';
+  const dotClass   = chipClass;
+
+  const div = document.createElement('div');
+  div.className   = 'alert-item';
+  div.dataset.id  = id;
+  div.innerHTML   = `
+    <span class="alert-dot ${dotClass}"></span>
+    <span class="alert-item-text">${texto}</span>
+    <span class="alert-chip ${chipClass}">${chipLabel}</span>
+    <button class="alert-dismiss-btn" aria-label="Dispensar">
+      <i class="ph ph-x"></i>
+    </button>
+  `;
+
+  div.querySelector('.alert-dismiss-btn').addEventListener('click', () => {
+    alertasDismissed.add(id);
+    _dismissItem(div);
+    const remaining = list.querySelectorAll('.alert-item').length - 1;
+    _syncBadge(Math.max(remaining, 0));
+    setTimeout(() => _syncBadge(list.querySelectorAll('.alert-item').length), 300);
+  });
+
+  // Remove o empty-state e insere o item
+  const empty = document.getElementById('alertEmpty');
+  if (empty) empty.style.display = 'none';
+  list.appendChild(div);
+}
+
+export function atualizarInsightsTopo(dadosMesAtual = {}) {
+  const receitas = Number(dadosMesAtual.rec) || 0;
+  const despesas = Number(dadosMesAtual.des) || 0;
+  const lazer    = Number(dadosMesAtual.lazer) || 0;
+  const reserva  = Number(dadosMesAtual.res) || 0;
+  const saldo    = receitas - despesas;
+
+  // ── Monta lista de alertas ativos ───────────────────────
+  const alertasAtivos = [];
+
+  if (saldo < 0) {
+    alertasAtivos.push({
+      id: 'saldo-negativo',
+      texto: `Despesas superam receitas em ${formatBRL(Math.abs(saldo))}`,
+      severity: 'danger',
+    });
+  }
+
+  if (receitas > 0 && reserva / receitas < 0.1) {
+    alertasAtivos.push({
+      id: 'reserva-baixa',
+      texto: 'Reserva está abaixo dos 10% recomendados. Saldo mensal negativo.',
+      severity: 'warn',
+    });
+  }
+
+  if (receitas > 0 && lazer / receitas > 0.1) {
+    alertasAtivos.push({
+      id: 'lazer-alto',
+      texto: 'Lazer passou de 10% da receita.',
+      severity: 'warn',
+    });
+  }
+
+  // ── Remove itens que não são mais alertas ────────────────
+  const list = document.getElementById('alertList');
+  if (list) {
+    list.querySelectorAll('.alert-item').forEach(el => {
+      const ativo = alertasAtivos.find(a => a.id === el.dataset.id);
+      if (!ativo) _dismissItem(el);
+    });
+  }
+
+  // ── Injeta ou atualiza os alertas ativos ────────────────
+  // Só renderiza os que não foram dispensados pelo usuário
+  const visiveis = alertasAtivos.filter(a => !alertasDismissed.has(a.id));
+  visiveis.forEach(_renderAlertItem);
+
+  // ── Atualiza badge e label ───────────────────────────────
+  setTimeout(() => {
+    const count = list ? list.querySelectorAll('.alert-item').length : 0;
+    _syncBadge(count);
+  }, 50);
 }

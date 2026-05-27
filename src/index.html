@@ -374,6 +374,34 @@
           Menu
         </button>
       </div>
+      <div class="alerts-wrapper">
+
+        <button class="bell-btn" id="bellBtn" onclick="window.toggleAlertDrawer()" aria-expanded="false"
+          aria-controls="alertDrawer">
+          <i class="ph ph-bell"></i>
+          Alertas
+          <span class="alert-badge" id="alertBadge" style="display:none">0</span>
+        </button>
+
+        <div class="alert-drawer-wrap" id="alertDrawer" aria-hidden="true">
+          <div class="alert-drawer">
+
+            <div class="alert-drawer-header">
+              <span id="alertDrawerLabel">Sem alertas</span>
+              <button class="alert-clear-btn" onclick="window.clearAllAlerts()">Dispensar todos</button>
+            </div>
+
+            <div id="alertList">
+              <div class="alert-empty" id="alertEmpty">
+                <i class="ph ph-check-circle"></i>
+                Nenhum alerta ativo
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
 
       <div class="summary-grid">
         <article class="card balance" id="card-metas">
@@ -401,7 +429,6 @@
             <p class="msg-vazio">Nenhum cartão cadastrado.</p>
           </div>
         </article>
-
       </div>
 
       <section class="bottom-charts-grid">
@@ -808,7 +835,7 @@
           onclick="document.getElementById('chat-mensagens').scrollTo({top: 999999, behavior: 'smooth'})">
           <i class="ph ph-arrow-down"></i>
         </button>
-        
+
         <div class="chat-input-wrapper">
           <div class="chat-input-box">
             <input type="text" id="chat-input" placeholder="Pergunte sobre suas finanças...">
