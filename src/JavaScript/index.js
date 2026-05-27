@@ -288,53 +288,148 @@ window.alternarOrdemFiltro = () => {
   window.atualizarDashboard?.();
 };
 
-
 function iniciarSwipeTabsMobile() {
+
   if (window.innerWidth > 768) return;
 
   const tabs = ['overview', 'transacoes', 'ia'];
 
   let startX = 0;
-  let startY = 0;
+  let currentX = 0;
+  let dragging = false;
+
+  const tabSections =
+    document.querySelectorAll('.tab-section');
+
+  function resetTabsTransition() {
+    tabSections.forEach(section => {
+      section.style.transition =
+        'transform 0.28s cubic-bezier(.2,.8,.2,1), opacity 0.28s';
+    });
+  }
 
   document.addEventListener('touchstart', (e) => {
+
+    const touchTarget = e.target;
+
+    const insideHorizontalScroll =
+      touchTarget.closest(
+        '.wallet-cards-list, .canvas-wrapper'
+      );
+
+    if (insideHorizontalScroll) {
+      dragging = false;
+      return;
+    }
+
     startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
+    currentX = startX;
+    dragging = true;
+
+    tabSections.forEach(section => {
+      section.style.transition = 'none';
+    });
+
   }, { passive: true });
 
-  document.addEventListener('touchend', (e) => {
-    const endX = e.changedTouches[0].clientX;
-    const endY = e.changedTouches[0].clientY;
+  document.addEventListener('touchmove', (e) => {
 
-    const diffX = startX - endX;
-    const diffY = startY - endY;
+    if (!dragging) return;
 
-    if (Math.abs(diffX) < 70) return;
-    if (Math.abs(diffY) > 60) return;
+    currentX = e.touches[0].clientX;
 
-    const activeBtn = document.querySelector('.tab-btn.active');
-    const activeTab = activeBtn?.dataset.tab;
+    const diffX = currentX - startX;
 
-    const currentIndex = tabs.indexOf(activeTab);
+    tabSections.forEach(section => {
 
-    if (currentIndex === -1) return;
+      if (!section.classList.contains('active'))
+        return;
+
+      section.style.transform =
+        `translateX(${diffX * 0.22}px)`;
+
+      section.style.opacity =
+        `${1 - Math.min(Math.abs(diffX) / 300, 0.35)}`;
+
+    });
+
+  }, { passive: true });
+
+  document.addEventListener('touchend', () => {
+
+    if (!dragging) return;
+
+    const diffX = currentX - startX;
+
+    resetTabsTransition();
+
+    tabSections.forEach(section => {
+
+      if (!section.classList.contains('active'))
+        return;
+
+      section.style.transform = '';
+      section.style.opacity = '';
+
+    });
+
+    if (Math.abs(diffX) < 80) {
+      dragging = false;
+      return;
+    }
+
+    const activeBtn =
+      document.querySelector('.tab-btn.active');
+
+    const activeTab =
+      activeBtn?.dataset.tab;
+
+    const currentIndex =
+      tabs.indexOf(activeTab);
+
+    if (currentIndex === -1) {
+      dragging = false;
+      return;
+    }
 
     let nextIndex = currentIndex;
 
-    if (diffX > 0) {
-      nextIndex = Math.min(currentIndex + 1, tabs.length - 1);
+    if (diffX < 0) {
+      nextIndex =
+        Math.min(currentIndex + 1, tabs.length - 1);
     } else {
-      nextIndex = Math.max(currentIndex - 1, 0);
+      nextIndex =
+        Math.max(currentIndex - 1, 0);
     }
 
-    if (nextIndex === currentIndex) return;
+    if (nextIndex !== currentIndex) {
 
-    document
-      .querySelector(`[data-tab="${tabs[nextIndex]}"]`)
-      ?.click();
+      const currentSection =
+        document.querySelector('.tab-section.active');
+
+      currentSection?.classList.add(
+        diffX < 0
+          ? 'swipe-out-left'
+          : 'swipe-out-right'
+      );
+
+      setTimeout(() => {
+
+        document
+          .querySelector(
+            `[data-tab="${tabs[nextIndex]}"]`
+          )
+          ?.click();
+
+      }, 120);
+
+    }
+
+    dragging = false;
+
   }, { passive: true });
-}
 
+}
 
 /* ========================================
    DOM READY

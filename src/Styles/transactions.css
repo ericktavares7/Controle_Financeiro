@@ -525,3 +525,35 @@
     justify-content: flex-start;
   }
 }
+
+#tab-transacoes .tx-desktop-actions .action-pill {
+  height: 48px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0f172a;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+
+#tab-transacoes .tx-desktop-actions .action-pill:hover {
+  opacity: 0.8;
+}
+
+#tab-transacoes .tx-desktop-actions .action-income i {
+  color: #00FFB2;
+}
+
+#tab-transacoes .tx-desktop-actions .action-expense i {
+  color: #FF6B35;
+}
+
+#tab-transacoes .tx-desktop-actions .action-goal i {
+  color: #00d2ff;
+}
