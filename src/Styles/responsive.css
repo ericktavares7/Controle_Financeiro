@@ -560,7 +560,7 @@
     inset: 0 !important;
     width: 100vw !important;
     height: 100dvh !important;
-    padding: 0 !important;
+    padding: 0 12px !important;
     margin: 0 !important;
     overflow: hidden !important;
     z-index: 8999 !important;
