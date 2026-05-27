@@ -1,55 +1,111 @@
-acesso ao app https://financesimplefy-git-main-ericktavares7s-projects.vercel.app/
+<div align="center">
 
-🚀 Finance Simplefy - Dashboard Pessoal com IA (Em desenvolvimento)
+<img src="https://financesimplefy-git-main-ericktavares7s-projects.vercel.app/logo_finance.png" alt="Finance Simplefy" width="80"/>
 
-<img width="480" height="815" alt="image" src="https://github.com/user-attachments/assets/c5ef78ba-5eec-447e-82d7-fc127224b37c" />
+# Finance Simplefy
 
-📌 Sobre o Projeto
-  O Finance Simplefy não é apenas mais um gerenciador de despesas; é o seu assistente financeiro inteligente. O projeto foi desenhado para simplificar o controle de gastos e, ao mesmo tempo, utilizar Inteligência Artificial (IA) para oferecer insights personalizados que planilhas tradicionais não conseguem ver.
+**Dashboard financeiro pessoal com Inteligência Artificial**
 
-A interface moderna e responsiva (Mobile-First) foi pensada para o uso rápido no dia a dia, aplicando a Regra Financeira 70/20/10 de forma automática e visual.
+[![Deploy](https://img.shields.io/badge/vercel-deployed-black?style=flat&logo=vercel)](https://financesimplefy-git-main-ericktavares7s-projects.vercel.app/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=flat&logo=javascript)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Firebase](https://img.shields.io/badge/Firebase-Firestore-orange?style=flat&logo=firebase)](https://firebase.google.com/)
 
-✨ Funcionalidades Principais
+[▶ Acessar o app](https://financesimplefy-git-main-ericktavares7s-projects.vercel.app/)
 
-  🧠 1. Inteligência Artificial (O Diferencial)
-O dashboard integra modelos de IA (via API da OpenAI ou similar) para analisar seu comportamento financeiro em tempo real.
+</div>
 
-Chat com o Assistente: Uma aba dedicada onde você pode fazer perguntas diretas ao assistente de IA, como: "Analise meus gastos com alimentação deste mês e me dê 3 dicas de economia" ou "Consigo comprar a GPU RX 7600 no próximo mês mantendo minha reserva intacta?".
+---
 
-Análise Preditiva: Com base no histórico de transações, o assistente pode prever estouros de orçamento nas metas de 70% e sugerir ajustes antes que aconteçam.
+## 📌 Sobre o projeto
 
-Insights de Categorização: Sugestões automáticas de como categorizar despesas incomuns para manter a Regra 70/20/10 precisa.
+O **Finance Simplefy** é um dashboard financeiro pessoal com foco em usabilidade mobile-first e inteligência artificial. O objetivo é simplificar o controle de gastos do dia a dia, aplicando automaticamente a **Regra 70/20/10** e oferecendo um assistente de IA para análise e insights personalizados.
 
-📊 2. Dashboard & Regras
-Regra 70/20/10 Automatizada: Monitoramento visual e em cores (Verde, Laranja) das três categorias principais.
+> Projeto #07 da minha jornada de transição de carreira para desenvolvimento.
 
-70% (Essenciais)
+---
 
-20% (Reserva/Investimento)
+## ✨ Funcionalidades
 
-10% (Estilo de Vida)
+### 🧠 Assistente de IA Financeira
+- Chat direto com IA para análise dos seus dados financeiros
+- Perguntas como *"Consigo comprar X mantendo minha reserva intacta?"* ou *"Analise meus gastos com alimentação deste mês"*
+- Análise preditiva de estouro de orçamento com base no histórico
 
-<img width="952" height="859" alt="image" src="https://github.com/user-attachments/assets/2e6c8791-8b21-4bcf-bc3a-4a85bbffefdf" />
+### 📊 Dashboard & Regra 70/20/10
+- Monitoramento visual automático das três categorias:
+  - 🏠 **70% Essenciais** — moradia, alimentação, transporte
+  - 🎯 **20% Reserva** — investimentos e emergências
+  - 🎬 **10% Lazer** — entretenimento e estilo de vida
+- Indicador de saúde financeira com alertas automáticos
+- Comparativo mensal com gráficos de evolução
 
+### 💳 Carteira de Cartões
+- Cadastro de múltiplos cartões de crédito
+- Calendário de vencimentos
+- Distribuição de faturas por cartão
+- Controle de parcelamentos e despesas recorrentes
 
-Real-time Database: Sincronização instantânea e persistente com Firebase/Firestore.
+### 📝 Transações
+- Registro rápido de receitas, despesas e caixinhas
+- Categorização com blocos financeiros
+- Filtro por mês com navegação por calendário
+- Histórico segmentado por tipo
 
-Evolução Mensal (Gráficos): Gráficos de linha modernos que mostram a evolução de receitas vs. despesas ao longo do tempo.
+### ⚙️ Configurações
+- Tema claro/escuro
+- Categorias personalizadas
+- Regras financeiras configuráveis
+- Suporte a PWA (uso como app no celular)
 
-Visão Mobile-First: Empilhamento de cards verticalmente para leitura clara e alvos de toque otimizados em smartphones.
-  
-  🛠 Tecnologias Utilizadas
-    Tecnologia                                    Função
-    JavaScript (ES6+)              Lógica de filtragem, cálculos e manipulação do DOM.
-    Firebase/Firestore             Banco de Dados NoSQL e autenticação em tempo real.
-    CSS3 (Grid/Flexbox)            Layout responsivo e estilização Neon.
-    Google Fonts (Manrope)         Tipografia moderna e altamente legível.
-    Chart.js                       Visualização de dados e evolução financeira.
+---
 
-📱 Visual Mobile
-  O projeto foi desenhado para ser utilizado como um PWA. Com os cards empilhados verticalmente, a leitura das taxas de poupança e metas de gastos fica clara até em telas menores, garantindo que o registro de uma despesa seja feito em menos de 10 segundos.
+## 🛠 Tecnologias
 
+| Tecnologia | Uso |
+|---|---|
+| JavaScript ES6+ | Lógica, manipulação de DOM, módulos |
+| Firebase / Firestore | Banco de dados NoSQL em tempo real + Auth |
+| Webpack | Bundling e hot reload |
+| CSS3 Grid/Flexbox | Layout responsivo mobile-first |
+| Chart.js | Gráficos de evolução e distribuição |
+| Anthropic Claude API | Assistente de IA financeira |
+| Google Fonts (Manrope) | Tipografia |
 
-👨‍💻 Autor
-Erick Supervisor de Vendas & Desenvolvedor Full-Stack em Transição. Atualmente cursando a trilha de especialização na Rocketseat.
-Projeto n07 até a minha primeira oportunidade de emprego de Jr.
+---
+
+## 🚀 Como rodar localmente
+
+```bash
+# Clone o repositório
+git clone https://github.com/ericktavares7/Controle_Financeiro.git
+
+# Instale as dependências
+cd finance-simplefy
+npm install
+
+# Configure as variáveis de ambiente
+cp .env.example .env
+# Preencha com suas chaves do Firebase
+
+# Inicie o servidor de desenvolvimento
+npm start
+```
+
+> A IA Financeira requer uma chave da [API da Anthropic](https://console.anthropic.com/), inserida diretamente no app nas configurações.
+
+---
+
+## 📱 Layout
+
+O app foi desenhado **mobile-first**, com registro de despesas em menos de 10 segundos e navegação por swipe entre as abas no celular.
+
+---
+
+## 👨‍💻 Autor
+
+**Erick Tavares**  
+Supervisor de Vendas em transição para Desenvolvimento Full-Stack  
+Trilha de especialização na Rocketseat
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Erick_Tavares-blue?style=flat&logo=linkedin)](https://www.linkedin.com/in/erick-tavares-5a0063224/)
+[![GitHub](https://img.shields.io/badge/GitHub-ericktavares7-black?style=flat&logo=github)](https://github.com/ericktavares7)
