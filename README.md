@@ -1,6 +1,8 @@
 <div align="center">
 
-<img src="https://financesimplefy-git-main-ericktavares7s-projects.vercel.app/logo_finance.png" alt="Finance Simplefy" width="80"/>
+
+<img width="48" height="48" alt="image" src="https://github.com/user-attachments/assets/7860251c-4e16-4471-8b9f-1681b1662420" />
+
 
 # Finance Simplefy
 
