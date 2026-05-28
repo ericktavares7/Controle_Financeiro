@@ -11,8 +11,6 @@ export function abrirModalTransacao(tipo) {
 
   window.fecharBottomPanels?.();
 
-  document.body.style.overflow = 'hidden';
-
   inputTipo.value = tipo;
 
   if (modalContent) {
@@ -74,7 +72,7 @@ export function abrirModalTransacao(tipo) {
   } else {
     financialGroup?.classList.add('hidden');
   }
-
+  document.body.classList.add('modal-open');
   modal.classList.add('active');
 }
 
@@ -84,7 +82,7 @@ export function fecharModalTransacao() {
   if (!modal) return;
 
   modal.classList.remove('active');
-  document.body.style.overflow = '';
+  document.body.classList.remove('modal-open');
 }
 
 export function abrirModalCartao() {

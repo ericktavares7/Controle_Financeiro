@@ -17,6 +17,19 @@
   display: none !important;
 }
 
+body.modal-open,
+body.panel-open {
+  overflow: hidden !important;
+  height: 100dvh;
+  touch-action: none;
+}
+
+body.modal-open .dashboard-container,
+body.panel-open .dashboard-container {
+  overflow: hidden !important;
+  height: 100dvh;
+}
+
 body {
   background-color: var(--bg-color);
   color: var(--txt-principal);

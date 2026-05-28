@@ -90,6 +90,7 @@ export function toggleConfigIA() {
       status.className = 'config-ia-status status-ok';
     }
   }
+  document.body.classList.add('panel-open');
 }
 
 export function salvarApiKey() {
