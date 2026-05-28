@@ -10,11 +10,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
 
-  <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" href="/favicon-96x96.png?v=2" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
+  <link rel="shortcut icon" href="/favicon.ico?v=2" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2" />
 
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
   <link rel="manifest" href="site.webmanifest" crossOrigin="use-credentials">
 
   <meta name="apple-mobile-web-app-title" content="FinanceSimplefy" />
@@ -351,59 +351,63 @@
 
     <section class="tab-section active" id="tab-overview">
 
+      <div class="overview-toolbar">
 
-      <div class="desktop-actions-bar">
-        <button class="action-pill action-income" onclick="window.abrirModal('income')">
-          <i class="ph ph-plus"></i>
-          Receita
-        </button>
+        <div class="alerts-wrapper">
 
-        <button class="action-pill action-expense" onclick="window.abrirModal('expense')">
-          <i class="ph ph-minus"></i>
-          Despesa
-        </button>
+          <button class="bell-btn" id="bellBtn" onclick="window.toggleAlertDrawer()" aria-expanded="false"
+            aria-controls="alertDrawer">
+            <i class="ph ph-bell"></i>
+            Alertas
+            <span class="alert-badge" id="alertBadge" style="display:none">0</span>
+          </button>
 
-        <button class="action-pill action-goal" onclick="window.abrirModal('goal')">
-          <i class="ph ph-rocket-launch"></i>
-          Caixinha
-        </button>
+          <div class="alert-drawer-wrap" id="alertDrawer" aria-hidden="true">
+            <div class="alert-drawer">
 
-        <button type="button" class="action-pill action-menu"
-          onclick="event.stopPropagation(); window.toggleMenuPanel();">
-          <i class="ph ph-list"></i>
-          Menu
-        </button>
-      </div>
-      <div class="alerts-wrapper">
-
-        <button class="bell-btn" id="bellBtn" onclick="window.toggleAlertDrawer()" aria-expanded="false"
-          aria-controls="alertDrawer">
-          <i class="ph ph-bell"></i>
-          Alertas
-          <span class="alert-badge" id="alertBadge" style="display:none">0</span>
-        </button>
-
-        <div class="alert-drawer-wrap" id="alertDrawer" aria-hidden="true">
-          <div class="alert-drawer">
-
-            <div class="alert-drawer-header">
-              <span id="alertDrawerLabel">Sem alertas</span>
-              <button class="alert-clear-btn" onclick="window.clearAllAlerts()">Dispensar todos</button>
-            </div>
-
-            <div id="alertList">
-              <div class="alert-empty" id="alertEmpty">
-                <i class="ph ph-check-circle"></i>
-                Nenhum alerta ativo
+              <div class="alert-drawer-header">
+                <span id="alertDrawerLabel">Sem alertas</span>
+                <button class="alert-clear-btn" onclick="window.clearAllAlerts()">Dispensar todos</button>
               </div>
-            </div>
 
+              <div id="alertList">
+                <div class="alert-empty" id="alertEmpty">
+                  <i class="ph ph-check-circle"></i>
+                  Nenhum alerta ativo
+                </div>
+              </div>
+
+            </div>
           </div>
+
         </div>
 
-      </div>
+        <div class="desktop-actions-bar">
+          <button class="action-pill action-income" onclick="window.abrirModal('income')">
+            <i class="ph ph-plus"></i>
+            Receita
+          </button>
 
+          <button class="action-pill action-expense" onclick="window.abrirModal('expense')">
+            <i class="ph ph-minus"></i>
+            Despesa
+          </button>
+
+          <button class="action-pill action-goal" onclick="window.abrirModal('goal')">
+            <i class="ph ph-rocket-launch"></i>
+            Caixinha
+          </button>
+
+          <button type="button" class="action-pill action-menu"
+            onclick="event.stopPropagation(); window.toggleMenuPanel();">
+            <i class="ph ph-list"></i>
+            Menu
+          </button>
+        </div>
+        
+      </div>
       <div class="summary-grid">
+
         <article class="card balance" id="card-metas">
           <header>
             <span class="icon">🎯</span>
