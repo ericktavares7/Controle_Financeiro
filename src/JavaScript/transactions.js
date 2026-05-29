@@ -359,7 +359,11 @@ export function iniciarEdicaoTransacoes() {
       }
 
       const desc = document.getElementById('edit-tx-desc').value;
-      const val = Number(document.getElementById('edit-tx-val').value) || 0;
+      Number(
+        document.getElementById('edit-tx-val').value
+          .replace(/\./g, '')
+          .replace(',', '.')
+      ) || 0
       const dataEditada =
         criarDataLocal(document.getElementById('edit-tx-date')?.value);
       const paymentMethod = document.getElementById('edit-tx-payment').value;
@@ -530,7 +534,11 @@ export function iniciarFormularioTransacao() {
       (window.cards || []).find(card => card.id === cardId);
 
     const valor =
-      Number(document.getElementById('input-val').value) || 0;
+      Number(
+        document.getElementById('input-val').value
+          .replace(/\./g, '')
+          .replace(',', '.')
+      ) || 0
 
     const descricao =
       document.getElementById('input-desc').value;
