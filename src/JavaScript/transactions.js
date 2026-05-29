@@ -359,11 +359,12 @@ export function iniciarEdicaoTransacoes() {
       }
 
       const desc = document.getElementById('edit-tx-desc').value;
-      Number(
+      const val = Number(
         document.getElementById('edit-tx-val').value
           .replace(/\./g, '')
           .replace(',', '.')
-      ) || 0
+      ) || 0;
+      
       const dataEditada =
         criarDataLocal(document.getElementById('edit-tx-date')?.value);
       const paymentMethod = document.getElementById('edit-tx-payment').value;
