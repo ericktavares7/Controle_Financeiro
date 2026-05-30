@@ -5,6 +5,12 @@ import {
   addCreditCard
 } from './services/cardService.js';
 
+import {
+  markInvoiceAsPaid,
+  unmarkInvoiceAsPaid,
+  isInvoicePaid
+} from './services/invoiceService.js';
+
 import { formatBRL, getMesSelecionado } from './utils.js';
 
 let unsubscribeCards = null;
@@ -40,6 +46,43 @@ export function calcularFaturaAtualDoCartao(cardId) {
       ? total + (Number(t.val) || 0)
       : total;
   }, 0);
+}
+
+export function calcularCompromissoFuturoCartao(cardId) {
+
+  const { ano, mes } = getMesSelecionado();
+
+  return (window.transactions || [])
+    .filter(t => {
+
+      if (
+        t.type !== 'expense' ||
+        t.paymentMethod !== 'credit' ||
+        t.cardId !== cardId
+      ) {
+        return false;
+      }
+
+      if (
+        t.invoiceYear == null ||
+        t.invoiceMonth == null
+      ) {
+        return false;
+      }
+
+      return (
+        Number(t.invoiceYear) > ano ||
+        (
+          Number(t.invoiceYear) === ano &&
+          Number(t.invoiceMonth) > mes
+        )
+      );
+    })
+    .reduce(
+      (acc, t) =>
+        acc + (Number(t.val) || 0),
+      0
+    );
 }
 
 function calcularDiasParaVencimento(dueDay) {
@@ -114,22 +157,67 @@ export function atualizarCartoesNaTela(cards = []) {
 
   if (!walletList) return;
 
-  const cardsComFatura = cards.map((card, index) => ({
-    ...card,
-    index,
-    invoiceValue:
-      calcularFaturaAtualDoCartao(card.id)
-  }));
+  const { ano, mes } = getMesSelecionado();
+
+  const cardsComFatura = cards.map((card, index) => {
+
+    const invoiceValue =
+      calcularFaturaAtualDoCartao(card.id);
+
+    const futureValue =
+      calcularCompromissoFuturoCartao(card.id);
+
+    const paid = isInvoicePaid({
+      payments: window.invoicePayments || [],
+      cardId: card.id,
+      invoiceYear: ano,
+      invoiceMonth: mes
+    });
+
+    return {
+      ...card,
+      index,
+      invoiceValue,
+      futureValue,
+      invoiceYear: ano,
+      invoiceMonth: mes,
+      paid
+    };
+  });
 
   const totalFaturas =
     cardsComFatura.reduce(
       (acc, card) =>
-        acc + card.invoiceValue,
+        card.paid
+          ? acc
+          : acc + card.invoiceValue,
       0
     );
 
-  const maiorFatura =
+  const totalCompromissosFuturos =
     cardsComFatura.reduce(
+      (acc, card) =>
+        acc + (card.futureValue || 0),
+      0
+    );
+
+  const totalFaturasPagas =
+    cardsComFatura.reduce(
+      (acc, card) =>
+        card.paid
+          ? acc + card.invoiceValue
+          : acc,
+      0
+    );
+
+  const cardsPendentes =
+    cardsComFatura.filter(card => !card.paid);
+
+  const cardsPagos =
+    cardsComFatura.filter(card => card.paid);
+
+  const maiorFatura =
+    cardsPendentes.reduce(
       (maior, card) =>
         card.invoiceValue >
           (maior?.invoiceValue || 0)
@@ -139,7 +227,7 @@ export function atualizarCartoesNaTela(cards = []) {
     );
 
   const proximoVencimento =
-    cardsComFatura
+    cardsPendentes
       .filter(card => Number(card.dueDay))
       .sort(
         (a, b) =>
@@ -155,7 +243,10 @@ export function atualizarCartoesNaTela(cards = []) {
 
           ${cardsComFatura.map(card => `
 
-            <div class="wallet-credit-card card-color-${card.colorIndex ?? card.index % 4}">
+   <div
+  class="wallet-credit-card card-color-${card.colorIndex ?? card.index % 4}"
+  onclick="window.abrirDetalhesCartao('${card.id}')"
+>
 
               <div class="wallet-card-top">
 
@@ -179,25 +270,80 @@ export function atualizarCartoesNaTela(cards = []) {
                 </div>
               </div>
 
-              <div class="wallet-card-invoice">
-                <small>Fatura do mês</small>
+             <div class="wallet-card-invoice">
 
-                <strong>
-                  ${formatBRL(card.invoiceValue)}
-                </strong>
-              </div>
+  <small>Fatura do mês</small>
 
-              <div class="wallet-card-footer">
+  <strong>
+    ${formatBRL(card.invoiceValue)}
+  </strong>
 
-                <small>
-                  Fecha dia ${card.closingDay || '--'}
-                </small>
+  ${card.futureValue > 0
+        ? `
+      <div class="wallet-future-badge">
+        + ${formatBRL(card.futureValue)}
+      </div>
+    `
+        : ''
+      }
 
-                <small>
-                  Vence dia ${card.dueDay || '--'}
-                </small>
+</div>
 
-              </div>
+             <div class="wallet-card-footer">
+
+  <small>
+    Fecha dia ${card.closingDay || '--'}
+  </small>
+
+  <small>
+    Vence dia ${card.dueDay || '--'}
+  </small>
+
+</div>
+
+<div class="wallet-invoice-actions">
+
+  ${card.paid
+        ? `
+      <span class="wallet-paid-badge">
+        <i class="ph ph-check-circle"></i>
+        Pago
+      </span>
+
+      <button
+        type="button"
+        class="wallet-invoice-btn secondary"
+        onclick="
+          window.desmarcarFaturaPaga(
+            '${card.id}',
+            ${card.invoiceYear},
+            ${card.invoiceMonth}
+          )
+        "
+      >
+        Reabrir
+      </button>
+    `
+        : `
+      <button
+        type="button"
+        class="wallet-invoice-btn"
+        onclick="
+          window.marcarFaturaPaga(
+            '${card.id}',
+            ${card.invoiceYear},
+            ${card.invoiceMonth},
+            ${card.invoiceValue}
+          )
+        "
+        ${card.invoiceValue <= 0 ? 'disabled' : ''}
+      >
+        Marcar paga
+      </button>
+    `
+      }
+
+</div>
 
             </div>
 
@@ -221,93 +367,103 @@ export function atualizarCartoesNaTela(cards = []) {
 
           <div class="wallet-kpi-grid">
 
-            <div class="wallet-kpi-box">
+  <div class="wallet-kpi-box">
 
-              <small>
-                <i class="ph ph-receipt"></i>
-                Total a pagar
-              </small>
+    <small>
+      <i class="ph ph-receipt"></i>
+      Total a pagar
+    </small>
 
-              <strong class="wallet-kpi-danger">
-                ${formatBRL(totalFaturas)}
-              </strong>
+    <strong class="wallet-kpi-danger">
+      ${formatBRL(totalFaturas)}
+    </strong>
 
-              <span>
-                ${cards.length} faturas em aberto
-              </span>
+    <span>
+      ${cardsPendentes.length} faturas em aberto
+    </span>
 
-            </div>
+  </div>
 
-            <div class="wallet-kpi-box">
+  <div class="wallet-kpi-box">
 
-              <small>
-                <i class="ph ph-warning"></i>
-                Próximo venc.
-              </small>
+    <small>
+      <i class="ph ph-hourglass"></i>
+      Compromisso futuro
+    </small>
 
-              <strong class="wallet-kpi-warning">
+    <strong class="wallet-kpi-info">
+      ${formatBRL(totalCompromissosFuturos)}
+    </strong>
 
-                ${proximoVencimento
+    <span>
+      Parcelas futuras
+    </span>
+
+  </div>
+
+  <div class="wallet-kpi-box">
+
+    <small>
+      <i class="ph ph-warning"></i>
+      Próximo venc.
+    </small>
+
+    <strong class="wallet-kpi-warning">
+      ${proximoVencimento
       ? `Dia ${proximoVencimento.dueDay}`
       : '--'
     }
+    </strong>
 
-              </strong>
+    <span>
+      ${proximoVencimento?.name || 'Nenhum cartão'}
+    </span>
 
-              <span>
-                ${proximoVencimento?.name || 'Nenhum cartão'}
-              </span>
+  </div>
 
-            </div>
+  <div class="wallet-kpi-box">
 
-            <div class="wallet-kpi-box">
+    <small>
+      <i class="ph ph-trend-up"></i>
+      Maior fatura
+    </small>
 
-              <small>
-                <i class="ph ph-trend-up"></i>
-                Maior fatura
-              </small>
-
-              <strong class="wallet-kpi-success">
-
-                ${maiorFatura && totalFaturas > 0
+    <strong class="wallet-kpi-success">
+      ${maiorFatura && totalFaturas > 0
       ? `${(
         (maiorFatura.invoiceValue / totalFaturas) * 100
       ).toFixed(1)}%`
       : '0%'
     }
+    </strong>
 
-              </strong>
+    <span>
+      ${maiorFatura?.name || 'Nenhum'} do total
+    </span>
 
-              <span>
-                ${maiorFatura?.name || 'Nenhum'} do total
-              </span>
+  </div>
 
-            </div>
+  <div class="wallet-kpi-box">
 
-            <div class="wallet-kpi-box">
+    <small>
+      <i class="ph ph-calendar"></i>
+      Próximo fechamento
+    </small>
 
-              <small>
-                <i class="ph ph-calendar"></i>
-                Próximo fechamento
-              </small>
-
-              <strong>
-
-                ${proximoVencimento
+    <strong>
+      ${proximoVencimento
       ? `Dia ${proximoVencimento.closingDay || '--'}`
       : '--'
     }
+    </strong>
 
-              </strong>
+    <span>
+      ${proximoVencimento?.name || 'Nenhum cartão'}
+    </span>
 
-              <span>
-                ${proximoVencimento?.name || 'Nenhum cartão'}
-              </span>
+  </div>
 
-            </div>
-
-          </div>
-
+</div>
           <div class="wallet-extra-grid">
 
             <div class="wallet-panel">
@@ -322,7 +478,7 @@ export function atualizarCartoesNaTela(cards = []) {
 
               <div class="wallet-bars">
 
-                ${cardsComFatura.map(card => {
+                ${cardsPendentes.map(card => {
 
       const pct =
         totalFaturas > 0
@@ -367,7 +523,7 @@ export function atualizarCartoesNaTela(cards = []) {
 
               <div class="wallet-due-list">
 
-                ${cardsComFatura
+                ${cardsPendentes
       .filter(card => Number(card.dueDay))
       .sort(
         (a, b) =>
@@ -388,32 +544,32 @@ export function atualizarCartoesNaTela(cards = []) {
 
         return `
 
-      <div class="wallet-due-item">
+                   <div class="wallet-due-item">
 
-        <span
-          class="wallet-due-dot card-dot-${card.colorIndex ?? card.index % 4}"
-        ></span>
+                   <span
+                      class="wallet-due-dot card-dot-${card.colorIndex ?? card.index % 4}"
+                     ></span>
 
-        <div>
+                  <div>
 
-          <strong>
-            ${card.name || 'Cartão'}
-          </strong>
+                  <strong>
+                    ${card.name || 'Cartão'}
+                  </strong>
 
-          <div class="wallet-due-meta">
+                <div class="wallet-due-meta">
 
-            <small>
-              Vence dia ${card.dueDay}
-            </small>
+                <small>
+                  Vence dia ${card.dueDay}
+                </small>
 
-            <span class="
-              wallet-due-badge
-              ${badgeClass}
-            ">
-              Em ${diasRestantes} dias
-            </span>
+                <span class="
+                  wallet-due-badge
+                  ${badgeClass}
+                ">
+                  Em ${diasRestantes} dias
+                </span>
 
-          </div>
+               </div>
 
         </div>
 
@@ -548,3 +704,161 @@ export function iniciarFormularioCartao() {
     });
   });
 }
+
+window.marcarFaturaPaga = async function (cardId, invoiceYear, invoiceMonth, amount) {
+  await markInvoiceAsPaid({
+    cardId,
+    invoiceYear,
+    invoiceMonth,
+    amount
+  });
+
+  window.showToast?.({
+    type: 'success',
+    title: 'Fatura paga',
+    message: 'A fatura foi marcada como paga.'
+  });
+};
+
+window.desmarcarFaturaPaga = async function (cardId, invoiceYear, invoiceMonth) {
+  await unmarkInvoiceAsPaid({
+    cardId,
+    invoiceYear,
+    invoiceMonth
+  });
+
+  window.showToast?.({
+    type: 'success',
+    title: 'Fatura reaberta',
+    message: 'A fatura voltou para pendente.'
+  });
+};
+
+window.abrirDetalhesCartao = function (cardId) {
+
+  const { ano, mes } = getMesSelecionado();
+
+  const transacoes = (window.transactions || [])
+    .filter(t =>
+      t.type === 'expense' &&
+      t.paymentMethod === 'credit' &&
+      t.cardId === cardId &&
+      Number(t.invoiceYear) === ano &&
+      Number(t.invoiceMonth) === mes
+    );
+
+  console.log(transacoes);
+};
+
+window.fecharModalFaturaCartao = function () {
+  document
+    .getElementById('modal-fatura-cartao')
+    ?.classList.remove('active');
+
+  document.body.classList.remove('modal-open');
+};
+
+window.abrirDetalhesCartao = function (cardId) {
+
+  const card =
+    (window.cards || [])
+      .find(c => c.id === cardId);
+
+  if (!card) return;
+
+  const { ano, mes } = getMesSelecionado();
+
+  const transacoes =
+    (window.transactions || [])
+      .filter(t =>
+        t.type === 'expense' &&
+        t.paymentMethod === 'credit' &&
+        t.cardId === cardId &&
+        Number(t.invoiceYear) === ano &&
+        Number(t.invoiceMonth) === mes
+      );
+
+  const container =
+    document.getElementById('card-invoice-details');
+
+  const titulo =
+    document.getElementById('titulo-fatura-cartao');
+
+  if (titulo) {
+    const meses = [
+      'Jan', 'Fev', 'Mar', 'Abr',
+      'Mai', 'Jun', 'Jul', 'Ago',
+      'Set', 'Out', 'Nov', 'Dez'
+    ];
+
+    titulo.textContent =
+      `${card.name} • ${meses[mes]}/${ano}`;
+  }
+
+  const total =
+    transacoes.reduce(
+      (acc, t) =>
+        acc + (Number(t.val) || 0),
+      0
+    );
+
+  container.innerHTML = `
+
+    <div class="invoice-summary">
+
+      <strong>
+        Total:
+        ${formatBRL(total)}
+      </strong>
+
+      <span>
+        ${transacoes.length}
+        lançamento(s)
+      </span>
+
+    </div>
+
+    <div class="invoice-list">
+
+      ${transacoes.length
+      ? transacoes.map(t => `
+
+          <div class="invoice-item">
+
+            <div>
+
+              <strong>
+                ${t.desc || 'Sem descrição'}
+              </strong>
+
+              <small>
+                ${t.cat || ''}
+              </small>
+
+            </div>
+
+            <b>
+              ${formatBRL(t.val)}
+            </b>
+
+          </div>
+
+        `).join('')
+      : `
+          <p class="msg-vazio">
+            Nenhuma transação encontrada.
+          </p>
+        `
+    }
+
+    </div>
+
+  `;
+
+  document.body.classList.add('modal-open');
+
+  document
+    .getElementById('modal-fatura-cartao')
+    ?.classList.add('active');
+};
+

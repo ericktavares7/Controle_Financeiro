@@ -589,7 +589,7 @@ body.modal-open {
 
 .wallet-credit-card {
   min-width: 230px;
-  height: 140px;
+  min-height: 125px;
   border-radius: 22px;
   padding: 18px;
   flex-shrink: 0;
@@ -2919,3 +2919,140 @@ body.light .alert-empty i {
     transform: none;
   }
 }
+
+.wallet-invoice-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-top: 10px;
+}
+
+.wallet-invoice-btn {
+  border: none;
+  border-radius: 999px;
+
+  padding: 7px 12px;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  background: #00ffb2;
+  color: #04140f;
+}
+
+.wallet-invoice-btn.secondary {
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+}
+
+.wallet-invoice-btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.wallet-paid-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 7px 12px;
+
+  border-radius: 999px;
+
+  background: rgba(0, 255, 178, .12);
+  color: #00ffb2;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.wallet-future-info {
+  margin-top: 8px;
+
+  font-size: 11px;
+
+  color: #94a3b8;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wallet-future-info span {
+  color: #00d1ff;
+  font-weight: 700;
+}
+
+.wallet-kpi-info {
+  color: #00d2ff;
+}
+
+.wallet-future-badge {
+  display: inline-flex;
+  align-items: center;
+
+  margin-top: 4px;
+  padding: 2px 8px;
+
+  border-radius: 999px;
+
+  background: rgba(255,255,255,.12);
+
+  color: rgba(255,255,255,.95);
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.invoice-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+
+  border-bottom: 1px solid var(--border-color);
+}
+
+.invoice-summary strong {
+  color: var(--receita);
+}
+
+.invoice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.invoice-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 12px 14px;
+
+  border-radius: 12px;
+
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.05);
+}
+
+.invoice-item strong {
+  color: var(--txt-principal);
+}
+
+.invoice-item small {
+  color: var(--txt-secundario);
+}
+
+.invoice-item b {
+  color: var(--despesa);
+}
+

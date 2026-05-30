@@ -78,6 +78,7 @@ export function atualizarDashboard() {
 
   let rec = 0;
   let des = 0;
+  let desSaldo = 0;
   let res = 0;
   let lazer = 0;
 
@@ -92,11 +93,29 @@ export function atualizarDashboard() {
       rec += valor;
     } else if (t.type === 'expense') {
       des += valor;
+
+      if (t.paymentMethod !== 'credit') {
+        desSaldo += valor;
+      }
+
       if (bloco === 'lazer') lazer += valor;
     } else if (t.type === 'goal') {
       res += valor;
     }
   });
+
+  const faturasPagas = (window.invoicePayments || [])
+    .filter(p =>
+      Number(p.invoiceYear) === anoFiltro &&
+      Number(p.invoiceMonth) === mesFiltro &&
+      p.status === 'paid'
+    )
+    .reduce(
+      (acc, p) => acc + (Number(p.amount) || 0),
+      0
+    );
+
+  const saldoReal = rec - desSaldo - res - faturasPagas;
 
   const mesAnterior = mesFiltro === 0 ? 11 : mesFiltro - 1;
   const anoAnterior = mesFiltro === 0 ? anoFiltro - 1 : anoFiltro;
@@ -144,12 +163,12 @@ export function atualizarDashboard() {
 
   if (mesReceita) mesReceita.textContent = formatBRL(rec);
   if (mesDespesa) mesDespesa.textContent = formatBRL(des);
-  if (mesSaldo) mesSaldo.textContent = formatBRL(rec - des - res);
+  if (mesSaldo) mesSaldo.textContent = formatBRL(saldoReal);
 
   const headerSaldo = document.getElementById('header-saldo-badge');
 
   if (headerSaldo) {
-    const saldo = rec - des - res;
+    const saldo = saldoReal;
 
     headerSaldo.innerHTML =
       `<span>◈ Saldo: </span> ${formatBRL(saldo)}`;
@@ -158,7 +177,7 @@ export function atualizarDashboard() {
       saldo >= 0 ? '#00FFB2' : '#FF6B35';
   }
 
-  atualizarInsightSaldo(select, rec, des, res);
+  atualizarInsightSaldo(select, rec, desSaldo + faturasPagas, res);
 
   atualizarInsightsTopo({
     rec,
@@ -166,7 +185,7 @@ export function atualizarDashboard() {
     res,
     lazer
   });
-  
+
   atualizarMetasIA(rec, des, res, lazer, dadosExibicao);
   atualizarCartoesNaTela(window.cards || []);
   atualizarPoupanca(rec, des, res);
@@ -532,7 +551,7 @@ let alertDrawerOpen = false;
 window.toggleAlertDrawer = function () {
   alertDrawerOpen = !alertDrawerOpen;
   const wrap = document.getElementById('alertDrawer');
-  const btn  = document.getElementById('bellBtn');
+  const btn = document.getElementById('bellBtn');
   if (!wrap || !btn) return;
   wrap.classList.toggle('open', alertDrawerOpen);
   btn.setAttribute('aria-expanded', alertDrawerOpen);
@@ -564,7 +583,7 @@ function _syncBadge(count) {
   const badge = document.getElementById('alertBadge');
   const label = document.getElementById('alertDrawerLabel');
   const empty = document.getElementById('alertEmpty');
-  const list  = document.getElementById('alertList');
+  const list = document.getElementById('alertList');
 
   if (badge) {
     badge.textContent = count;
@@ -599,14 +618,14 @@ function _renderAlertItem({ id, texto, severity }) {
   // Ignorado pelo usuário nesta sessão?
   if (alertasDismissed.has(id)) return;
 
-  const chipClass  = severity === 'danger' ? 'danger' : 'warn';
-  const chipLabel  = severity === 'danger' ? 'Crítico' : 'Atenção';
-  const dotClass   = chipClass;
+  const chipClass = severity === 'danger' ? 'danger' : 'warn';
+  const chipLabel = severity === 'danger' ? 'Crítico' : 'Atenção';
+  const dotClass = chipClass;
 
   const div = document.createElement('div');
-  div.className   = 'alert-item';
-  div.dataset.id  = id;
-  div.innerHTML   = `
+  div.className = 'alert-item';
+  div.dataset.id = id;
+  div.innerHTML = `
     <span class="alert-dot ${dotClass}"></span>
     <span class="alert-item-text">${texto}</span>
     <span class="alert-chip ${chipClass}">${chipLabel}</span>
@@ -632,9 +651,9 @@ function _renderAlertItem({ id, texto, severity }) {
 export function atualizarInsightsTopo(dadosMesAtual = {}) {
   const receitas = Number(dadosMesAtual.rec) || 0;
   const despesas = Number(dadosMesAtual.des) || 0;
-  const lazer    = Number(dadosMesAtual.lazer) || 0;
-  const reserva  = Number(dadosMesAtual.res) || 0;
-  const saldo    = receitas - despesas;
+  const lazer = Number(dadosMesAtual.lazer) || 0;
+  const reserva = Number(dadosMesAtual.res) || 0;
+  const saldo = receitas - despesas;
 
   // ── Monta lista de alertas ativos ───────────────────────
   const alertasAtivos = [];

@@ -114,6 +114,13 @@ export function iniciarModaisBase() {
     const modalCategorias = document.getElementById('modal-categorias');
     const modalNome = document.getElementById('modal-editar-nome');
 
+    const modalFatura =
+      document.getElementById('modal-fatura-cartao');
+
+    if (e.target === modalFatura) {
+      window.fecharModalFaturaCartao?.();
+    }
+
     if (e.target === modalRegistro) {
       fecharModalTransacao();
     }

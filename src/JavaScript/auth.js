@@ -13,10 +13,15 @@ import {
 } from './services/transactionService.js';
 
 import {
+  listenInvoicePayments
+} from './services/invoiceService.js';
+
+import {
   signOut
 } from 'firebase/auth';
 
 let unsubscribeTransactions = null;
+let unsubscribeInvoicePayments = null;
 
 
 function showAuthMessage(message, type = 'error') {
@@ -320,8 +325,14 @@ observeAuthState((user) => {
     /* REMOVE LISTENER ANTIGO */
     if (unsubscribeTransactions) {
       unsubscribeTransactions();
+      unsubscribeTransactions = null;
     }
 
+    if (unsubscribeInvoicePayments) {
+      unsubscribeInvoicePayments();
+      unsubscribeInvoicePayments = null;
+    }
+    
     unsubscribeTransactions = listenTransactions(user.uid, (txs) => {
       window.transactions = txs;
 
@@ -330,7 +341,7 @@ observeAuthState((user) => {
       if (window.cards?.length) {
         window.atualizarCartoesNaTela?.(window.cards);
       }
-      
+
       if (window.meuGrafico && window.atualizarGrafico) {
         window.atualizarGrafico(
           window.meuGrafico,
@@ -338,6 +349,22 @@ observeAuthState((user) => {
         );
       }
     });
+
+    unsubscribeInvoicePayments = listenInvoicePayments(
+      user.uid,
+      (payments) => {
+
+        window.invoicePayments = payments;
+
+        window.atualizarDashboard?.();
+
+        if (window.cards?.length) {
+          window.atualizarCartoesNaTela?.(
+            window.cards
+          );
+        }
+      }
+    );
 
     window.initCardsListener?.(user.uid);
     window.carregarConfiguracoesUsuario?.(user.uid);
@@ -366,13 +393,18 @@ observeAuthState((user) => {
     document.body.classList.remove('logged-in');
 
     window.transactions = [];
+    window.invoicePayments = [];
 
     /* REMOVE LISTENER */
     if (unsubscribeTransactions) {
 
       unsubscribeTransactions();
-
       unsubscribeTransactions = null;
+    }
+
+    if (unsubscribeInvoicePayments) {
+      unsubscribeInvoicePayments();
+      unsubscribeInvoicePayments = null;
     }
   }
 });

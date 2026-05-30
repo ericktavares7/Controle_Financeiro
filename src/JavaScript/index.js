@@ -107,6 +107,7 @@ import {
 
 window.cards = state.cards;
 window.transactions = state.transactions;
+window.invoicePayments = state.invoicePayments;
 window.regraFinanceira = state.regraFinanceira;
 window.categoriasCustom = state.categoriasCustom;
 window.ordemCrescente = false;

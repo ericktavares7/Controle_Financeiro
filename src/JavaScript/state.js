@@ -4,6 +4,7 @@ export const CATS_LAZER = ['lazer', 'entretenimento', 'hobbies'];
 export const state = {
   transactions: [],
   cards: [],
+  invoicePayments: [],
   regraFinanceira: {
     essencial: 70,
     reserva: 20,
