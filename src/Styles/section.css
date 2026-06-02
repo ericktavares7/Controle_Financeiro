@@ -2915,3 +2915,32 @@ body.light .alert-empty i {
 .invoice-tab-content.active {
   display: block;
 }
+
+.future-month-group {
+  margin-bottom: 24px;
+}
+
+.future-month-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.future-month-header strong {
+  display: block;
+  font-size: 16px;
+}
+
+.future-month-header small {
+  color: var(--txt-secundario);
+}
+
+.future-month-header b {
+  color: var(--receita);
+  font-size: 15px;
+}

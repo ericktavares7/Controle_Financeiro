@@ -788,13 +788,6 @@ window.abrirDetalhesCartao = function (cardId) {
 
   const parceladas = transacoes.filter(t => t.installmentGroupId);
   const unicas = transacoes.filter(t => !t.installmentGroupId);
-  const faturaPaga = isInvoicePaid({
-    payments: window.invoicePayments || [],
-    cardId,
-    invoiceYear: ano,
-    invoiceMonth: mes
-  });
-
   const renderItem = (t) => {
     const installmentNumber =
       Number(t.installmentNumber) || 0;
@@ -844,6 +837,98 @@ window.abrirDetalhesCartao = function (cardId) {
     </div>
   `;
   };
+  const futuras =
+    (window.transactions || [])
+      .filter(t =>
+        t.type === 'expense' &&
+        t.paymentMethod === 'credit' &&
+        t.cardId === cardId &&
+        t.invoiceYear != null &&
+        t.invoiceMonth != null &&
+        (
+          Number(t.invoiceYear) > ano ||
+          (
+            Number(t.invoiceYear) === ano &&
+            Number(t.invoiceMonth) > mes
+          )
+        )
+      )
+      .sort((a, b) =>
+        Number(a.invoiceYear) - Number(b.invoiceYear) ||
+        Number(a.invoiceMonth) - Number(b.invoiceMonth)
+      );
+
+  const mesesNome = [
+    'Jan', 'Fev', 'Mar', 'Abr',
+    'Mai', 'Jun', 'Jul', 'Ago',
+    'Set', 'Out', 'Nov', 'Dez'
+  ];
+
+  const futurasAgrupadas = futuras.reduce((acc, tx) => {
+
+    const chave =
+      `${tx.invoiceYear}-${tx.invoiceMonth}`;
+
+    if (!acc[chave]) {
+      acc[chave] = [];
+    }
+
+    acc[chave].push(tx);
+
+    return acc;
+
+  }, {});
+  const htmlFuturo = Object.entries(futurasAgrupadas)
+    .map(([chave, itens]) => {
+
+      const [anoGrupo, mesGrupo] =
+        chave.split('-');
+
+      const totalMes =
+        itens.reduce(
+          (acc, t) =>
+            acc + (Number(t.val) || 0),
+          0
+        );
+
+      return `
+
+      <div class="future-month-group">
+
+        <div class="future-month-header">
+
+          <div>
+
+            <strong>
+              ${mesesNome[Number(mesGrupo)]}/${anoGrupo}
+            </strong>
+
+            <small>
+              ${itens.length} lançamento(s)
+            </small>
+
+          </div>
+
+          <b>
+            ${formatBRL(totalMes)}
+          </b>
+
+        </div>
+
+        ${itens.map(renderItem).join('')}
+
+      </div>
+
+    `;
+    })
+    .join('');
+  const faturaPaga = isInvoicePaid({
+    payments: window.invoicePayments || [],
+    cardId,
+    invoiceYear: ano,
+    invoiceMonth: mes
+  });
+
 
   container.innerHTML = `
 
@@ -944,9 +1029,18 @@ ${faturaPaga
 
 <div id="invoice-future-tab" class="invoice-tab-content">
 
-  <p class="msg-vazio">
-    Próximo passo: carregar compromissos futuros.
-  </p>
+  <div class="invoice-list">
+
+    ${futuras.length
+      ? htmlFuturo
+      : `
+        <p class="msg-vazio">
+          Nenhum compromisso futuro.
+        </p>
+      `
+    }
+
+  </div>
 
 </div>
 `;

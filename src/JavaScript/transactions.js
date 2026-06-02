@@ -44,7 +44,7 @@ function calcularDadosFaturaCartao(dataCompra, cartao) {
   let anoFechamento = dataCompra.getFullYear();
   let mesFechamento = dataCompra.getMonth();
 
-  if (dataCompra.getDate() > closingDay) {
+  if (dataCompra.getDate() >= closingDay) {
     mesFechamento++;
 
     if (mesFechamento > 11) {
