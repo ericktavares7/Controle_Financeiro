@@ -247,6 +247,28 @@ export async function deletarTransacao(id) {
   }
 }
 
+export function abrirEdicaoTransacaoPorId(txId) {
+  const tx =
+    (window.transactions || [])
+      .find(t => t.id === txId);
+
+  if (!tx) return;
+
+  window.fecharModalFaturaCartao?.();
+
+  const btnFake = document.createElement('button');
+
+  btnFake.className = 'btn-edit-tx';
+  btnFake.dataset.txId = txId;
+
+  document.body.appendChild(btnFake);
+  btnFake.click();
+  btnFake.remove();
+}
+
+window.abrirEdicaoTransacaoPorId = abrirEdicaoTransacaoPorId;
+
+
 export function fecharModalEditarTx() {
   document
     .getElementById('modal-editar-transacao')
@@ -364,7 +386,7 @@ export function iniciarEdicaoTransacoes() {
           .replace(/\./g, '')
           .replace(',', '.')
       ) || 0;
-      
+
       const dataEditada =
         criarDataLocal(document.getElementById('edit-tx-date')?.value);
       const paymentMethod = document.getElementById('edit-tx-payment').value;

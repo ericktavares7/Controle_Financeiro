@@ -734,22 +734,6 @@ window.desmarcarFaturaPaga = async function (cardId, invoiceYear, invoiceMonth) 
   });
 };
 
-window.abrirDetalhesCartao = function (cardId) {
-
-  const { ano, mes } = getMesSelecionado();
-
-  const transacoes = (window.transactions || [])
-    .filter(t =>
-      t.type === 'expense' &&
-      t.paymentMethod === 'credit' &&
-      t.cardId === cardId &&
-      Number(t.invoiceYear) === ano &&
-      Number(t.invoiceMonth) === mes
-    );
-
-  console.log(transacoes);
-};
-
 window.fecharModalFaturaCartao = function () {
   document
     .getElementById('modal-fatura-cartao')
@@ -802,63 +786,196 @@ window.abrirDetalhesCartao = function (cardId) {
       0
     );
 
+  const parceladas = transacoes.filter(t => t.installmentGroupId);
+  const unicas = transacoes.filter(t => !t.installmentGroupId);
+  const faturaPaga = isInvoicePaid({
+    payments: window.invoicePayments || [],
+    cardId,
+    invoiceYear: ano,
+    invoiceMonth: mes
+  });
+
+  const renderItem = (t) => {
+    const installmentNumber =
+      Number(t.installmentNumber) || 0;
+
+    const totalInstallments =
+      Number(t.totalInstallments) || 0;
+
+    const parcelasRestantes =
+      totalInstallments && installmentNumber
+        ? Math.max(totalInstallments - installmentNumber, 0)
+        : 0;
+
+    const badgeParcela =
+      t.installmentGroupId && parcelasRestantes === 0
+        ? `<span class="invoice-installment-badge done">Finaliza este mês</span>`
+        : t.installmentGroupId && parcelasRestantes === 1
+          ? `<span class="invoice-installment-badge warning">Última próxima</span>`
+          : '';
+
+    const meta = t.installmentGroupId
+      ? `Parcela ${installmentNumber}/${totalInstallments} • Restam ${parcelasRestantes}`
+      : 'Compra única';
+
+    return `
+    <div
+      class="invoice-item"
+      onclick="window.abrirEdicaoTransacaoPorId?.('${t.id}')"
+    >
+      <div>
+        <strong>
+  ${t.installmentGroupId
+        ? String(t.desc || 'Sem descrição')
+          .replace(/\s*\(\d+\/\d+\)\s*/g, '')
+        : t.desc || 'Sem descrição'
+      }
+</strong>
+
+        <small>
+          ${meta}
+          ${t.cat ? ` • ${t.cat}` : ''}
+          ${badgeParcela}
+        </small>
+        
+      </div>
+
+      <b>${formatBRL(t.val)}</b>
+    </div>
+  `;
+  };
+
   container.innerHTML = `
 
-    <div class="invoice-summary">
+<div class="invoice-summary">
 
-      <strong>
-        Total:
-        ${formatBRL(total)}
-      </strong>
+  <div class="invoice-total-block">
 
-      <span>
-        ${transacoes.length}
-        lançamento(s)
-      </span>
+    <span class="invoice-label">
+      Fatura atual
+    </span>
 
+    <strong class="invoice-total">
+      ${formatBRL(total)}
+    </strong>
+
+    <div class="invoice-meta">
+      ${transacoes.length} lançamento(s)
     </div>
 
-    <div class="invoice-list">
+    <div class="invoice-breakdown">
+      ${parceladas.length} parcelada(s)
+      •
+      ${unicas.length} única(s)
+    </div>
 
-      ${transacoes.length
-      ? transacoes.map(t => `
+  </div>
 
-          <div class="invoice-item">
+</div>
 
-            <div>
-
-              <strong>
-                ${t.desc || 'Sem descrição'}
-              </strong>
-
-              <small>
-                ${t.cat || ''}
-              </small>
-
-            </div>
-
-            <b>
-              ${formatBRL(t.val)}
-            </b>
-
-          </div>
-
-        `).join('')
-      : `
-          <p class="msg-vazio">
-            Nenhuma transação encontrada.
-          </p>
-        `
+${faturaPaga
+      ? `
+    <div class="invoice-paid-alert">
+      <i class="ph ph-check-circle"></i>
+      Fatura quitada
+    </div>
+  `
+      : ''
     }
 
-    </div>
+<div class="invoice-tabs">
+  <button
+    type="button"
+    class="invoice-tab-btn active"
+    onclick="window.trocarAbaFatura('atual')"
+  >
+    Fatura atual
+  </button>
 
-  `;
+  <button
+    type="button"
+    class="invoice-tab-btn"
+    onclick="window.trocarAbaFatura('futuro')"
+  >
+    Futuro
+  </button>
+</div>
+
+<div id="invoice-current-tab" class="invoice-tab-content active">
+
+  <div class="invoice-list">
+
+    ${parceladas.length
+      ? `
+        <div class="invoice-section-title">
+          <i class="ph ph-stack"></i>
+          Parceladas
+        </div>
+
+        ${parceladas.map(renderItem).join('')}
+      `
+      : ''
+    }
+
+    ${unicas.length
+      ? `
+        <div class="invoice-section-title">
+          <i class="ph ph-receipt"></i>
+          Compras únicas
+        </div>
+
+        ${unicas.map(renderItem).join('')}
+      `
+      : ''
+    }
+
+    ${!transacoes.length
+      ? `
+        <p class="msg-vazio">
+          Nenhuma transação encontrada.
+        </p>
+      `
+      : ''
+    }
+
+  </div>
+
+</div>
+
+<div id="invoice-future-tab" class="invoice-tab-content">
+
+  <p class="msg-vazio">
+    Próximo passo: carregar compromissos futuros.
+  </p>
+
+</div>
+`;
 
   document.body.classList.add('modal-open');
 
   document
     .getElementById('modal-fatura-cartao')
     ?.classList.add('active');
+};
+
+window.trocarAbaFatura = function (aba) {
+  const current = document.getElementById('invoice-current-tab');
+  const future = document.getElementById('invoice-future-tab');
+
+  const buttons = document.querySelectorAll('.invoice-tab-btn');
+
+  buttons.forEach(btn => btn.classList.remove('active'));
+
+  if (aba === 'atual') {
+    current?.classList.add('active');
+    future?.classList.remove('active');
+    buttons[0]?.classList.add('active');
+  }
+
+  if (aba === 'futuro') {
+    future?.classList.add('active');
+    current?.classList.remove('active');
+    buttons[1]?.classList.add('active');
+  }
 };
 
