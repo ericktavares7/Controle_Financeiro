@@ -738,9 +738,21 @@
   }
 
   #modal-fatura-cartao {
-    padding: 12px !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 9999999 !important;
+
+    display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+
+    width: 100vw !important;
+    height: 100dvh !important;
+
+    padding: 12px !important;
+
+    background: rgba(0, 0, 0, 0.62) !important;
+    backdrop-filter: blur(10px) !important;
   }
 
   #modal-fatura-cartao .modal-content {
