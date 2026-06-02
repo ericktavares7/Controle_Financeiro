@@ -738,57 +738,49 @@
   }
 
   #modal-fatura-cartao {
-    padding: 14px;
-    align-items: center;
+    padding: 12px !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   #modal-fatura-cartao .modal-content {
-    width: 100%;
-    max-width: 100%;
-    max-height: calc(100dvh - 28px);
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: calc(100dvh - 24px) !important;
 
-    padding: 18px;
-    border-radius: 20px;
+    display: flex !important;
+    flex-direction: column !important;
+
+    padding: 16px !important;
+    border-radius: 20px !important;
+    overflow: hidden !important;
   }
 
   #modal-fatura-cartao .modal-header {
-    gap: 12px;
-    margin-bottom: 16px;
+    flex-shrink: 0 !important;
+    margin-bottom: 14px !important;
   }
 
-  #modal-fatura-cartao .modal-header h2 {
-    font-size: 18px;
-    line-height: 1.15;
+  #modal-fatura-cartao #card-invoice-details {
+    min-height: 0 !important;
+    flex: 1 !important;
+    overflow: hidden !important;
   }
 
-  .invoice-summary {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
+  #modal-fatura-cartao .invoice-list {
+    max-height: none !important;
+    flex: 1 !important;
+    overflow-y: auto !important;
   }
 
-  .invoice-list {
-    max-height: calc(100dvh - 220px);
-    overflow-y: auto;
+  #modal-fatura-cartao .invoice-item {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    gap: 10px !important;
+    align-items: start !important;
   }
 
-  .invoice-item {
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .invoice-item b {
-    white-space: nowrap;
-    font-size: 14px;
-  }
-
-  .invoice-item strong {
-    font-size: 14px;
-  }
-
-  .invoice-item small {
-    font-size: 12px;
-  }
 }
 
 /* =========================
@@ -939,6 +931,7 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
+
 
 }
 
