@@ -189,6 +189,7 @@ export function atualizarDashboard() {
   atualizarMetasIA(rec, des, res, lazer, dadosExibicao);
   atualizarCartoesNaTela(window.cards || []);
   atualizarPoupanca(rec, des, res);
+  window.atualizarBadgeEventos?.();
 
 }
 
@@ -551,17 +552,33 @@ function gerarProximosEventos(cards = []) {
 
   return cards.flatMap(card => {
 
-    const fechamento = new Date(
+    let fechamento = new Date(
       hoje.getFullYear(),
       hoje.getMonth(),
       Number(card.closingDay)
     );
 
-    const vencimento = new Date(
+    if (fechamento < hoje) {
+      fechamento = new Date(
+        hoje.getFullYear(),
+        hoje.getMonth() + 1,
+        Number(card.closingDay)
+      );
+    }
+
+    let vencimento = new Date(
       hoje.getFullYear(),
       hoje.getMonth(),
       Number(card.dueDay)
     );
+
+    if (vencimento < hoje) {
+      vencimento = new Date(
+        hoje.getFullYear(),
+        hoje.getMonth() + 1,
+        Number(card.dueDay)
+      );
+    }
 
     return [
       {
@@ -603,11 +620,13 @@ window.toggleEventosCartao = function () {
     return;
   }
 
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
   const eventos =
     gerarProximosEventos(window.cards || [])
+      .filter(evento => evento.data >= hoje)
       .slice(0, 5);
-
-  const hoje = new Date();
 
   lista.innerHTML = eventos.length
     ? eventos.map(evento => {
@@ -617,6 +636,23 @@ window.toggleEventosCartao = function () {
           (evento.data - hoje) /
           (1000 * 60 * 60 * 24)
         );
+        
+      const descricao =
+        evento.tipo === 'fechamento'
+          ? (
+            diasRestantes <= 0
+              ? 'Fecha hoje'
+              : diasRestantes === 1
+                ? 'Fecha amanhã'
+                : `Fecha em ${diasRestantes} dias`
+          )
+          : (
+            diasRestantes <= 0
+              ? 'Vence hoje'
+              : diasRestantes === 1
+                ? 'Vence amanhã'
+                : `Vence em ${diasRestantes} dias`
+          );
 
       return `
       <div class="event-item">
@@ -626,14 +662,9 @@ window.toggleEventosCartao = function () {
             ${evento.cardName}
           </strong>
 
-          <div class="event-date">
-            ${diasRestantes <= 0
-          ? 'Hoje'
-          : diasRestantes === 1
-            ? 'Amanhã'
-            : `Em ${diasRestantes} dias`
-        }
-          </div>
+      <div class="event-date">
+  ${descricao}
+</div>
         </div>
 
         <span class="event-type ${evento.tipo}">
@@ -685,6 +716,26 @@ window.clearAllAlerts = function () {
     _dismissItem(el);
   });
   _syncBadge(0);
+};
+
+window.atualizarBadgeEventos = function () {
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  const eventos =
+    gerarProximosEventos(window.cards || [])
+      .filter(evento => evento.data >= hoje);
+
+  const badge =
+    document.getElementById('eventsBadge');
+
+  if (!badge) return;
+
+  badge.textContent = eventos.length;
+
+  badge.style.display =
+    eventos.length ? 'inline-flex' : 'none';
 };
 
 function _dismissItem(el) {
