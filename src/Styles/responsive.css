@@ -1055,7 +1055,7 @@
   #modal-fatura-cartao .modal-content {
     width: 100%;
     max-width: 420px;
-    max-height: calc(100dvh - 28px);
+    max-height: calc(100dvh - 10px);
 
     display: flex;
     flex-direction: column;
@@ -1083,6 +1083,7 @@
   #modal-fatura-cartao .invoice-list {
     overflow-y: auto;
     padding-bottom: 28px;
+
   }
 
   #modal-fatura-cartao .invoice-item {
@@ -1370,9 +1371,14 @@
   }
 
   #modal-fatura-cartao .modal-content {
-    padding: 16px;
-    border-radius: 18px;
+
+    max-height: calc(100dvh - 6px);
+    
+    width: 100%;
     max-width: 340px;
+
+    padding: 14px;
+    border-radius: 18px;
   }
 
   #modal-fatura-cartao .modal-header h2 {
