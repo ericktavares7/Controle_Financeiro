@@ -545,6 +545,125 @@ function atualizarMetasIA(
 `;
 }
 
+function gerarProximosEventos(cards = []) {
+
+  const hoje = new Date();
+
+  return cards.flatMap(card => {
+
+    const fechamento = new Date(
+      hoje.getFullYear(),
+      hoje.getMonth(),
+      Number(card.closingDay)
+    );
+
+    const vencimento = new Date(
+      hoje.getFullYear(),
+      hoje.getMonth(),
+      Number(card.dueDay)
+    );
+
+    return [
+      {
+        tipo: 'fechamento',
+        cardId: card.id,
+        cardName: card.name,
+        data: fechamento
+      },
+      {
+        tipo: 'vencimento',
+        cardId: card.id,
+        cardName: card.name,
+        data: vencimento
+      }
+    ];
+
+  }).sort((a, b) => a.data - b.data);
+}
+
+window.toggleEventosCartao = function () {
+  const drawer =
+    document.getElementById('eventsDrawer');
+
+  const lista =
+    document.getElementById('eventsList');
+
+  if (!drawer || !lista) return;
+
+  const isOpen =
+    drawer.classList.contains('active');
+
+  document
+    .getElementById('alertDrawer')
+    ?.classList.remove('active');
+
+  if (isOpen) {
+    drawer.classList.remove('active');
+    drawer.setAttribute('aria-hidden', 'true');
+    return;
+  }
+
+  const eventos =
+    gerarProximosEventos(window.cards || [])
+      .slice(0, 5);
+
+  const hoje = new Date();
+
+  lista.innerHTML = eventos.length
+    ? eventos.map(evento => {
+
+      const diasRestantes =
+        Math.ceil(
+          (evento.data - hoje) /
+          (1000 * 60 * 60 * 24)
+        );
+
+      return `
+      <div class="event-item">
+
+        <div>
+          <strong>
+            ${evento.cardName}
+          </strong>
+
+          <div class="event-date">
+            ${diasRestantes <= 0
+          ? 'Hoje'
+          : diasRestantes === 1
+            ? 'Amanhã'
+            : `Em ${diasRestantes} dias`
+        }
+          </div>
+        </div>
+
+        <span class="event-type ${evento.tipo}">
+          ${evento.tipo === 'fechamento'
+          ? 'Fecha'
+          : 'Vence'
+        }
+        </span>
+
+      </div>
+    `;
+    }).join('')
+    : `
+    <div class="alert-empty">
+      <i class="ph ph-check-circle"></i>
+      Nenhum evento próximo
+    </div>
+  `;
+
+  drawer.classList.add('active');
+  drawer.setAttribute('aria-hidden', 'false');
+};
+
+window.fecharEventosCartao = function () {
+  const drawer =
+    document.getElementById('eventsDrawer');
+
+  drawer?.classList.remove('active');
+  drawer?.setAttribute('aria-hidden', 'true');
+};
 const alertasDismissed = new Set();
 let alertDrawerOpen = false;
 

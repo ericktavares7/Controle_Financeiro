@@ -2980,3 +2980,88 @@ body.light .alert-empty i {
   font-size: 12px;
   font-weight: 700;
 }
+
+.events-drawer-wrap {
+  position: absolute;
+
+  top: 52px;
+  left: 0;
+
+  width: 320px;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transform: translateY(-8px);
+
+  transition:
+    opacity .22s ease,
+    transform .22s ease,
+    visibility .22s ease;
+
+  z-index: 99999;
+}
+
+.events-drawer-wrap.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+
+  transform: translateY(0);
+}
+
+.event-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+
+  padding: 12px 0;
+
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+.event-item:last-child {
+  border-bottom: none;
+}
+
+.event-item strong {
+  display: block;
+  color: #fff;
+  font-size: 13px;
+}
+
+.event-date {
+  margin-top: 3px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.event-type {
+  flex-shrink: 0;
+
+  padding: 5px 8px;
+
+  border-radius: 999px;
+
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.event-type.fechamento {
+  background: rgba(255, 176, 32, .14);
+  color: #ffb020;
+}
+
+.event-type.vencimento {
+  background: rgba(255, 107, 107, .14);
+  color: #ff6b6b;
+}
+
+@media (max-width: 480px) {
+  .events-drawer-wrap {
+    width: calc(100vw - 28px);
+  }
+}
