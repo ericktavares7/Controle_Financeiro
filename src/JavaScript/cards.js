@@ -864,6 +864,23 @@ window.abrirDetalhesCartao = function (cardId) {
     'Set', 'Out', 'Nov', 'Dez'
   ];
 
+  const totalFuturo =
+    futuras.reduce(
+      (acc, t) => acc + (Number(t.val) || 0),
+      0
+    );
+
+  const totalParcelasFuturas =
+    futuras.length;
+
+  const ultimaFutura =
+    futuras[futuras.length - 1];
+
+  const ateMes =
+    ultimaFutura
+      ? `${mesesNome[Number(ultimaFutura.invoiceMonth)]}/${ultimaFutura.invoiceYear}`
+      : null;
+
   const futurasAgrupadas = futuras.reduce((acc, tx) => {
 
     const chave =
@@ -878,6 +895,7 @@ window.abrirDetalhesCartao = function (cardId) {
     return acc;
 
   }, {});
+
   const htmlFuturo = Object.entries(futurasAgrupadas)
     .map(([chave, itens]) => {
 
@@ -922,6 +940,7 @@ window.abrirDetalhesCartao = function (cardId) {
     `;
     })
     .join('');
+
   const faturaPaga = isInvoicePaid({
     payments: window.invoicePayments || [],
     cardId,
@@ -1029,6 +1048,29 @@ ${faturaPaga
 
 <div id="invoice-future-tab" class="invoice-tab-content">
 
+
+${futuras.length
+      ? `
+    <div class="invoice-future-kpi">
+
+      <span>
+        Compromisso futuro
+      </span>
+
+      <strong>
+        ${formatBRL(totalFuturo)}
+      </strong>
+
+      <small>
+        ${totalParcelasFuturas} parcela(s) futura(s)
+        ${ateMes ? ` • Até ${ateMes}` : ''}
+      </small>
+
+    </div>
+  `
+      : ''
+    } 
+    
   <div class="invoice-list">
 
     ${futuras.length

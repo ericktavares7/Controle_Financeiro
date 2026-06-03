@@ -2928,7 +2928,7 @@ body.light .alert-empty i {
   margin-bottom: 12px;
   padding-bottom: 10px;
 
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
 }
 
 .future-month-header strong {
@@ -2943,4 +2943,40 @@ body.light .alert-empty i {
 .future-month-header b {
   color: var(--receita);
   font-size: 15px;
+}
+
+.invoice-future-kpi {
+  margin-top: 12px;
+  margin-bottom: 14px;
+
+  padding: 14px 16px;
+
+  border-radius: 18px;
+
+  background: rgba(0, 210, 255, .08);
+  border: 1px solid rgba(0, 210, 255, .18);
+
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.invoice-future-kpi span {
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+
+.invoice-future-kpi strong {
+  color: #00d2ff;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.invoice-future-kpi small {
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 700;
 }

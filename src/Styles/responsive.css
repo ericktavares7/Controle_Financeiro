@@ -415,11 +415,23 @@
   overflow: hidden;
 }
 
+#modal-fatura-cartao .invoice-tab-content.active {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 #modal-fatura-cartao .invoice-list {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   padding-bottom: 72px;
+}
+
+#modal-fatura-cartao .invoice-list::after {
+  content: "";
+  display: block;
+  height: 24px;
 }
 
 /* =========================
@@ -1373,7 +1385,7 @@
   #modal-fatura-cartao .modal-content {
 
     max-height: calc(100dvh - 6px);
-    
+
     width: 100%;
     max-width: 340px;
 
