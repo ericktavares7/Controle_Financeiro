@@ -13,6 +13,8 @@ import {
 
 import { formatBRL, getMesSelecionado } from './utils.js';
 
+import { deletarTransacao } from './transactions.js';
+
 let unsubscribeCards = null;
 
 export function calcularFaturaAtualDoCartao(cardId) {
@@ -737,6 +739,7 @@ window.fecharModalFaturaCartao = function () {
 };
 
 window.abrirDetalhesCartao = function (cardId) {
+  window.cardFaturaAbertaId = cardId;
 
   const card =
     (window.cards || [])
@@ -827,7 +830,21 @@ window.abrirDetalhesCartao = function (cardId) {
         
       </div>
 
-      <b>${formatBRL(t.val)}</b>
+      <div class="invoice-item-actions">
+  <b>${formatBRL(t.val)}</b>
+
+  <button
+    type="button"
+    class="invoice-delete-btn"
+    onclick="
+      event.stopPropagation();
+      window.excluirTransacaoDaFatura?.('${t.id}');
+    "
+    title="Excluir transação"
+  >
+    <i class="ph ph-trash"></i>
+  </button>
+</div>
     </div>
   `;
   };
@@ -1107,5 +1124,19 @@ window.trocarAbaFatura = function (aba) {
     current?.classList.remove('active');
     buttons[1]?.classList.add('active');
   }
+};
+
+window.excluirTransacaoDaFatura = async function (txId) {
+  await deletarTransacao(txId);
+
+  setTimeout(() => {
+    const cardId = window.cardFaturaAbertaId;
+
+    if (cardId) {
+      window.abrirDetalhesCartao(cardId);
+    }
+
+    atualizarCartoesNaTela(window.cards || []);
+  }, 300);
 };
 

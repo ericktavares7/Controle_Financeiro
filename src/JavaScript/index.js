@@ -349,13 +349,11 @@ function iniciarSwipeTabsMobile() {
     const diffX = currentX - startX;
     const diffY = currentY - startY;
 
-    /* Define na primeira movimentação se é horizontal ou vertical */
     if (isHorizontal === null) {
       if (Math.abs(diffX) > Math.abs(diffY) + 5) {
         isHorizontal = true;
       } else if (Math.abs(diffY) > Math.abs(diffX) + 5) {
         isHorizontal = false;
-        /* É scroll vertical — cancela o swipe e restaura */
         dragging = false;
         resetTabsTransition();
         resetActiveSection();
@@ -386,7 +384,6 @@ function iniciarSwipeTabsMobile() {
 
     dragging = false;
 
-    /* Ignora se não foi horizontal ou foi curto demais */
     if (!isHorizontal || Math.abs(diffX) < 80) return;
 
     const activeBtn = document.querySelector('.tab-btn.active');
@@ -412,7 +409,6 @@ function iniciarSwipeTabsMobile() {
     );
 
     setTimeout(() => {
-      /* Remove as classes de swipe antes de trocar */
       currentSection?.classList.remove('swipe-out-left', 'swipe-out-right');
       currentSection.style.transform = '';
       currentSection.style.opacity = '';
@@ -475,7 +471,6 @@ function iniciarTabs() {
 
       secoes.forEach(sec => {
         sec.classList.remove('active');
-        /* Limpa qualquer transform/opacity residual do swipe */
         sec.style.transform = '';
         sec.style.opacity = '';
         sec.classList.remove('swipe-out-left', 'swipe-out-right');

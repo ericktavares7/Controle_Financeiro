@@ -302,6 +302,70 @@
 
   </div>
 
+  <div id="modal-conta-fixa">
+
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h2 id="fixed-bill-modal-title">
+          Nova Conta Fixa
+        </h2>
+
+        <button type="button" class="btn-close" onclick="window.fecharModalContaFixa()">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <form id="form-conta-fixa">
+        <input type="hidden" id="fixed-bill-id">
+
+        <div class="form-group">
+          <label>Nome da conta</label>
+          <input type="text" id="fixed-bill-name" placeholder="Ex: Apartamento, Energia, Água..." required>
+        </div>
+
+        <div class="form-group">
+          <label>Valor</label>
+          <input type="text" inputmode="decimal" id="fixed-bill-value" placeholder="0,00" required>
+        </div>
+
+        <div class="form-group">
+          <label>Dia de vencimento</label>
+          <input type="number" id="fixed-bill-due" min="1" max="31" placeholder="Ex: 10" required>
+        </div>
+
+        <div class="form-group">
+          <label>Categoria</label>
+          <select id="fixed-bill-category">
+            <option value="Moradia">Moradia</option>
+            <option value="Energia">Energia</option>
+            <option value="Água">Água</option>
+            <option value="Internet">Internet</option>
+            <option value="Saúde">Saúde</option>
+            <option value="Educação">Educação</option>
+            <option value="Outros">Outros</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Bloco financeiro</label>
+          <select id="fixed-bill-financial-cat">
+            <option value="essencial">🏠 Essencial</option>
+            <option value="lazer">🎬 Lazer</option>
+            <option value="reserva">🎯 Reserva</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-save">
+          Salvar conta fixa
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
   <main id="app" class="dashboard-container">
 
     <header class="dashboard-header">
@@ -872,6 +936,29 @@
           </div>
 
         </div>
+
+        <section class="fixed-bills-card">
+
+          <div class="fixed-bills-header">
+
+            <div>
+              <h3>🏠 Contas Fixas</h3>
+              <span>acompanhe vencimentos e pagamentos do mês</span>
+            </div>
+
+            <button type="button" class="fixed-bills-add" onclick="window.abrirModalContaFixa?.()">
+              + Adicionar
+            </button>
+
+          </div>
+
+          <div id="fixed-bills-list" class="fixed-bills-list">
+            <p class="msg-vazio">
+              Nenhuma conta fixa cadastrada.
+            </p>
+          </div>
+
+        </section>
 
       </div>
 

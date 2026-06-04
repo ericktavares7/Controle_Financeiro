@@ -17,12 +17,17 @@ import {
 } from './services/invoiceService.js';
 
 import {
+  iniciarContasFixas
+} from './fixedBills.js';
+
+import {
   signOut
 } from 'firebase/auth';
 
 let unsubscribeTransactions = null;
 let unsubscribeInvoicePayments = null;
-
+let unsubscribeFixedBills = null;
+let contasFixasIniciadas = false;
 
 function showAuthMessage(message, type = 'error') {
   const container = document.getElementById('auth-message');
@@ -272,6 +277,7 @@ export function iniciarAuth() {
     }
   });
 }
+
 export async function logOut() {
   try {
     await signOut(auth);
@@ -286,32 +292,25 @@ export async function logOut() {
   }
 }
 
-
 observeAuthState((user) => {
-
   const authContainer = document.getElementById('auth-container');
   const app = document.getElementById('app');
 
   if (user) {
-
     console.log("Usuário logado:", user.email);
 
     if (window.updateUserHeader) {
       window.updateUserHeader(user);
     }
 
-    /* ESCONDE LOGIN */
     if (authContainer) {
       authContainer?.classList.add('fade-out');
 
       setTimeout(() => {
-
         authContainer.style.display = 'none';
-
       }, 300);
     }
 
-    /* MOSTRA APP */
     if (app) {
       app.style.display = 'block';
     }
@@ -322,7 +321,6 @@ observeAuthState((user) => {
       history.pushState({ app: true }, '', '#app');
     }
 
-    /* REMOVE LISTENER ANTIGO */
     if (unsubscribeTransactions) {
       unsubscribeTransactions();
       unsubscribeTransactions = null;
@@ -332,7 +330,7 @@ observeAuthState((user) => {
       unsubscribeInvoicePayments();
       unsubscribeInvoicePayments = null;
     }
-    
+
     unsubscribeTransactions = listenTransactions(user.uid, (txs) => {
       window.transactions = txs;
 
@@ -343,25 +341,19 @@ observeAuthState((user) => {
       }
 
       if (window.meuGrafico && window.atualizarGrafico) {
-        window.atualizarGrafico(
-          window.meuGrafico,
-          txs
-        );
+        window.atualizarGrafico(window.meuGrafico, txs);
       }
     });
 
     unsubscribeInvoicePayments = listenInvoicePayments(
       user.uid,
       (payments) => {
-
         window.invoicePayments = payments;
 
         window.atualizarDashboard?.();
 
         if (window.cards?.length) {
-          window.atualizarCartoesNaTela?.(
-            window.cards
-          );
+          window.atualizarCartoesNaTela?.(window.cards);
         }
       }
     );
@@ -373,19 +365,22 @@ observeAuthState((user) => {
       window.carregarConfiguracoesUsuario(user.uid);
     }
 
-  } else {
+    // ✅ Inicia contas fixas apenas uma vez por sessão
+    if (!contasFixasIniciadas) {
+      contasFixasIniciadas = true;
+      iniciarContasFixas();
+    }
 
+  } else {
     console.log("Nenhum usuário logado.");
 
-    /* REMOVE O FADE */
+    contasFixasIniciadas = false;
+
     if (authContainer) {
-
       authContainer.classList.remove('fade-out');
-
       authContainer.style.display = 'flex';
     }
 
-    /* ESCONDE APP */
     if (app) {
       app.style.display = 'none';
     }
@@ -394,10 +389,9 @@ observeAuthState((user) => {
 
     window.transactions = [];
     window.invoicePayments = [];
+    window.fixedBills = [];
 
-    /* REMOVE LISTENER */
     if (unsubscribeTransactions) {
-
       unsubscribeTransactions();
       unsubscribeTransactions = null;
     }

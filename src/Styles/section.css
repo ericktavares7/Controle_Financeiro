@@ -3065,3 +3065,268 @@ body.light .alert-empty i {
     width: calc(100vw - 28px);
   }
 }
+
+.invoice-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.invoice-delete-btn {
+  width: 30px;
+  height: 30px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 999px;
+
+  background: rgba(255, 107, 53, .12);
+  color: #ff6b35;
+
+  cursor: pointer;
+}
+
+.invoice-delete-btn i {
+  font-size: 15px;
+}
+
+.invoice-delete-btn:active {
+  transform: scale(.94);
+}
+
+@media (max-width: 768px) {
+  #modal-fatura-cartao .invoice-item-actions {
+    justify-content: space-between;
+  }
+}
+
+.fixed-bills-card {
+  margin-top: 24px;
+  padding: 22px;
+
+  border-radius: 22px;
+
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(255, 255, 255, .08);
+}
+
+.fixed-bills-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-bottom: 18px;
+}
+
+.fixed-bills-header h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 17px;
+}
+
+.fixed-bills-header span {
+  color: var(--txt-secundario);
+  font-size: 12px;
+}
+
+.fixed-bills-add {
+  min-height: 38px;
+  padding: 0 14px;
+
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .1);
+
+  background: #111827;
+  color: #fff;
+
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.fixed-bills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fixed-bill-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+
+  padding: 14px 16px;
+
+  border-radius: 16px;
+
+  background: rgba(255, 255, 255, .035);
+  border: 1px solid rgba(255, 255, 255, .06);
+}
+
+.fixed-bill-item strong {
+  color: #fff;
+}
+
+.fixed-bill-item small {
+  display: block;
+  margin-top: 3px;
+
+  color: var(--txt-secundario);
+  font-size: 12px;
+}
+
+.fixed-bill-value {
+  color: #ff6b35;
+  font-weight: 900;
+}
+
+.fixed-bill-pay {
+  min-height: 32px;
+  padding: 0 12px;
+
+  border: none;
+  border-radius: 999px;
+
+  background: #00ffb2;
+  color: #03140f;
+
+  font-weight: 900;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .fixed-bills-card {
+    padding: 18px;
+  }
+
+  .fixed-bills-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .fixed-bill-item {
+    grid-template-columns: 1fr;
+  }
+
+  .fixed-bill-value {
+    font-size: 16px;
+  }
+}
+
+.fixed-bill-item.paid {
+  opacity: .72;
+}
+
+.fixed-bill-paid {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  color: #00ffb2;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+#modal-conta-fixa {
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.6);
+
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease;
+
+  z-index: 999999;
+}
+
+#modal-conta-fixa.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+#modal-conta-fixa .modal-content {
+  width: 100%;
+  max-width: 480px;
+
+  max-height: 85vh;
+  overflow-y: auto;
+
+  background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
+
+  border: 1px solid #1e2d40;
+  border-radius: 24px;
+
+  padding: 24px;
+
+  transform: translateY(20px) scale(0.96);
+  opacity: 0;
+
+  transition:
+    transform 0.28s cubic-bezier(.2, .8, .2, 1);
+}
+
+#modal-conta-fixa.active .modal-content {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  #modal-conta-fixa {
+    padding: 14px;
+  }
+
+  #modal-conta-fixa .modal-content {
+    max-width: 420px;
+    max-height: calc(100dvh - 20px);
+
+    padding: 18px;
+    border-radius: 22px;
+  }
+}
+
+.fixed-bill-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fixed-bill-edit,
+.fixed-bill-undo {
+  min-height: 32px;
+  padding: 0 10px;
+
+  border: none;
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.fixed-bill-edit {
+  background: rgba(255, 255, 255, .08);
+  color: #cbd5e1;
+}
+
+.fixed-bill-undo {
+  background: rgba(255, 107, 107, .14);
+  color: #ff6b6b;
+}
