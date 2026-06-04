@@ -28,23 +28,17 @@ export function calcularFaturaAtualDoCartao(cardId) {
     }
 
     if (
-      t.invoiceYear != null &&
-      t.invoiceMonth != null
+      t.invoiceYear == null ||
+      t.invoiceMonth == null
     ) {
-      return Number(t.invoiceYear) === ano &&
-        Number(t.invoiceMonth) === mes
-        ? total + (Number(t.val) || 0)
-        : total;
+      return total;
     }
 
-    const data = t.createdAt?.toDate
-      ? t.createdAt.toDate()
-      : new Date(t.createdAt);
-
-    return data.getFullYear() === ano &&
-      data.getMonth() === mes
+    return Number(t.invoiceYear) === ano &&
+      Number(t.invoiceMonth) === mes
       ? total + (Number(t.val) || 0)
       : total;
+
   }, 0);
 }
 
