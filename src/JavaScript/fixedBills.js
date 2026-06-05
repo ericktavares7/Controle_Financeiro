@@ -6,6 +6,8 @@ import {
   updateFixedBill
 } from './services/fixedBillService.js';
 
+import { addTransaction, deleteTransaction } from './services/transactionService.js';
+
 window.fixedBills = window.fixedBills || [];
 
 function parseMoneyBR(value) {
@@ -54,11 +56,14 @@ export function editarContaFixa(contaId) {
 
   if (!conta) return;
 
+  // PASSO 2: Garante que ao editar uma conta antiga salva como "Aluguel", ela carregue como "Moradia"
+  const categoriaTratada = conta.category === 'Aluguel' ? 'Moradia' : (conta.category || 'Outros');
+
   document.getElementById('fixed-bill-id').value = conta.id;
   document.getElementById('fixed-bill-name').value = conta.name || '';
   document.getElementById('fixed-bill-value').value = formatInputMoney(conta.value);
   document.getElementById('fixed-bill-due').value = conta.dueDay || '';
-  document.getElementById('fixed-bill-category').value = conta.category || 'Outros';
+  document.getElementById('fixed-bill-category').value = categoriaTratada;
   document.getElementById('fixed-bill-financial-cat').value =
     conta.financialCategory || 'essencial';
 
@@ -78,62 +83,62 @@ export function renderContasFixas() {
     window.fixedBills || [];
 
   list.innerHTML = contas.length
-    ? contas.map(conta => `
-      <div class="fixed-bill-item ${conta.paid ? 'paid' : ''}">
+    ? contas.map(conta => {
+      // PASSO 2: Tradução visual automática de "Aluguel" para "Moradia" na listagem
+      const categoriaExibida = conta.category === 'Aluguel' ? 'Moradia' : (conta.category || 'Outros');
 
-        <div>
-          <strong>${conta.name || 'Conta sem nome'}</strong>
+      return `
+          <div class="fixed-bill-item ${conta.paid ? 'paid' : ''}">
+            <div>
+              <strong>${conta.name || 'Conta sem nome'}</strong>
+              <small>
+                ${categoriaExibida}
+                • Vence dia ${conta.dueDay || '--'}
+              </small>
+            </div>
 
-          <small>
-            ${conta.category || 'Outros'}
-            • Vence dia ${conta.dueDay || '--'}
-          </small>
-        </div>
+            <span class="fixed-bill-value">
+              ${formatBRL(conta.value)}
+            </span>
 
-        <span class="fixed-bill-value">
-          ${formatBRL(conta.value)}
-        </span>
-
-        <div class="fixed-bill-actions">
-
-          <button
-            type="button"
-            class="fixed-bill-edit"
-            onclick="window.editarContaFixa('${conta.id}')"
-          >
-            Editar
-          </button>
-
-          ${conta.paid
-        ? `
-              <span class="fixed-bill-paid">
-                <i class="ph ph-check-circle"></i>
-                Pago
-              </span>
-
+            <div class="fixed-bill-actions">
               <button
                 type="button"
-                class="fixed-bill-undo"
-                onclick="window.desfazerPagamentoContaFixa('${conta.id}')"
+                class="fixed-bill-edit"
+                onclick="window.editarContaFixa('${conta.id}')"
               >
-                Desfazer
+                Editar
               </button>
-            `
-        : `
-              <button
-                type="button"
-                class="fixed-bill-pay"
-                onclick="window.pagarContaFixa('${conta.id}')"
-              >
-                Marcar paga
-              </button>
-            `
-      }
 
-        </div>
+              ${conta.paid
+          ? `
+                  <span class="fixed-bill-paid">
+                    <i class="ph ph-check-circle"></i>
+                    Pago
+                  </span>
 
-      </div>
-    `).join('')
+                  <button
+                    type="button"
+                    class="fixed-bill-undo"
+                    onclick="window.desfazerPagamentoContaFixa('${conta.id}')"
+                  >
+                    Desfazer
+                  </button>
+                `
+          : `
+                  <button
+                    type="button"
+                    class="fixed-bill-pay"
+                    onclick="window.pagarContaFixa('${conta.id}')"
+                  >
+                    Marcar paga
+                  </button>
+                `
+        }
+            </div>
+          </div>
+        `;
+    }).join('')
     : `
       <p class="msg-vazio">
         Nenhuma conta fixa cadastrada.
@@ -157,11 +162,15 @@ export function iniciarContasFixas() {
     const editingId =
       document.getElementById('fixed-bill-id')?.value;
 
+    let categoriaSelecionada = document.getElementById('fixed-bill-category')?.value || 'Outros';
+    // PASSO 2: Se por acaso ainda vier como Aluguel no formulário, força salvar como Moradia
+    if (categoriaSelecionada === 'Aluguel') categoriaSelecionada = 'Moradia';
+
     const dadosConta = {
       name: document.getElementById('fixed-bill-name')?.value || '',
       value: parseMoneyBR(document.getElementById('fixed-bill-value')?.value),
       dueDay: Number(document.getElementById('fixed-bill-due')?.value),
-      category: document.getElementById('fixed-bill-category')?.value || 'Outros',
+      category: categoriaSelecionada,
       financialCategory:
         document.getElementById('fixed-bill-financial-cat')?.value || 'essencial'
     };
@@ -173,7 +182,6 @@ export function iniciarContasFixas() {
     }
 
     fecharModalContaFixa();
-
     window.atualizarDashboard?.();
   });
 
@@ -181,7 +189,6 @@ export function iniciarContasFixas() {
     window.fixedBills = bills;
     renderContasFixas();
   });
-  
 }
 
 export async function pagarContaFixa(contaId) {
@@ -193,51 +200,56 @@ export async function pagarContaFixa(contaId) {
 
   const hoje = new Date();
 
+  // PASSO 2: Garante que a transação gerada no histórico vá mapeada como Moradia
+  const categoriaTransacao = conta.category === 'Aluguel' ? 'Moradia' : conta.category;
+
   const transacao = {
-    id: crypto.randomUUID(),
     type: 'expense',
     desc: conta.name,
     val: conta.value,
-    cat: conta.category,
+    cat: categoriaTransacao,
     financialCategory: conta.financialCategory,
     paymentMethod: 'debit',
     createdAt: hoje,
+    purchaseDate: hoje,
     source: 'fixedBill',
     fixedBillId: conta.id
   };
+  const paymentTxId = crypto.randomUUID();
 
-  window.transactions =
-    window.transactions || [];
+  const docRef =
+    await addTransaction(transacao);
 
-  window.transactions.push(transacao);
+  if (!docRef?.id) {
+    throw new Error('Erro ao criar transação da conta fixa.');
+  }
 
-  conta.paid = true;
-  conta.paidAt = hoje;
-  conta.paymentTxId = transacao.id;
+  await updateFixedBill(conta.id, {
+    paid: true,
+    paidAt: hoje,
+    paymentTxId: docRef.id
+  });
 
   renderContasFixas();
-
   window.atualizarDashboard?.();
 }
 
 export async function desfazerPagamentoContaFixa(contaId) {
-  const conta =
-    (window.fixedBills || [])
-      .find(c => c.id === contaId);
+  const conta = (window.fixedBills || []).find(c => c.id === contaId);
 
   if (!conta) return;
 
+
   if (conta.paymentTxId) {
-    window.transactions =
-      (window.transactions || [])
-        .filter(t => t.id !== conta.paymentTxId);
+    await deleteTransaction(conta.paymentTxId);
   }
 
-  conta.paid = false;
-  conta.paidAt = null;
-  conta.paymentTxId = null;
+  await updateFixedBill(conta.id, {
+    paid: false,
+    paidAt: null,
+    paymentTxId: null
+  });
 
   renderContasFixas();
-
   window.atualizarDashboard?.();
 }

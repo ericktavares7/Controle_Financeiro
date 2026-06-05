@@ -14,14 +14,15 @@ import {
 import { db, auth } from '../firebase.js';
 
 export async function addTransaction(data) {
-  if (!auth.currentUser) return;
+  if (!auth.currentUser) return null;
 
-  await addDoc(collection(db, 'transacoes'), {
+  const docRef = await addDoc(collection(db, 'transacoes'), {
     ...data,
     userId: auth.currentUser.uid
   });
-}
 
+  return docRef;
+}
 export function listenTransactions(uid, callback) {
   const q = query(
     collection(db, 'transacoes'),

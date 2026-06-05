@@ -1,3 +1,5 @@
+import { validarTransacao } from './validacao-ia.js';
+
 import {
   updateTransaction,
   deleteInstallmentGroup,
@@ -443,6 +445,29 @@ export function iniciarEdicaoTransacoes() {
           fixedExpense && fixedDuration !== 'indefinite' ? fixedMonths : null
       });
 
+      const btnSalvar = document.querySelector('#form-editar-transacao [type="submit"]');
+      if (btnSalvar) { btnSalvar.disabled = true; btnSalvar.textContent = 'Validando...'; }
+
+      const resultadoEdicao = await validarTransacao({
+        tipo: tx.type,
+        descricao: desc,
+        valor: val,
+        categoria: tx.cat,
+        paymentMethod,
+        financialCategory
+      }, 'editar');
+
+      if (btnSalvar) { btnSalvar.disabled = false; btnSalvar.textContent = 'Salvar'; }
+
+      if (!resultadoEdicao.aprovado) {
+        window.showToast?.({
+          type: 'error',
+          title: 'Edição bloqueada',
+          message: resultadoEdicao.motivo || 'Verifique os dados.'
+        });
+        return;
+      }
+
       if (fixedExpense && !tx.fixedGroupId) {
         const fixedGroupId = crypto.randomUUID();
 
@@ -524,7 +549,6 @@ export function iniciarEdicaoTransacoes() {
 }
 
 export function iniciarFormularioTransacao() {
-
   const form = document.getElementById('form-transacao');
 
   if (!form) return;
@@ -539,7 +563,8 @@ export function iniciarFormularioTransacao() {
     const inputDataStr =
       document.getElementById('input-data')?.value;
 
-    const dataCompra = criarDataLocal(inputDataStr);
+    const dataCompra =
+      criarDataLocal(inputDataStr);
 
     const tipo =
       document.getElementById('input-tipo').value;
@@ -561,7 +586,7 @@ export function iniciarFormularioTransacao() {
         document.getElementById('input-val').value
           .replace(/\./g, '')
           .replace(',', '.')
-      ) || 0
+      ) || 0;
 
     const descricao =
       document.getElementById('input-desc').value;
@@ -585,7 +610,6 @@ export function iniciarFormularioTransacao() {
 
     const financialCategory =
       document.getElementById('input-financial-cat')?.value || 'essencial';
-
 
     if (
       tipo === 'expense' &&
@@ -618,11 +642,63 @@ export function iniciarFormularioTransacao() {
       cardId,
 
       purchaseDate: Timestamp.fromDate(dataCompra),
-
       createdAt: Timestamp.fromDate(dataCompra),
 
       ...dadosFatura
     };
+
+    const btnSubmit =
+      form.querySelector('[type="submit"]');
+
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = 'Validando...';
+    }
+
+    let resultadoIA;
+
+    try {
+      resultadoIA = await validarTransacao({
+        tipo,
+        descricao,
+        valor,
+        categoria,
+        paymentMethod,
+        financialCategory
+      }, 'adicionar');
+    } catch (error) {
+      console.error('Erro na validação com IA:', error);
+
+      resultadoIA = {
+        aprovado: true,
+        alertas: [
+          'Não foi possível validar com IA. A transação será registrada normalmente.'
+        ]
+      };
+    }
+
+    if (btnSubmit) {
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = 'Confirmar Registro';
+    }
+
+    if (!resultadoIA.aprovado) {
+      window.showToast?.({
+        type: 'error',
+        title: 'Lançamento bloqueado',
+        message: resultadoIA.motivo || 'Verifique os dados e tente novamente.'
+      });
+
+      return;
+    }
+
+    if (resultadoIA.alertas?.length > 0) {
+      window.showToast?.({
+        type: 'warning',
+        title: 'Atenção',
+        message: resultadoIA.alertas[0]
+      });
+    }
 
     if (
       tipo === 'expense' &&
@@ -636,10 +712,7 @@ export function iniciarFormularioTransacao() {
           adicionarMeses(dataCompra, i);
 
         const dadosFaturaParcela =
-          calcularDadosFaturaCartao(
-            dataParcela,
-            cartao
-          );
+          calcularDadosFaturaCartao(dataParcela, cartao);
 
         await addTransaction({
           ...nova,
@@ -662,10 +735,12 @@ export function iniciarFormularioTransacao() {
       tipo === 'expense' &&
       fixedExpense
     ) {
-      const fixedGroupId = crypto.randomUUID();
+      const fixedGroupId =
+        crypto.randomUUID();
 
       for (let i = 0; i < fixedMonths; i++) {
-        const dataFixa = adicionarMeses(dataCompra, i);
+        const dataFixa =
+          adicionarMeses(dataCompra, i);
 
         const dadosFaturaFixa =
           paymentMethod === 'credit'
@@ -739,7 +814,6 @@ export function iniciarFormularioTransacao() {
     window.fecharModal?.();
   });
 }
-
 export function iniciarCamposTransacao() {
   const inputPayment = document.getElementById('input-payment');
   const creditCardGroup = document.getElementById('credit-card-group');
