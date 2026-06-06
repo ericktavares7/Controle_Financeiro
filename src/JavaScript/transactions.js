@@ -39,6 +39,90 @@ function adicionarMeses(data, qtd) {
   );
 }
 
+export async function ajustarSaldoAtual(valorReal) {
+  const valor = Number(valorReal);
+
+  if (Number.isNaN(valor)) return;
+
+  const select = document.getElementById('filtro-mes');
+  if (!select) return;
+
+  const [ano, mes] =
+    select.value.split('-').map(Number);
+
+  const inicioMes =
+    new Date(ano, mes, 1, 12, 0, 0);
+
+  const transacoesMes =
+    (window.transactions || []).filter(t => {
+      const d =
+        t.createdAt?.toDate
+          ? t.createdAt.toDate()
+          : new Date(t.createdAt);
+
+      return (
+        d.getFullYear() === ano &&
+        d.getMonth() === mes
+      );
+    });
+
+  let rec = 0;
+  let desSaldo = 0;
+  let res = 0;
+  let ajustes = 0;
+
+  transacoesMes.forEach(t => {
+    const v = Number(t.val) || 0;
+
+    if (t.type === 'income') rec += v;
+
+    else if (t.type === 'expense') {
+      if (t.paymentMethod !== 'credit') {
+        desSaldo += v;
+      }
+    }
+
+    else if (t.type === 'goal') res += v;
+
+    else if (t.type === 'adjustment') ajustes += v;
+  });
+
+  const faturasPagas =
+    (window.invoicePayments || [])
+      .filter(p =>
+        Number(p.invoiceYear) === ano &&
+        Number(p.invoiceMonth) === mes &&
+        p.status === 'paid'
+      )
+      .reduce(
+        (acc, p) => acc + (Number(p.amount) || 0),
+        0
+      );
+
+  const saldoCalculadoAtual =
+    ajustes + rec - desSaldo - res - faturasPagas;
+
+  const ajusteNecessario =
+    valor - saldoCalculadoAtual;
+
+  if (ajusteNecessario === 0) return;
+
+  await addTransaction({
+    type: 'adjustment',
+    desc: 'Ajuste de saldo',
+    val: ajusteNecessario,
+    cat: 'Ajuste',
+    paymentMethod: 'system',
+    source: 'balanceAdjustment',
+    createdAt: inicioMes,
+    purchaseDate: inicioMes
+  });
+
+  window.atualizarDashboard?.();
+}
+
+window.ajustarSaldoAtual = ajustarSaldoAtual;
+
 function calcularDadosFaturaCartao(dataCompra, cartao) {
   const closingDay = Number(cartao.closingDay);
   const dueDay = Number(cartao.dueDay);
@@ -113,7 +197,10 @@ export function renderListaTransacoes(lista) {
     const categoriaClasse =
       `cat-${(t.cat || 'Geral').replace(/\s+/g, '-')}`;
 
-    const income = t.type === 'income';
+       const income =
+      t.type === 'income' ||
+      (t.type === 'adjustment' && Number(t.val) > 0);
+
     const goal = t.type === 'goal';
 
     const sinal =
@@ -173,10 +260,16 @@ export function renderListaTransacoes(lista) {
   };
 
   const receitas =
-    lista.filter(t => t.type === 'income');
+    lista.filter(t =>
+      t.type === 'income' ||
+      (t.type === 'adjustment' && Number(t.val) > 0)
+    );
 
   const despesas =
-    lista.filter(t => t.type !== 'income');
+    lista.filter(t =>
+      t.type === 'expense' ||
+      (t.type === 'adjustment' && Number(t.val) < 0)
+    );
 
   const totalReceitas = receitas.reduce(
     (acc, t) => acc + (Number(t.val) || 0),
@@ -219,6 +312,21 @@ export async function deletarTransacao(id) {
   }
 
   try {
+    if (tx.fixedGroupId) {
+      window.abrirConfirmacaoSimples?.({
+        title: 'Excluir gasto fixo?',
+        text: 'Deseja remover apenas este lançamento fixo?',
+        confirmText: 'Excluir',
+        cancelText: 'Cancelar',
+
+        onConfirm: async () => {
+          await deleteTransaction(id);
+        }
+      });
+
+      return;
+    }
+
     if (tx.installmentGroupId) {
       window.abrirConfirmacaoParcelas?.({
         onDeleteAll: async () => {
@@ -248,6 +356,8 @@ export async function deletarTransacao(id) {
     console.error('Erro ao excluir:', e);
   }
 }
+
+window.deletarTransacao = deletarTransacao;
 
 export function abrirEdicaoTransacaoPorId(txId) {
   const tx =

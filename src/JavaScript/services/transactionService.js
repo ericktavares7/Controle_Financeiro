@@ -32,9 +32,9 @@ export function listenTransactions(uid, callback) {
 
   return onSnapshot(q, (snapshot) => {
     const txs = snapshot.docs.map(docSnap => ({
-      id: docSnap.id,
-      ...docSnap.data()
-    }));
+      ...docSnap.data(),
+      id: docSnap.id
+    }))
 
     callback(txs);
   }, (error) => {

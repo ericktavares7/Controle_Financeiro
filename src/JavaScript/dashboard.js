@@ -2,7 +2,7 @@ import { formatBRL } from './utils.js';
 import { atualizarCartoesNaTela } from './cards.js';
 import { CATS_LAZER } from './state.js';
 import { renderListaTransacoes, getFiltroBloco } from './transactions.js';
-import { criarGraficoDonut, atualizarGraficoDonut, atualizarComparativo } from './charts.js';
+import { atualizarGraficoDonut, atualizarComparativo } from './charts.js';
 
 const mesesTexto = [
   'janeiro',
@@ -65,14 +65,17 @@ export function atualizarDashboard() {
     ? dadosExibicao
     : dadosExibicao.filter(t => {
       if (t.type === 'income') return bloco === 'todos';
+
       const catNorm = String(t.cat || '').toLowerCase().trim();
-      const blocoTx = t.financialCategory ||
+
+      const blocoTx =
+        t.financialCategory ||
         (CATS_LAZER.includes(catNorm) ? 'lazer' : 'essencial');
+
       return blocoTx === bloco;
     });
 
   renderListaTransacoes(dadosFiltrados);
-
 
   window.renderCategoriasGrafico?.(dadosExibicao);
 
@@ -81,66 +84,129 @@ export function atualizarDashboard() {
   let desSaldo = 0;
   let res = 0;
   let lazer = 0;
+  let ajusteSaldo = 0;
 
   dadosExibicao.forEach(t => {
     const valor = Number(t.val) || 0;
     const catNorm = String(t.cat || '').toLowerCase().trim();
 
-    const bloco = t.financialCategory ||
+    const bloco =
+      t.financialCategory ||
       (CATS_LAZER.includes(catNorm) ? 'lazer' : 'essencial');
 
     if (t.type === 'income') {
       rec += valor;
-    } else if (t.type === 'expense') {
+    }
+
+    else if (t.type === 'expense') {
       des += valor;
 
       if (t.paymentMethod !== 'credit') {
         desSaldo += valor;
       }
 
-      if (bloco === 'lazer') lazer += valor;
-    } else if (t.type === 'goal') {
+      if (bloco === 'lazer') {
+        lazer += valor;
+      }
+    }
+
+    else if (t.type === 'goal') {
       res += valor;
+    }
+
+    else if (t.type === 'adjustment') {
+      ajusteSaldo += valor;
     }
   });
 
-  const faturasPagas = (window.invoicePayments || [])
-    .filter(p =>
-      Number(p.invoiceYear) === anoFiltro &&
-      Number(p.invoiceMonth) === mesFiltro &&
-      p.status === 'paid'
-    )
-    .reduce(
-      (acc, p) => acc + (Number(p.amount) || 0),
-      0
-    );
+  const faturasPagas =
+    (window.invoicePayments || [])
+      .filter(p =>
+        Number(p.invoiceYear) === anoFiltro &&
+        Number(p.invoiceMonth) === mesFiltro &&
+        p.status === 'paid'
+      )
+      .reduce(
+        (acc, p) => acc + (Number(p.amount) || 0),
+        0
+      );
 
-  const saldoReal = rec - desSaldo - res - faturasPagas;
+  const desImpactoSaldo =
+    desSaldo + faturasPagas;
 
-  const mesAnterior = mesFiltro === 0 ? 11 : mesFiltro - 1;
-  const anoAnterior = mesFiltro === 0 ? anoFiltro - 1 : anoFiltro;
+  const ajustePositivo =
+    Math.max(ajusteSaldo, 0);
 
-  let recAnt = 0, desAnt = 0, resAnt = 0, lazerAnt = 0;
+  const baseReceitaMetas =
+    rec + ajustePositivo;
+
+  const saldoReal =
+    ajusteSaldo + rec - desImpactoSaldo - res;
+
+  const mesAnterior =
+    mesFiltro === 0 ? 11 : mesFiltro - 1;
+
+  const anoAnterior =
+    mesFiltro === 0 ? anoFiltro - 1 : anoFiltro;
+
+  const faturasPagasAnt =
+    (window.invoicePayments || [])
+      .filter(p =>
+        Number(p.invoiceYear) === anoAnterior &&
+        Number(p.invoiceMonth) === mesAnterior &&
+        p.status === 'paid'
+      )
+      .reduce(
+        (acc, p) => acc + (Number(p.amount) || 0),
+        0
+      );
+
+  let recAnt = 0;
+  let desAnt = 0;
+  let resAnt = 0;
+  let lazerAnt = 0;
 
   (window.transactions || []).forEach(t => {
-    const d = t.createdAt?.toDate
-      ? t.createdAt.toDate()
-      : new Date(t.createdAt);
+    const d =
+      t.createdAt?.toDate
+        ? t.createdAt.toDate()
+        : new Date(t.createdAt);
 
-    if (d.getFullYear() !== anoAnterior || d.getMonth() !== mesAnterior) return;
+    if (
+      d.getFullYear() !== anoAnterior ||
+      d.getMonth() !== mesAnterior
+    ) {
+      return;
+    }
 
     const valor = Number(t.val) || 0;
     const catNorm = String(t.cat || '').toLowerCase().trim();
-    const bloco = t.financialCategory ||
+
+    const bloco =
+      t.financialCategory ||
       (CATS_LAZER.includes(catNorm) ? 'lazer' : 'essencial');
 
-    if (t.type === 'income') recAnt += valor;
-    else if (t.type === 'expense') {
-      desAnt += valor;
-      if (bloco === 'lazer') lazerAnt += valor;
+    if (t.type === 'income') {
+      recAnt += valor;
     }
-    else if (t.type === 'goal') resAnt += valor;
+
+    else if (t.type === 'expense') {
+      if (t.paymentMethod !== 'credit') {
+        desAnt += valor;
+      }
+
+      if (bloco === 'lazer') {
+        lazerAnt += valor;
+      }
+    }
+
+    else if (t.type === 'goal') {
+      resAnt += valor;
+    }
   });
+
+  const desImpactoSaldoAnt =
+    desAnt + faturasPagasAnt;
 
   const mesesNomes = [
     'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
@@ -148,13 +214,24 @@ export function atualizarDashboard() {
   ];
 
   atualizarComparativo(
-    { rec, des, res, lazer },
-    { rec: recAnt, des: desAnt, res: resAnt, lazer: lazerAnt },
+    {
+      rec,
+      des: desImpactoSaldo,
+      res,
+      lazer
+    },
+    {
+      rec: recAnt,
+      des: desImpactoSaldoAnt,
+      res: resAnt,
+      lazer: lazerAnt
+    },
     mesesNomes[mesFiltro],
     mesesNomes[mesAnterior]
   );
 
   const essencialReal = des - lazer;
+
   atualizarGraficoDonut(essencialReal, lazer, res);
 
   const mesReceita = document.getElementById('mes-receita');
@@ -168,32 +245,39 @@ export function atualizarDashboard() {
   const headerSaldo = document.getElementById('header-saldo-badge');
 
   if (headerSaldo) {
-    const saldo = saldoReal;
-
     headerSaldo.innerHTML =
-      `<span>◈ Saldo: </span> ${formatBRL(saldo)}`;
+      `<span>◈ Saldo: </span> ${formatBRL(saldoReal)}`;
 
     headerSaldo.style.color =
-      saldo >= 0 ? '#00FFB2' : '#FF6B35';
+      saldoReal >= 0 ? '#00FFB2' : '#FF6B35';
   }
 
-  atualizarInsightSaldo(select, rec, desSaldo + faturasPagas, res);
+  atualizarInsightSaldo(
+    select,
+    rec,
+    desImpactoSaldo,
+    res
+  );
 
   atualizarInsightsTopo({
-    rec,
-    des,
+    rec: baseReceitaMetas,
+    desImpactoSaldo,
     res,
     lazer
   });
 
-  atualizarMetasIA(rec, des, res, lazer, dadosExibicao);
+  atualizarMetasIA(baseReceitaMetas, des, res, lazer, dadosExibicao);
   atualizarCartoesNaTela(window.cards || []);
-  atualizarPoupanca(rec, des, res);
+  atualizarPoupanca(baseReceitaMetas, des, res);
   window.atualizarBadgeEventos?.();
-
 }
 
-function atualizarInsightSaldo(select, rec, des, res) {
+function atualizarInsightSaldo(
+  select,
+  rec,
+  desImpactoSaldo,
+  res
+) {
   const insightEl = document.getElementById('insight-saldo');
 
   if (!insightEl) return;
@@ -225,15 +309,40 @@ function atualizarInsightSaldo(select, rec, des, res) {
   let resAnt = 0;
 
   txMesAnterior.forEach(t => {
-    const v = Number(t.val) || 0;
+    const valor = Number(t.val) || 0;
 
-    if (t.type === 'income') recAnt += v;
-    else if (t.type === 'expense') desAnt += v;
-    else if (t.type === 'goal') resAnt += v;
+    if (t.type === 'income') {
+      recAnt += valor;
+    }
+
+    else if (t.type === 'expense') {
+      if (t.paymentMethod !== 'credit') {
+        desAnt += valor;
+      }
+    }
+
+    else if (t.type === 'goal') {
+      resAnt += valor;
+    }
   });
 
-  const saldoAtual = rec - des - res;
-  const saldoAnterior = recAnt - desAnt - resAnt;
+  const faturasPagasAnt =
+    (window.invoicePayments || [])
+      .filter(p =>
+        Number(p.invoiceYear) === anoAnterior &&
+        Number(p.invoiceMonth) === mesAnterior &&
+        p.status === 'paid'
+      )
+      .reduce(
+        (acc, p) => acc + (Number(p.amount) || 0),
+        0
+      );
+
+  const saldoAtual =
+    rec - desImpactoSaldo - res;
+
+  const saldoAnterior =
+    recAnt - desAnt - resAnt - faturasPagasAnt;
 
   const mesesNomes = [
     'Jan', 'Fev', 'Mar', 'Abr',
@@ -243,7 +352,9 @@ function atualizarInsightSaldo(select, rec, des, res) {
 
   if (!txMesAnterior.length) {
     insightEl.textContent = '';
-  } else if (saldoAtual > saldoAnterior) {
+  }
+
+  else if (saldoAtual > saldoAnterior) {
     const diff =
       Math.round(
         ((saldoAtual - saldoAnterior) /
@@ -255,7 +366,9 @@ function atualizarInsightSaldo(select, rec, des, res) {
 
     insightEl.className =
       'insight-saldo insight--positivo';
-  } else if (saldoAtual < saldoAnterior) {
+  }
+
+  else if (saldoAtual < saldoAnterior) {
     const diff =
       Math.round(
         ((saldoAnterior - saldoAtual) /
@@ -267,7 +380,9 @@ function atualizarInsightSaldo(select, rec, des, res) {
 
     insightEl.className =
       'insight-saldo insight--negativo';
-  } else {
+  }
+
+  else {
     insightEl.textContent =
       `= igual a ${mesesNomes[mesAnterior]}`;
 
@@ -293,7 +408,8 @@ function atualizarPoupanca(receita, despesa, reserva) {
     return;
   }
 
-  const taxa = ((reserva / receita) * 100).toFixed(1);
+  const taxa =
+    ((reserva / receita) * 100).toFixed(1);
 
   display.textContent = `${taxa}%`;
 
@@ -312,21 +428,38 @@ function montarSubcategorias(dadosExibicao, blocoAlvo) {
   const totais = {};
 
   dadosExibicao.forEach(t => {
-    if (t.type !== 'expense' && t.type !== 'goal') return;
+    if (
+      t.type !== 'expense' &&
+      t.type !== 'goal' &&
+      t.type !== 'adjustment'
+    ) return;
 
-    const catNorm = String(t.cat || '').toLowerCase().trim();
-    const bloco = t.financialCategory ||
+    if (
+      t.type === 'adjustment' &&
+      Number(t.val) > 0
+    ) {
+      return;
+    }
+
+    const catNorm =
+      String(t.cat || '').toLowerCase().trim();
+
+    const bloco =
+      t.financialCategory ||
       (CATS_LAZER.includes(catNorm) ? 'lazer' : 'essencial');
 
     if (bloco !== blocoAlvo) return;
     if (t.type === 'goal' && blocoAlvo !== 'reserva') return;
 
     const cat = t.cat || 'Outros';
-    totais[cat] = (totais[cat] || 0) + (Number(t.val) || 0);
+
+    totais[cat] =
+      (totais[cat] || 0) + (Number(t.val) || 0);
   });
 
-  const itens = Object.entries(totais)
-    .sort((a, b) => b[1] - a[1]);
+  const itens =
+    Object.entries(totais)
+      .sort((a, b) => b[1] - a[1]);
 
   if (!itens.length) return '';
 
@@ -342,26 +475,30 @@ function montarSubcategorias(dadosExibicao, blocoAlvo) {
   `;
 }
 
-function atualizarSaudeFinanceira(essencialReal, essencialIdeal, lazer, lazerIdeal, reserva, reservaIdeal) {
-  const badge = document.getElementById('saude-financeira-badge');
+function atualizarSaudeFinanceira(
+  essencialReal,
+  essencialIdeal,
+  lazer,
+  lazerIdeal,
+  reserva,
+  reservaIdeal
+) {
+  const badge =
+    document.getElementById('saude-financeira-badge');
+
   if (!badge) return;
 
   let pontos = 0;
 
-  // Essenciais dentro do limite
   if (essencialReal <= essencialIdeal) pontos++;
-
-  // Lazer dentro do limite
   if (lazer <= lazerIdeal) pontos++;
-
-  // Reserva sendo feita
   if (reserva >= reservaIdeal) pontos++;
 
   const config = {
     3: { label: '● Saudável', classe: 'saude--verde' },
     2: { label: '● Atenção', classe: 'saude--amarelo' },
     1: { label: '● Crítico', classe: 'saude--vermelho' },
-    0: { label: '● Crítico', classe: 'saude--vermelho' },
+    0: { label: '● Crítico', classe: 'saude--vermelho' }
   };
 
   const { label, classe } = config[pontos];
@@ -377,7 +514,8 @@ function atualizarMetasIA(
   lazer = 0,
   dadosExibicao = []
 ) {
-  const container = document.getElementById('metas-container');
+  const container =
+    document.getElementById('metas-container');
 
   if (!container) return;
 
@@ -386,13 +524,15 @@ function atualizarMetasIA(
   reserva = Number(reserva) || 0;
   lazer = Number(lazer) || 0;
 
-  const regra = window.regraFinanceira || {
-    essencial: 70,
-    reserva: 20,
-    lazer: 10
-  };
+  const regra =
+    window.regraFinanceira || {
+      essencial: 70,
+      reserva: 20,
+      lazer: 10
+    };
 
-  const essencialReal = despesa - lazer;
+  const essencialReal =
+    despesa - lazer;
 
   const essencialIdeal =
     receita * (regra.essencial / 100);
@@ -493,7 +633,6 @@ function atualizarMetasIA(
         </p>
 
         ${subcats}
-
       </div>
     `;
   };
@@ -508,13 +647,16 @@ function atualizarMetasIA(
   }
 
   atualizarSaudeFinanceira(
-    essencialReal, essencialIdeal,
-    lazer, lazerIdeal,
-    reserva, reservaIdeal
+    essencialReal,
+    essencialIdeal,
+    lazer,
+    lazerIdeal,
+    reserva,
+    reservaIdeal
   );
 
   container.innerHTML = `
-  ${montarLinha({
+    ${montarLinha({
     nome: 'Essenciais',
     percentual: regra.essencial,
     usado: essencialReal,
@@ -524,7 +666,7 @@ function atualizarMetasIA(
     subcats: montarSubcategorias(dadosExibicao, 'essencial')
   })}
 
-  ${montarLinha({
+    ${montarLinha({
     nome: 'Reserva',
     percentual: regra.reserva,
     usado: reserva,
@@ -534,7 +676,7 @@ function atualizarMetasIA(
     subcats: montarSubcategorias(dadosExibicao, 'reserva')
   })}
 
-  ${montarLinha({
+    ${montarLinha({
     nome: 'Lazer',
     percentual: regra.lazer,
     usado: lazer,
@@ -543,41 +685,43 @@ function atualizarMetasIA(
     tipo: 'limite',
     subcats: montarSubcategorias(dadosExibicao, 'lazer')
   })}
-`;
+  `;
 }
 
 function gerarProximosEventos(cards = []) {
-
   const hoje = new Date();
 
   return cards.flatMap(card => {
-
-    let fechamento = new Date(
-      hoje.getFullYear(),
-      hoje.getMonth(),
-      Number(card.closingDay)
-    );
-
-    if (fechamento < hoje) {
-      fechamento = new Date(
+    let fechamento =
+      new Date(
         hoje.getFullYear(),
-        hoje.getMonth() + 1,
+        hoje.getMonth(),
         Number(card.closingDay)
       );
+
+    if (fechamento < hoje) {
+      fechamento =
+        new Date(
+          hoje.getFullYear(),
+          hoje.getMonth() + 1,
+          Number(card.closingDay)
+        );
     }
 
-    let vencimento = new Date(
-      hoje.getFullYear(),
-      hoje.getMonth(),
-      Number(card.dueDay)
-    );
-
-    if (vencimento < hoje) {
-      vencimento = new Date(
+    let vencimento =
+      new Date(
         hoje.getFullYear(),
-        hoje.getMonth() + 1,
+        hoje.getMonth(),
         Number(card.dueDay)
       );
+
+    if (vencimento < hoje) {
+      vencimento =
+        new Date(
+          hoje.getFullYear(),
+          hoje.getMonth() + 1,
+          Number(card.dueDay)
+        );
     }
 
     return [
@@ -594,7 +738,6 @@ function gerarProximosEventos(cards = []) {
         data: vencimento
       }
     ];
-
   }).sort((a, b) => a.data - b.data);
 }
 
@@ -628,61 +771,54 @@ window.toggleEventosCartao = function () {
       .filter(evento => evento.data >= hoje)
       .slice(0, 5);
 
-  lista.innerHTML = eventos.length
-    ? eventos.map(evento => {
-
-      const diasRestantes =
-        Math.ceil(
-          (evento.data - hoje) /
-          (1000 * 60 * 60 * 24)
-        );
-        
-      const descricao =
-        evento.tipo === 'fechamento'
-          ? (
-            diasRestantes <= 0
-              ? 'Fecha hoje'
-              : diasRestantes === 1
-                ? 'Fecha amanhã'
-                : `Fecha em ${diasRestantes} dias`
-          )
-          : (
-            diasRestantes <= 0
-              ? 'Vence hoje'
-              : diasRestantes === 1
-                ? 'Vence amanhã'
-                : `Vence em ${diasRestantes} dias`
+  lista.innerHTML =
+    eventos.length
+      ? eventos.map(evento => {
+        const diasRestantes =
+          Math.ceil(
+            (evento.data - hoje) /
+            (1000 * 60 * 60 * 24)
           );
 
-      return `
-      <div class="event-item">
+        const descricao =
+          evento.tipo === 'fechamento'
+            ? (
+              diasRestantes <= 0
+                ? 'Fecha hoje'
+                : diasRestantes === 1
+                  ? 'Fecha amanhã'
+                  : `Fecha em ${diasRestantes} dias`
+            )
+            : (
+              diasRestantes <= 0
+                ? 'Vence hoje'
+                : diasRestantes === 1
+                  ? 'Vence amanhã'
+                  : `Vence em ${diasRestantes} dias`
+            );
 
-        <div>
-          <strong>
-            ${evento.cardName}
-          </strong>
+        return `
+          <div class="event-item">
+            <div>
+              <strong>${evento.cardName}</strong>
 
-      <div class="event-date">
-  ${descricao}
-</div>
+              <div class="event-date">
+                ${descricao}
+              </div>
+            </div>
+
+            <span class="event-type ${evento.tipo}">
+              ${evento.tipo === 'fechamento' ? 'Fecha' : 'Vence'}
+            </span>
+          </div>
+        `;
+      }).join('')
+      : `
+        <div class="alert-empty">
+          <i class="ph ph-check-circle"></i>
+          Nenhum evento próximo
         </div>
-
-        <span class="event-type ${evento.tipo}">
-          ${evento.tipo === 'fechamento'
-          ? 'Fecha'
-          : 'Vence'
-        }
-        </span>
-
-      </div>
-    `;
-    }).join('')
-    : `
-    <div class="alert-empty">
-      <i class="ph ph-check-circle"></i>
-      Nenhum evento próximo
-    </div>
-  `;
+      `;
 
   drawer.classList.add('active');
   drawer.setAttribute('aria-hidden', 'false');
@@ -695,31 +831,41 @@ window.fecharEventosCartao = function () {
   drawer?.classList.remove('active');
   drawer?.setAttribute('aria-hidden', 'true');
 };
+
 const alertasDismissed = new Set();
 let alertDrawerOpen = false;
 
 window.toggleAlertDrawer = function () {
   alertDrawerOpen = !alertDrawerOpen;
-  const wrap = document.getElementById('alertDrawer');
-  const btn = document.getElementById('bellBtn');
+
+  const wrap =
+    document.getElementById('alertDrawer');
+
+  const btn =
+    document.getElementById('bellBtn');
+
   if (!wrap || !btn) return;
+
   wrap.classList.toggle('open', alertDrawerOpen);
   btn.setAttribute('aria-expanded', alertDrawerOpen);
   wrap.setAttribute('aria-hidden', !alertDrawerOpen);
 };
 
 window.clearAllAlerts = function () {
-  const list = document.getElementById('alertList');
+  const list =
+    document.getElementById('alertList');
+
   if (!list) return;
+
   list.querySelectorAll('.alert-item').forEach(el => {
     alertasDismissed.add(el.dataset.id);
     _dismissItem(el);
   });
+
   _syncBadge(0);
 };
 
 window.atualizarBadgeEventos = function () {
-
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
 
@@ -741,19 +887,28 @@ window.atualizarBadgeEventos = function () {
 function _dismissItem(el) {
   el.style.opacity = '0';
   el.style.maxHeight = el.offsetHeight + 'px';
+
   requestAnimationFrame(() => {
     el.style.maxHeight = '0';
     el.style.paddingTop = '0';
     el.style.paddingBottom = '0';
   });
+
   setTimeout(() => el.remove(), 280);
 }
 
 function _syncBadge(count) {
-  const badge = document.getElementById('alertBadge');
-  const label = document.getElementById('alertDrawerLabel');
-  const empty = document.getElementById('alertEmpty');
-  const list = document.getElementById('alertList');
+  const badge =
+    document.getElementById('alertBadge');
+
+  const label =
+    document.getElementById('alertDrawerLabel');
+
+  const empty =
+    document.getElementById('alertEmpty');
+
+  const list =
+    document.getElementById('alertList');
 
   if (badge) {
     badge.textContent = count;
@@ -761,40 +916,56 @@ function _syncBadge(count) {
   }
 
   if (label) {
-    label.textContent = count > 0
-      ? `${count} alerta${count > 1 ? 's' : ''} ativo${count > 1 ? 's' : ''}`
-      : 'Sem alertas';
+    label.textContent =
+      count > 0
+        ? `${count} alerta${count > 1 ? 's' : ''} ativo${count > 1 ? 's' : ''}`
+        : 'Sem alertas';
   }
 
-  // Mostra ou oculta o estado vazio
   if (empty && list) {
-    const temItens = list.querySelectorAll('.alert-item').length > 0;
-    empty.style.display = temItens ? 'none' : 'flex';
+    const temItens =
+      list.querySelectorAll('.alert-item').length > 0;
+
+    empty.style.display =
+      temItens ? 'none' : 'flex';
   }
 }
 
 function _renderAlertItem({ id, texto, severity }) {
-  const list = document.getElementById('alertList');
+  const list =
+    document.getElementById('alertList');
+
   if (!list) return;
 
-  // Já existe? Atualiza só o texto (evita flicker)
-  const existing = list.querySelector(`[data-id="${id}"]`);
+  const existing =
+    list.querySelector(`[data-id="${id}"]`);
+
   if (existing) {
-    const textEl = existing.querySelector('.alert-item-text');
+    const textEl =
+      existing.querySelector('.alert-item-text');
+
     if (textEl) textEl.textContent = texto;
+
     return;
   }
 
-  // Ignorado pelo usuário nesta sessão?
   if (alertasDismissed.has(id)) return;
 
-  const chipClass = severity === 'danger' ? 'danger' : 'warn';
-  const chipLabel = severity === 'danger' ? 'Crítico' : 'Atenção';
-  const dotClass = chipClass;
+  const chipClass =
+    severity === 'danger' ? 'danger' : 'warn';
 
-  const div = document.createElement('div');
+  const chipLabel =
+    severity === 'danger' ? 'Crítico' : 'Atenção';
+
+  const dotClass =
+    chipClass;
+
+  const div =
+    document.createElement('div');
+
   div.className = 'alert-item';
   div.dataset.id = id;
+
   div.innerHTML = `
     <span class="alert-dot ${dotClass}"></span>
     <span class="alert-item-text">${texto}</span>
@@ -804,43 +975,63 @@ function _renderAlertItem({ id, texto, severity }) {
     </button>
   `;
 
-  div.querySelector('.alert-dismiss-btn').addEventListener('click', () => {
-    alertasDismissed.add(id);
-    _dismissItem(div);
-    const remaining = list.querySelectorAll('.alert-item').length - 1;
-    _syncBadge(Math.max(remaining, 0));
-    setTimeout(() => _syncBadge(list.querySelectorAll('.alert-item').length), 300);
-  });
+  div
+    .querySelector('.alert-dismiss-btn')
+    .addEventListener('click', () => {
+      alertasDismissed.add(id);
+      _dismissItem(div);
 
-  // Remove o empty-state e insere o item
-  const empty = document.getElementById('alertEmpty');
+      const remaining =
+        list.querySelectorAll('.alert-item').length - 1;
+
+      _syncBadge(Math.max(remaining, 0));
+
+      setTimeout(() => {
+        _syncBadge(
+          list.querySelectorAll('.alert-item').length
+        );
+      }, 300);
+    });
+
+  const empty =
+    document.getElementById('alertEmpty');
+
   if (empty) empty.style.display = 'none';
+
   list.appendChild(div);
 }
 
 export function atualizarInsightsTopo(dadosMesAtual = {}) {
-  const receitas = Number(dadosMesAtual.rec) || 0;
-  const despesas = Number(dadosMesAtual.des) || 0;
-  const lazer = Number(dadosMesAtual.lazer) || 0;
-  const reserva = Number(dadosMesAtual.res) || 0;
-  const saldo = receitas - despesas;
+  const receitas =
+    Number(dadosMesAtual.rec) || 0;
 
-  // ── Monta lista de alertas ativos ───────────────────────
+  const desImpactoSaldo =
+    Number(dadosMesAtual.desImpactoSaldo) || 0;
+
+  const lazer =
+    Number(dadosMesAtual.lazer) || 0;
+
+  const reserva =
+    Number(dadosMesAtual.res) || 0;
+
+  const saldo =
+    receitas - desImpactoSaldo - reserva;
+
   const alertasAtivos = [];
 
   if (saldo < 0) {
     alertasAtivos.push({
       id: 'saldo-negativo',
       texto: `Despesas superam receitas em ${formatBRL(Math.abs(saldo))}`,
-      severity: 'danger',
+      severity: 'danger'
     });
   }
 
   if (receitas > 0 && reserva / receitas < 0.1) {
     alertasAtivos.push({
       id: 'reserva-baixa',
-      texto: 'Reserva está abaixo dos 10% recomendados. Saldo mensal negativo.',
-      severity: 'warn',
+      texto: 'Reserva está abaixo dos 10% recomendados.',
+      severity: 'warn'
     });
   }
 
@@ -848,27 +1039,31 @@ export function atualizarInsightsTopo(dadosMesAtual = {}) {
     alertasAtivos.push({
       id: 'lazer-alto',
       texto: 'Lazer passou de 10% da receita.',
-      severity: 'warn',
+      severity: 'warn'
     });
   }
 
-  // ── Remove itens que não são mais alertas ────────────────
-  const list = document.getElementById('alertList');
+  const list =
+    document.getElementById('alertList');
+
   if (list) {
     list.querySelectorAll('.alert-item').forEach(el => {
-      const ativo = alertasAtivos.find(a => a.id === el.dataset.id);
+      const ativo =
+        alertasAtivos.find(a => a.id === el.dataset.id);
+
       if (!ativo) _dismissItem(el);
     });
   }
 
-  // ── Injeta ou atualiza os alertas ativos ────────────────
-  // Só renderiza os que não foram dispensados pelo usuário
-  const visiveis = alertasAtivos.filter(a => !alertasDismissed.has(a.id));
+  const visiveis =
+    alertasAtivos.filter(a => !alertasDismissed.has(a.id));
+
   visiveis.forEach(_renderAlertItem);
 
-  // ── Atualiza badge e label ───────────────────────────────
   setTimeout(() => {
-    const count = list ? list.querySelectorAll('.alert-item').length : 0;
+    const count =
+      list ? list.querySelectorAll('.alert-item').length : 0;
+
     _syncBadge(count);
   }, 50);
 }
