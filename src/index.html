@@ -911,28 +911,34 @@
         <!-- HISTÓRICO -->
         <div class="historico-segmentado">
 
-          <!-- RECEITAS -->
-          <div class="card-historico">
+          <!-- COLUNA ESQUERDA: Receitas + Caixinhas -->
+          <div class="historico-coluna-esquerda">
 
-            <div class="titulo-receitas">
-              <span>💰 Receitas</span>
-              <strong id="total-receitas-lista">+ R$ 0,00</strong>
+            <div class="card-historico">
+              <div class="titulo-receitas">
+                <span>💰 Receitas</span>
+                <strong id="total-receitas-lista">+ R$ 0,00</strong>
+              </div>
+              <div id="lista-receitas-historico"></div>
             </div>
 
-            <div id="lista-receitas-historico"></div>
+            <div class="card-historico">
+              <div class="titulo-receitas" style="border-color: #00D1FF">
+                <span>🚀 Caixinhas</span>
+                <strong id="total-caixinhas-lista" style="color:#00D1FF">◆ R$ 0,00</strong>
+              </div>
+              <div id="lista-caixinhas-historico"></div>
+            </div>
 
           </div>
 
-          <!-- DESPESAS -->
+          <!-- COLUNA DIREITA: Despesas -->
           <div class="card-historico">
-
             <div class="titulo-despesas">
               <span>💸 Despesas</span>
               <strong id="total-despesas-lista">- R$ 0,00</strong>
             </div>
-
             <div id="lista-despesas-historico"></div>
-
           </div>
 
         </div>

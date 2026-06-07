@@ -8,6 +8,8 @@ import {
 
 import { addTransaction, deleteTransaction } from './services/transactionService.js';
 
+import { deleteField } from 'firebase/firestore';
+
 window.fixedBills = window.fixedBills || [];
 
 function parseMoneyBR(value) {
@@ -78,6 +80,7 @@ export function renderContasFixas() {
     document.getElementById('fixed-bills-list');
 
   if (!list) return;
+  const monthKey = getSelectedMonthKey();
 
   const contas =
     window.fixedBills || [];
@@ -87,8 +90,14 @@ export function renderContasFixas() {
       // PASSO 2: Tradução visual automática de "Aluguel" para "Moradia" na listagem
       const categoriaExibida = conta.category === 'Aluguel' ? 'Moradia' : (conta.category || 'Outros');
 
+      const pagamentoMes =
+        conta.paidMonths?.[monthKey];
+
+      const estaPaga =
+        pagamentoMes?.paid === true;
+
       return `
-          <div class="fixed-bill-item ${conta.paid ? 'paid' : ''}">
+          <div class="fixed-bill-item ${estaPaga ? 'paid' : ''}">
             <div>
               <strong>${conta.name || 'Conta sem nome'}</strong>
               <small>
@@ -110,7 +119,7 @@ export function renderContasFixas() {
                 Editar
               </button>
 
-              ${conta.paid
+              ${estaPaga
           ? `
                   <span class="fixed-bill-paid">
                     <i class="ph ph-check-circle"></i>
@@ -120,7 +129,7 @@ export function renderContasFixas() {
                   <button
                     type="button"
                     class="fixed-bill-undo"
-                    onclick="window.desfazerPagamentoContaFixa('${conta.id}')"
+                    onclick="window.desfazerPagamentoContaFixa('${conta.id}', '${monthKey}')"
                   >
                     Desfazer
                   </button>
@@ -129,7 +138,7 @@ export function renderContasFixas() {
                   <button
                     type="button"
                     class="fixed-bill-pay"
-                    onclick="window.pagarContaFixa('${conta.id}')"
+                    onclick="window.pagarContaFixa('${conta.id}', '${monthKey}')"
                   >
                     Marcar paga
                   </button>
@@ -152,6 +161,7 @@ export function iniciarContasFixas() {
   window.editarContaFixa = editarContaFixa;
   window.pagarContaFixa = pagarContaFixa;
   window.desfazerPagamentoContaFixa = desfazerPagamentoContaFixa;
+  window.renderContasFixas = renderContasFixas;
 
   const form =
     document.getElementById('form-conta-fixa');
@@ -191,31 +201,47 @@ export function iniciarContasFixas() {
   });
 }
 
-export async function pagarContaFixa(contaId) {
+export async function pagarContaFixa(
+  contaId,
+  monthKey = getSelectedMonthKey()
+) {
   const conta =
     (window.fixedBills || [])
       .find(c => c.id === contaId);
 
-  if (!conta || conta.paid) return;
+  if (!conta) return;
 
-  const hoje = new Date();
+  const pagamentoMes =
+    conta.paidMonths?.[monthKey];
 
-  // PASSO 2: Garante que a transação gerada no histórico vá mapeada como Moradia
-  const categoriaTransacao = conta.category === 'Aluguel' ? 'Moradia' : conta.category;
+  // Se já existe transação daquele mês, remove antes de recriar
+  if (pagamentoMes?.paymentTxId) {
+    await deleteTransaction(pagamentoMes.paymentTxId);
+  }
+
+  const [ano, mes] = monthKey.split('-').map(Number);
+  const dataPagamento = new Date(ano, mes - 1, Number(conta.dueDay) || 1, 12, 0, 0);
+
+  const categoriaTransacao =
+    conta.category === 'Aluguel'
+      ? 'Moradia'
+      : conta.category;
 
   const transacao = {
     type: 'expense',
     desc: conta.name,
-    val: conta.value,
-    cat: categoriaTransacao,
-    financialCategory: conta.financialCategory,
+    val: Number(conta.value) || 0,
+    cat: categoriaTransacao || 'Outros',
+    financialCategory: conta.financialCategory || 'essencial',
     paymentMethod: 'debit',
-    createdAt: hoje,
-    purchaseDate: hoje,
+
+    createdAt: dataPagamento,
+    purchaseDate: dataPagamento,
+
     source: 'fixedBill',
-    fixedBillId: conta.id
+    fixedBillId: conta.id,
+    fixedBillMonth: monthKey
   };
-  const paymentTxId = crypto.randomUUID();
 
   const docRef =
     await addTransaction(transacao);
@@ -225,31 +251,58 @@ export async function pagarContaFixa(contaId) {
   }
 
   await updateFixedBill(conta.id, {
-    paid: true,
-    paidAt: hoje,
-    paymentTxId: docRef.id
+    paid: false,
+    paidAt: null,
+    paymentTxId: null,
+
+    [`paidMonths.${monthKey}`]: {
+      paid: true,
+      paidAt: dataPagamento,
+      paymentTxId: docRef.id
+    }
   });
 
   renderContasFixas();
   window.atualizarDashboard?.();
 }
 
-export async function desfazerPagamentoContaFixa(contaId) {
-  const conta = (window.fixedBills || []).find(c => c.id === contaId);
+export async function desfazerPagamentoContaFixa(
+  contaId,
+  monthKey = getSelectedMonthKey()
+) {
+  const conta =
+    (window.fixedBills || [])
+      .find(c => c.id === contaId);
 
   if (!conta) return;
 
+  const pagamentoMes =
+    conta.paidMonths?.[monthKey];
 
-  if (conta.paymentTxId) {
-    await deleteTransaction(conta.paymentTxId);
+  if (pagamentoMes?.paymentTxId) {
+    await deleteTransaction(pagamentoMes.paymentTxId);
   }
 
   await updateFixedBill(conta.id, {
     paid: false,
     paidAt: null,
-    paymentTxId: null
+    paymentTxId: null,
+
+    [`paidMonths.${monthKey}`]: deleteField()
   });
 
   renderContasFixas();
   window.atualizarDashboard?.();
+}
+
+function getSelectedMonthKey() {
+  const select = document.getElementById('filtro-mes');
+
+  if (select?.value) {
+    const [ano, mes] = select.value.split('-').map(Number);
+    return `${ano}-${mes + 1}`;
+  }
+
+  const hoje = new Date();
+  return `${hoje.getFullYear()}-${hoje.getMonth() + 1}`;
 }

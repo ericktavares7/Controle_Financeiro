@@ -3330,3 +3330,81 @@ body.light .alert-empty i {
   background: rgba(255, 107, 107, .14);
   color: #ff6b6b;
 }
+
+.historico-coluna-esquerda {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.despesa-categoria-grupo {
+  border-bottom: 1px solid var(--border, #1e2d40);
+}
+
+.despesa-cat-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  gap: 0.5rem;
+}
+
+.despesa-cat-header:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.despesa-cat-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.despesa-cat-nome {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.despesa-cat-qtd {
+  font-size: 0.75rem;
+  color: var(--text-muted, #64748b);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+}
+
+.despesa-cat-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.despesa-cat-total {
+  color: #FF6B35;
+  font-size: 0.9rem;
+}
+
+.despesa-cat-icon {
+  transition: transform 0.2s ease;
+  font-size: 0.85rem;
+  color: var(--text-muted, #64748b);
+}
+
+/* itens escondidos por padrão */
+.despesa-cat-itens {
+  display: none;
+  padding: 0 0.5rem 0.5rem;
+}
+
+/* quando aberto */
+.despesa-categoria-grupo.aberto .despesa-cat-itens {
+  display: block;
+}
+
+.despesa-categoria-grupo.aberto .despesa-cat-icon {
+  transform: rotate(180deg);
+}

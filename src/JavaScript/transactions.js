@@ -190,117 +190,112 @@ export function iniciarFiltroBlocos() {
 export function renderListaTransacoes(lista) {
   const cRec = document.getElementById('lista-receitas-historico');
   const cDes = document.getElementById('lista-despesas-historico');
+  const cGoal = document.getElementById('lista-caixinhas-historico');
 
   if (!cRec || !cDes) return;
 
   const template = (t) => {
-    const categoriaClasse =
-      `cat-${(t.cat || 'Geral').replace(/\s+/g, '-')}`;
-
-       const income =
-      t.type === 'income' ||
-      (t.type === 'adjustment' && Number(t.val) > 0);
-
+    const categoriaClasse = `cat-${(t.cat || 'Geral').replace(/\s+/g, '-')}`;
+    const income = t.type === 'income' || (t.type === 'adjustment' && Number(t.val) > 0);
     const goal = t.type === 'goal';
-
-    const sinal =
-      income
-        ? '+'
-        : goal
-          ? '◆'
-          : '-';
-
+    const sinal = income ? '+' : goal ? '◆' : '-';
     const paymentInfo =
-      t.paymentMethod === 'credit'
-        ? ' • Cartão'
-        : t.paymentMethod === 'debit'
-          ? ' • Débito/Pix'
+      t.paymentMethod === 'credit' ? ' • Cartão'
+        : t.paymentMethod === 'debit' ? ' • Débito/Pix'
           : '';
 
     return `
       <div class="tx-item ${categoriaClasse}" id="tx-${t.id}">
         <div class="tx-info">
           <span class="tx-desc">${t.desc}</span>
-
-          <span class="tx-meta">
-            ${t.cat || 'Geral'}${paymentInfo} • ${formatDate(t.createdAt)}
-          </span>
+          <span class="tx-meta">${t.cat || 'Geral'}${paymentInfo} • ${formatDate(t.createdAt)}</span>
         </div>
-
         <div class="tx-right">
-          <span class="tx-val ${income
-        ? 'tx-val--income'
-        : goal
-          ? 'tx-val--goal'
-          : 'tx-val--expense'
-      }">
+          <span class="tx-val ${income ? 'tx-val--income' : goal ? 'tx-val--goal' : 'tx-val--expense'}">
             ${sinal} ${formatBRL(t.val)}
           </span>
-
-<button
-  type="button"
-  class="btn-edit-tx"
-  data-tx-id="${t.id}"
-  aria-label="Editar transação"
->
-  <i class="ph ph-pencil-simple"></i>
-</button>
-
-<button
-  type="button"
-  class="tx-delete"
-  onclick="window.deletarTransacao('${t.id}')"
-  aria-label="Remover transação"
->
-  <i class="ph ph-trash"></i>
-</button>
+          <button type="button" class="btn-edit-tx" data-tx-id="${t.id}" aria-label="Editar transação">
+            <i class="ph ph-pencil-simple"></i>
+          </button>
+          <button type="button" class="tx-delete" onclick="window.deletarTransacao('${t.id}')" aria-label="Remover transação">
+            <i class="ph ph-trash"></i>
+          </button>
         </div>
       </div>
     `;
   };
 
-  const receitas =
-    lista.filter(t =>
-      t.type === 'income' ||
-      (t.type === 'adjustment' && Number(t.val) > 0)
-    );
-
-  const despesas =
-    lista.filter(t =>
-      t.type === 'expense' ||
-      (t.type === 'adjustment' && Number(t.val) < 0)
-    );
-
-  const totalReceitas = receitas.reduce(
-    (acc, t) => acc + (Number(t.val) || 0),
-    0
+  const receitas = lista.filter(t =>
+    t.type === 'income' || (t.type === 'adjustment' && Number(t.val) > 0)
   );
 
-  const totalDespesas = despesas.reduce(
-    (acc, t) => acc + (Number(t.val) || 0),
-    0
+  const despesas = lista.filter(t =>
+    t.type === 'expense' || (t.type === 'adjustment' && Number(t.val) < 0)
   );
 
-  const totalReceitasEl = document.getElementById('total-receitas-lista');
-  const totalDespesasEl = document.getElementById('total-despesas-lista');
+  const caixinhas = lista.filter(t => t.type === 'goal');
 
-  if (totalReceitasEl) {
-    totalReceitasEl.textContent = `+ ${formatBRL(totalReceitas)}`;
+  // ── totais ──
+  const totalReceitas = receitas.reduce((acc, t) => acc + (Number(t.val) || 0), 0);
+  const totalDespesas = despesas.reduce((acc, t) => acc + (Number(t.val) || 0), 0);
+  const totalCaixinhas = caixinhas.reduce((acc, t) => acc + (Number(t.val) || 0), 0);
+
+  document.getElementById('total-receitas-lista')?.setHTMLUnsafe?.(`+ ${formatBRL(totalReceitas)}`);
+  document.getElementById('total-receitas-lista') && (document.getElementById('total-receitas-lista').textContent = `+ ${formatBRL(totalReceitas)}`);
+  document.getElementById('total-despesas-lista') && (document.getElementById('total-despesas-lista').textContent = `- ${formatBRL(totalDespesas)}`);
+  document.getElementById('total-caixinhas-lista') && (document.getElementById('total-caixinhas-lista').textContent = `◆ ${formatBRL(totalCaixinhas)}`);
+
+  // ── receitas ──
+  cRec.innerHTML = receitas.length
+    ? receitas.map(template).join('')
+    : `<p class="msg-vazio">Sem receitas</p>`;
+
+  // ── caixinhas ──
+  if (cGoal) {
+    cGoal.innerHTML = caixinhas.length
+      ? caixinhas.map(template).join('')
+      : `<p class="msg-vazio">Nenhum depósito em caixinha</p>`;
   }
 
-  if (totalDespesasEl) {
-    totalDespesasEl.textContent = `- ${formatBRL(totalDespesas)}`;
-  }
+  // ── despesas agrupadas por categoria ──
+  const despesasPorCat = {};
+  despesas.forEach(t => {
+    const cat = t.cat || 'Outros';
+    if (!despesasPorCat[cat]) despesasPorCat[cat] = [];
+    despesasPorCat[cat].push(t);
+  });
 
-  cRec.innerHTML =
-    receitas.length
-      ? receitas.map(template).join('')
-      : `<p class="msg-vazio">Sem receitas</p>`;
+  const catsOrdenadas = Object.entries(despesasPorCat)
+    .map(([cat, itens]) => ({
+      cat,
+      itens,
+      total: itens.reduce((acc, t) => acc + (Number(t.val) || 0), 0)
+    }))
+    .sort((a, b) => b.total - a.total);
 
-  cDes.innerHTML =
-    despesas.length
-      ? despesas.map(template).join('')
-      : `<p class="msg-vazio">Sem despesas</p>`;
+  cDes.innerHTML = catsOrdenadas.length
+    ? catsOrdenadas.map(({ cat, itens, total }) => `
+        <div class="despesa-categoria-grupo">
+          <button
+            type="button"
+            class="despesa-cat-header"
+            onclick="this.parentElement.classList.toggle('aberto')"
+          >
+            <div class="despesa-cat-info">
+              <span class="despesa-cat-nome">${cat}</span>
+              <span class="despesa-cat-qtd">${itens.length} item${itens.length > 1 ? 's' : ''}</span>
+            </div>
+            <div class="despesa-cat-right">
+              <strong class="despesa-cat-total">- ${formatBRL(total)}</strong>
+              <i class="ph ph-caret-down despesa-cat-icon"></i>
+            </div>
+          </button>
+          <div class="despesa-cat-itens">
+            ${itens.map(template).join('')}
+          </div>
+        </div>
+      `).join('')
+    : `<p class="msg-vazio">Sem despesas</p>`;
 }
 
 export async function deletarTransacao(id) {

@@ -125,20 +125,25 @@ export function iniciarMonthPicker() {
 
   monthsGrid.addEventListener('click', (e) => {
     const btn = e.target.closest('.month-item');
-
     if (!btn) return;
 
-    filtroMes.value = btn.dataset.value;
+    const value = btn.dataset.value;
 
+    if (!Array.from(filtroMes.options).some(o => o.value === value)) {
+      const [ano, mes] = value.split('-').map(Number);
+      const nomeMes = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][mes];
+      const option = new Option(`${nomeMes} ${ano}`, value);
+      filtroMes.appendChild(option);
+    }
+
+    filtroMes.value = value;
     atualizarTextoBotaoMes();
 
-    window.atualizarDashboard?.();
+    filtroMes.dispatchEvent(new Event('change'));
 
     if (window.meuGrafico && window.transactions?.length) {
-      window.atualizarGrafico(
-        window.meuGrafico,
-        window.transactions
-      );
+      window.atualizarGrafico(window.meuGrafico, window.transactions);
     }
 
     monthModal.classList.remove('active');

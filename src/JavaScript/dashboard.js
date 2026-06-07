@@ -3,6 +3,8 @@ import { atualizarCartoesNaTela } from './cards.js';
 import { CATS_LAZER } from './state.js';
 import { renderListaTransacoes, getFiltroBloco } from './transactions.js';
 import { atualizarGraficoDonut, atualizarComparativo } from './charts.js';
+import { getMesSelecionado } from './utils.js';
+import { isInvoicePaid } from './services/invoiceService.js';
 
 const mesesTexto = [
   'janeiro',
@@ -690,54 +692,35 @@ function atualizarMetasIA(
 
 function gerarProximosEventos(cards = []) {
   const hoje = new Date();
+  const { ano, mes } = getMesSelecionado();
 
   return cards.flatMap(card => {
-    let fechamento =
-      new Date(
-        hoje.getFullYear(),
-        hoje.getMonth(),
-        Number(card.closingDay)
-      );
+    const faturaPaga = isInvoicePaid({
+      payments: window.invoicePayments || [],
+      cardId: card.id,
+      invoiceYear: ano,
+      invoiceMonth: mes
+    });
 
+    let fechamento = new Date(hoje.getFullYear(), hoje.getMonth(), Number(card.closingDay));
     if (fechamento < hoje) {
-      fechamento =
-        new Date(
-          hoje.getFullYear(),
-          hoje.getMonth() + 1,
-          Number(card.closingDay)
-        );
+      fechamento = new Date(hoje.getFullYear(), hoje.getMonth() + 1, Number(card.closingDay));
     }
 
-    let vencimento =
-      new Date(
-        hoje.getFullYear(),
-        hoje.getMonth(),
-        Number(card.dueDay)
-      );
-
+    let vencimento = new Date(hoje.getFullYear(), hoje.getMonth(), Number(card.dueDay));
     if (vencimento < hoje) {
-      vencimento =
-        new Date(
-          hoje.getFullYear(),
-          hoje.getMonth() + 1,
-          Number(card.dueDay)
-        );
+      vencimento = new Date(hoje.getFullYear(), hoje.getMonth() + 1, Number(card.dueDay));
     }
 
-    return [
-      {
-        tipo: 'fechamento',
-        cardId: card.id,
-        cardName: card.name,
-        data: fechamento
-      },
-      {
-        tipo: 'vencimento',
-        cardId: card.id,
-        cardName: card.name,
-        data: vencimento
-      }
+    const eventos = [
+      { tipo: 'fechamento', cardId: card.id, cardName: card.name, data: fechamento }
     ];
+
+    if (!faturaPaga) {
+      eventos.push({ tipo: 'vencimento', cardId: card.id, cardName: card.name, data: vencimento });
+    }
+
+    return eventos;
   }).sort((a, b) => a.data - b.data);
 }
 
@@ -771,54 +754,48 @@ window.toggleEventosCartao = function () {
       .filter(evento => evento.data >= hoje)
       .slice(0, 5);
 
-  lista.innerHTML =
-    eventos.length
-      ? eventos.map(evento => {
-        const diasRestantes =
-          Math.ceil(
-            (evento.data - hoje) /
-            (1000 * 60 * 60 * 24)
-          );
+  lista.innerHTML = eventos.length
+    ? eventos.map(evento => {
+      const diasRestantes = Math.ceil((evento.data - hoje) / (1000 * 60 * 60 * 24));
 
-        const descricao =
-          evento.tipo === 'fechamento'
-            ? (
-              diasRestantes <= 0
-                ? 'Fecha hoje'
-                : diasRestantes === 1
-                  ? 'Fecha amanhã'
-                  : `Fecha em ${diasRestantes} dias`
-            )
-            : (
-              diasRestantes <= 0
-                ? 'Vence hoje'
-                : diasRestantes === 1
-                  ? 'Vence amanhã'
-                  : `Vence em ${diasRestantes} dias`
-            );
+      const descricao =
+        evento.tipo === 'fechamento'
+          ? diasRestantes <= 0 ? 'Fecha hoje' : diasRestantes === 1 ? 'Fecha amanhã' : `Fecha em ${diasRestantes} dias`
+          : diasRestantes <= 0 ? 'Vence hoje' : diasRestantes === 1 ? 'Vence amanhã' : `Vence em ${diasRestantes} dias`;
 
-        return `
-          <div class="event-item">
-            <div>
-              <strong>${evento.cardName}</strong>
+      // ícone por tipo
+      const icone = evento.tipo === 'fechamento'
+        ? '<i class="ph ph-lock-simple"></i>'
+        : '<i class="ph ph-warning-circle"></i>';
 
-              <div class="event-date">
-                ${descricao}
-              </div>
-            </div>
+      // badge de urgência
+      const urgenciaClass =
+        diasRestantes <= 0 ? 'hoje'
+          : diasRestantes === 1 ? 'amanha'
+            : diasRestantes <= 5 ? 'breve'
+              : 'ok';
 
-            <span class="event-type ${evento.tipo}">
-              ${evento.tipo === 'fechamento' ? 'Fecha' : 'Vence'}
-            </span>
+      const urgenciaLabel =
+        diasRestantes <= 0 ? 'Hoje'
+          : diasRestantes === 1 ? 'Amanhã'
+            : diasRestantes <= 5 ? 'Em breve'
+              : `${diasRestantes}d`;
+
+      return `
+        <div class="event-item">
+          <div class="event-icon ${evento.tipo}">${icone}</div>
+          <div class="event-body">
+            <strong>${evento.cardName}</strong>
+            <div class="event-date">${descricao}</div>
           </div>
-        `;
-      }).join('')
-      : `
-        <div class="alert-empty">
-          <i class="ph ph-check-circle"></i>
-          Nenhum evento próximo
+          <span class="event-urgency ${urgenciaClass}">${urgenciaLabel}</span>
         </div>
       `;
+    }).join('')
+    : `<div class="alert-empty">
+      <i class="ph ph-check-circle"></i>
+      Nenhum evento próximo
+    </div>`;
 
   drawer.classList.add('active');
   drawer.setAttribute('aria-hidden', 'false');

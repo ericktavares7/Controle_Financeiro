@@ -491,11 +491,10 @@ function iniciarTabs() {
 }
 
 function iniciarFiltroMes() {
-  document
-    .getElementById('filtro-mes')
-    ?.addEventListener('change', () => {
-      window.atualizarDashboard?.();
-    });
+  document.getElementById('filtro-mes')?.addEventListener('change', () => {
+    window.atualizarDashboard?.();
+    window.renderContasFixas?.();
+  });
 }
 
 function iniciarEscape() {
