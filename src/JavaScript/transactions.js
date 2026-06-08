@@ -190,112 +190,196 @@ export function iniciarFiltroBlocos() {
 export function renderListaTransacoes(lista) {
   const cRec = document.getElementById('lista-receitas-historico');
   const cDes = document.getElementById('lista-despesas-historico');
-  const cGoal = document.getElementById('lista-caixinhas-historico');
 
   if (!cRec || !cDes) return;
 
   const template = (t) => {
-    const categoriaClasse = `cat-${(t.cat || 'Geral').replace(/\s+/g, '-')}`;
-    const income = t.type === 'income' || (t.type === 'adjustment' && Number(t.val) > 0);
+    const categoriaClasse =
+      `cat-${(t.cat || 'Geral').replace(/\s+/g, '-')}`;
+
+       const income =
+      t.type === 'income' ||
+      (t.type === 'adjustment' && Number(t.val) > 0);
+
     const goal = t.type === 'goal';
-    const sinal = income ? '+' : goal ? '◆' : '-';
+
+    const sinal =
+      income
+        ? '+'
+        : goal
+          ? '◆'
+          : '-';
+
     const paymentInfo =
-      t.paymentMethod === 'credit' ? ' • Cartão'
-        : t.paymentMethod === 'debit' ? ' • Débito/Pix'
+      t.paymentMethod === 'credit'
+        ? ' • Cartão'
+        : t.paymentMethod === 'debit'
+          ? ' • Débito/Pix'
           : '';
 
     return `
       <div class="tx-item ${categoriaClasse}" id="tx-${t.id}">
         <div class="tx-info">
           <span class="tx-desc">${t.desc}</span>
-          <span class="tx-meta">${t.cat || 'Geral'}${paymentInfo} • ${formatDate(t.createdAt)}</span>
+
+          <span class="tx-meta">
+            ${t.cat || 'Geral'}${paymentInfo} • ${formatDate(t.createdAt)}
+          </span>
         </div>
+
         <div class="tx-right">
-          <span class="tx-val ${income ? 'tx-val--income' : goal ? 'tx-val--goal' : 'tx-val--expense'}">
+          <span class="tx-val ${income
+        ? 'tx-val--income'
+        : goal
+          ? 'tx-val--goal'
+          : 'tx-val--expense'
+      }">
             ${sinal} ${formatBRL(t.val)}
           </span>
-          <button type="button" class="btn-edit-tx" data-tx-id="${t.id}" aria-label="Editar transação">
-            <i class="ph ph-pencil-simple"></i>
-          </button>
-          <button type="button" class="tx-delete" onclick="window.deletarTransacao('${t.id}')" aria-label="Remover transação">
-            <i class="ph ph-trash"></i>
-          </button>
+
+<button
+  type="button"
+  class="btn-edit-tx"
+  data-tx-id="${t.id}"
+  aria-label="Editar transação"
+>
+  <i class="ph ph-pencil-simple"></i>
+</button>
+
+<button
+  type="button"
+  class="tx-delete"
+  onclick="window.deletarTransacao('${t.id}')"
+  aria-label="Remover transação"
+>
+  <i class="ph ph-trash"></i>
+</button>
         </div>
       </div>
     `;
   };
 
-  const receitas = lista.filter(t =>
-    t.type === 'income' || (t.type === 'adjustment' && Number(t.val) > 0)
+  const receitas =
+    lista.filter(t =>
+      t.type === 'income' ||
+      (t.type === 'adjustment' && Number(t.val) > 0)
+    );
+
+  const despesas =
+    lista.filter(t =>
+      t.type === 'expense' ||
+      (t.type === 'adjustment' && Number(t.val) < 0)
+    );
+
+  const totalReceitas = receitas.reduce(
+    (acc, t) => acc + (Number(t.val) || 0),
+    0
   );
 
-  const despesas = lista.filter(t =>
-    t.type === 'expense' || (t.type === 'adjustment' && Number(t.val) < 0)
+  const totalDespesas = despesas.reduce(
+    (acc, t) => acc + (Number(t.val) || 0),
+    0
   );
 
-  const caixinhas = lista.filter(t => t.type === 'goal');
+  const totalReceitasEl = document.getElementById('total-receitas-lista');
+  const totalDespesasEl = document.getElementById('total-despesas-lista');
 
-  // ── totais ──
-  const totalReceitas = receitas.reduce((acc, t) => acc + (Number(t.val) || 0), 0);
-  const totalDespesas = despesas.reduce((acc, t) => acc + (Number(t.val) || 0), 0);
-  const totalCaixinhas = caixinhas.reduce((acc, t) => acc + (Number(t.val) || 0), 0);
-
-  document.getElementById('total-receitas-lista')?.setHTMLUnsafe?.(`+ ${formatBRL(totalReceitas)}`);
-  document.getElementById('total-receitas-lista') && (document.getElementById('total-receitas-lista').textContent = `+ ${formatBRL(totalReceitas)}`);
-  document.getElementById('total-despesas-lista') && (document.getElementById('total-despesas-lista').textContent = `- ${formatBRL(totalDespesas)}`);
-  document.getElementById('total-caixinhas-lista') && (document.getElementById('total-caixinhas-lista').textContent = `◆ ${formatBRL(totalCaixinhas)}`);
-
-  // ── receitas ──
-  cRec.innerHTML = receitas.length
-    ? receitas.map(template).join('')
-    : `<p class="msg-vazio">Sem receitas</p>`;
-
-  // ── caixinhas ──
-  if (cGoal) {
-    cGoal.innerHTML = caixinhas.length
-      ? caixinhas.map(template).join('')
-      : `<p class="msg-vazio">Nenhum depósito em caixinha</p>`;
+  if (totalReceitasEl) {
+    totalReceitasEl.textContent = `+ ${formatBRL(totalReceitas)}`;
   }
 
-  // ── despesas agrupadas por categoria ──
-  const despesasPorCat = {};
-  despesas.forEach(t => {
-    const cat = t.cat || 'Outros';
-    if (!despesasPorCat[cat]) despesasPorCat[cat] = [];
-    despesasPorCat[cat].push(t);
+  if (totalDespesasEl) {
+    totalDespesasEl.textContent = `- ${formatBRL(totalDespesas)}`;
+  }
+
+  cRec.innerHTML =
+    receitas.length
+      ? receitas.map(template).join('')
+      : `<p class="msg-vazio">Sem receitas</p>`;
+
+  // ===== Caixinhas (goals) =====
+  const caixinhasListEl = document.getElementById('lista-caixinhas-historico');
+  const totalCaixinhasEl = document.getElementById('total-caixinhas-lista');
+
+  const caixinhas = lista.filter(t => t.type === 'goal');
+  const totalCaixinhas = caixinhas.reduce((acc, t) => acc + (Number(t.val) || 0), 0);
+
+  if (totalCaixinhasEl) totalCaixinhasEl.textContent = `◆ ${formatBRL(totalCaixinhas)}`;
+
+  if (caixinhasListEl) {
+    caixinhasListEl.innerHTML = caixinhas.length
+      ? caixinhas.sort((a, b) => Number(b.val) - Number(a.val)).map(template).join('')
+      : `<p class="msg-vazio">Sem caixinhas</p>`;
+  }
+
+  // ===== Despesas agrupadas por categoria e ordenadas =====
+  if (!despesas.length) {
+    cDes.innerHTML = `<p class="msg-vazio">Sem despesas</p>`;
+  } else {
+    const groups = {};
+
+    despesas.forEach(t => {
+      const cat = t.cat || 'Outros';
+      if (!groups[cat]) groups[cat] = { total: 0, items: [] };
+      groups[cat].total += Number(t.val) || 0;
+      groups[cat].items.push(t);
+    });
+
+    const sortedCats = Object.entries(groups).sort((a, b) => b[1].total - a[1].total);
+
+    cDes.innerHTML = sortedCats.map(([cat, data]) => {
+      const itemsHtml = data.items
+        .sort((a, b) => Number(b.val) - Number(a.val))
+        .map(template)
+        .join('');
+
+      return `
+        <div class="despesa-cat" data-cat-name="${cat}">
+          <button type="button" class="despesa-cat-toggle" aria-expanded="false" data-cat="${cat}">
+            <strong>${cat}</strong>
+            <span class="despesa-cat-total">- ${formatBRL(data.total)}</span>
+            <i class="ph ph-caret-down"></i>
+          </button>
+          <div class="despesa-cat-items">${itemsHtml}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Ensure all groups start closed to avoid inconsistent states
+  cDes.querySelectorAll('.despesa-cat').forEach(catEl => {
+    catEl.classList.remove('open');
+    const t = catEl.querySelector('.despesa-cat-toggle');
+    if (t) t.setAttribute('aria-expanded', 'false');
   });
 
-  const catsOrdenadas = Object.entries(despesasPorCat)
-    .map(([cat, itens]) => ({
-      cat,
-      itens,
-      total: itens.reduce((acc, t) => acc + (Number(t.val) || 0), 0)
-    }))
-    .sort((a, b) => b.total - a.total);
+  // Delegated toggle for category groups (acts like a select)
+  cDes.querySelectorAll('.despesa-cat-toggle').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      const toggle = ev.currentTarget;
+      const parent = toggle.closest('.despesa-cat');
+      if (!parent) return;
 
-  cDes.innerHTML = catsOrdenadas.length
-    ? catsOrdenadas.map(({ cat, itens, total }) => `
-        <div class="despesa-categoria-grupo">
-          <button
-            type="button"
-            class="despesa-cat-header"
-            onclick="this.parentElement.classList.toggle('aberto')"
-          >
-            <div class="despesa-cat-info">
-              <span class="despesa-cat-nome">${cat}</span>
-              <span class="despesa-cat-qtd">${itens.length} item${itens.length > 1 ? 's' : ''}</span>
-            </div>
-            <div class="despesa-cat-right">
-              <strong class="despesa-cat-total">- ${formatBRL(total)}</strong>
-              <i class="ph ph-caret-down despesa-cat-icon"></i>
-            </div>
-          </button>
-          <div class="despesa-cat-itens">
-            ${itens.map(template).join('')}
-          </div>
-        </div>
-      `).join('')
-    : `<p class="msg-vazio">Sem despesas</p>`;
+      const isOpen = parent.classList.contains('open');
+
+      // close all other categories (select-like behavior)
+      cDes.querySelectorAll('.despesa-cat').forEach(catEl => {
+        if (catEl === parent) return;
+        catEl.classList.remove('open');
+        const t = catEl.querySelector('.despesa-cat-toggle');
+        if (t) t.setAttribute('aria-expanded', 'false');
+      });
+
+      // toggle the clicked one via class
+      if (isOpen) {
+        parent.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+      } else {
+        parent.classList.add('open');
+        toggle.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
 }
 
 export async function deletarTransacao(id) {

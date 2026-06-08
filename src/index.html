@@ -224,7 +224,6 @@
 
   </div>
 
-
   <div id="modal-categorias" class="modal">
     <div class="modal-content categorias-card">
       <div class="modal-header">
@@ -439,12 +438,14 @@
 
         <div class="toolbar-pills">
 
+
           <div class="alerts-wrapper">
 
-            <button class="bell-btn" id="bellBtn" onclick="window.toggleAlertDrawer()" aria-expanded="false"
-              aria-controls="alertDrawer">
+            <button type="button" class="bell-btn" id="bellBtn" onclick="window.toggleAlertDrawer()"
+              aria-expanded="false" aria-controls="alertDrawer">
               <i class="ph ph-bell"></i>
               Alertas
+
               <span class="alert-badge" id="alertBadge" style="display:none">
                 0
               </span>
@@ -462,56 +463,47 @@
               </span>
             </button>
 
+            <div id="alertBackdrop" class="alert-backdrop"></div>
+            <div id="eventsBackdrop" class="events-backdrop"></div>
+
             <div class="alert-drawer-wrap" id="alertDrawer" aria-hidden="true">
-
               <div class="alert-drawer">
-
                 <div class="alert-drawer-header">
+                  <span id="alertDrawerLabel">Sem alertas</span>
 
-                  <span id="alertDrawerLabel">
-                    Sem alertas
-                  </span>
-
-                  <button class="alert-clear-btn" onclick="window.clearAllAlerts()">
-                    Dispensar todos
-                  </button>
-
+                  <div class="alert-header-actions">
+                    <button class="alert-clear-btn" type="button" onclick="window.fecharAlertDrawer()">
+                      Fechar
+                    </button>
+                    <button class="alert-clear-btn" type="button" onclick="window.clearAllAlerts()">
+                      Dispensar todos
+                    </button>
+                  </div>
                 </div>
 
                 <div id="alertList">
-
                   <div class="alert-empty" id="alertEmpty">
                     <i class="ph ph-check-circle"></i>
                     Nenhum alerta ativo
                   </div>
-
                 </div>
-
               </div>
-
             </div>
 
             <div class="events-drawer-wrap" id="eventsDrawer" aria-hidden="true">
-
               <div class="alert-drawer">
-
                 <div class="alert-drawer-header">
-
-                  <span>
-                    Próximos eventos
-                  </span>
+                  <span>Próximos eventos</span>
 
                   <button class="alert-clear-btn" onclick="window.fecharEventosCartao()">
                     Fechar
                   </button>
-
                 </div>
 
                 <div id="eventsList"></div>
-
               </div>
-
             </div>
+
           </div>
 
         </div>
@@ -665,6 +657,7 @@
             <select id="input-payment">
               <option value="debit">Débito / Pix / Saldo em conta</option>
               <option value="credit">Cartão de crédito</option>
+              <option value="goal">Caixinha</option>
             </select>
           </div>
 
@@ -689,6 +682,14 @@
 
               <input type="number" id="input-installments" min="2" max="60" value="2">
             </div>
+          </div>
+
+          <div class="form-group hidden" id="goal-payment-group">
+            <label>Escolha a caixinha</label>
+
+            <select id="input-goal-payment">
+              <option value="">Selecione uma caixinha</option>
+            </select>
           </div>
 
           <div class="form-group hidden" id="fixed-duration-group">

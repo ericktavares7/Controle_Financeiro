@@ -1195,7 +1195,8 @@
      font-size: 14px;
    }
 
- }
+  }
+
 
  /* =========================
    CELULARES MÉDIOS — 481px até 768px
@@ -1511,32 +1512,6 @@
    }
  }
 
- /* ── Telas muito pequenas ── */
- @media (max-width: 480px) {
-   .events-label {
-     display: none !important;
-   }
-
-   .events-drawer-wrap {
-     width: calc(100vw - 28px);
-   }
-
-   .events-btn {
-     width: 44px !important;
-     min-width: 44px !important;
-     padding: 0 !important;
-     position: relative !important;
-     overflow: visible !important;
-   }
-
-   .events-badge {
-     position: absolute !important;
-     top: -5px !important;
-     right: -5px !important;
-     transform: none !important;
-   }
- }
-
  .toolbar-pills {
    display: flex;
    align-items: center;
@@ -1552,34 +1527,6 @@
    display: flex;
    align-items: center;
    gap: 8px;
- }
-
- .alert-drawer-wrap {
-   position: absolute;
-   top: 52px;
-   left: 0;
-   z-index: 99999;
-
-   width: 320px;
-
-   opacity: 0;
-   visibility: hidden;
-   pointer-events: none;
-
-   transform: translateY(-8px);
-
-   transition:
-     opacity .22s ease,
-     transform .22s ease,
-     visibility .22s ease;
- }
-
- .alert-drawer-wrap.open {
-   opacity: 1;
-   visibility: visible;
-   pointer-events: auto;
-
-   transform: translateY(0);
  }
 
  .events-btn {
@@ -1606,7 +1553,7 @@
  }
 
  .events-btn i {
-   font-size: 16px;
+   font-size: 15px;
    color: #94a3b8;
  }
 
@@ -1769,52 +1716,27 @@
 
  @media (max-width: 480px) {
    .events-label {
-     display: none;
+     display: none !important;
    }
 
    .events-btn {
-     width: 46px;
-     padding: 0;
-     position: relative;
+     width: 46px !important;
+     min-width: 46px !important;
+     height: 36px !important;
+     padding: 0 !important;
+     border-radius: 999px !important;
+     background: rgba(15, 23, 42, 0.92) !important;
+     border: 1px solid rgba(255, 255, 255, 0.08) !important;
+     display: inline-flex !important;
+     align-items: center !important;
+     justify-content: center !important;
+     position: relative !important;
    }
 
    .events-badge {
-     position: absolute;
-     top: -5px;
-     right: -5px;
-   }
- }
-
- /* ── 1. Drawer de eventos não sai da tela no mobile ── */
- @media (max-width: 768px) {
-   .events-drawer-wrap {
-     position: fixed !important;
-     top: auto !important;
-     bottom: calc(84px + env(safe-area-inset-bottom)) !important;
-     left: 14px !important;
-     right: 14px !important;
-     width: auto !important;
-     max-height: 60dvh;
-     overflow-y: auto;
-     transform: none !important;
-     z-index: 999999 !important;
-
-     opacity: 0;
-     visibility: hidden;
-     pointer-events: none;
-     transition: opacity .22s ease, visibility .22s ease;
-   }
-
-   .events-drawer-wrap.active {
-     opacity: 1 !important;
-     visibility: visible !important;
-     pointer-events: auto !important;
-     transform: none !important;
-   }
-
-   .events-drawer-wrap .alert-drawer {
-     max-height: 60dvh;
-     overflow-y: auto;
+     position: absolute !important;
+     top: -5px !important;
+     right: -5px !important;
    }
  }
 
@@ -1832,6 +1754,44 @@
 
  /* ── 3. Modal de editar transação rolando corretamente no mobile ── */
  @media (max-width: 768px) {
+   .events-backdrop {
+     display: none;
+     position: fixed;
+     inset: 0;
+     z-index: 99999997;
+     background: rgba(0, 0, 0, 0.55);
+     -webkit-backdrop-filter: blur(4px);
+     backdrop-filter: blur(4px);
+   }
+
+   .events-backdrop.active {
+     display: block;
+   }
+
+   #eventsDrawer {
+     position: fixed !important;
+     top: 50% !important;
+     left: 50% !important;
+     bottom: auto !important;
+     right: auto !important;
+     transform: translate(-50%, -50%) scale(0.95) !important;
+     width: calc(100vw - 28px) !important;
+     max-height: 70dvh !important;
+     overflow-y: auto !important;
+     opacity: 0;
+     visibility: hidden;
+     pointer-events: none;
+     z-index: 99999999 !important;
+     transition: opacity .22s ease, visibility .22s ease, transform .22s ease !important;
+   }
+
+   #eventsDrawer.active {
+     opacity: 1 !important;
+     visibility: visible !important;
+     pointer-events: auto !important;
+     transform: translate(-50%, -50%) scale(1) !important;
+   }
+
    #modal-editar-transacao {
      align-items: flex-end !important;
      padding: 0 !important;
@@ -1860,4 +1820,205 @@
    position: fixed !important;
    width: 100% !important;
    touch-action: none !important;
+ }
+
+ @media (min-width: 769px) {
+   #alertDrawer {
+     position: fixed !important;
+     top: 110px !important;
+     left: 24px !important;
+     width: 320px !important;
+     height: auto !important;
+     max-height: 70dvh !important;
+
+     background: transparent !important;
+     -webkit-backdrop-filter: none !important;
+     backdrop-filter: none !important;
+     padding: 0 !important;
+
+     display: block !important;
+     align-items: unset !important;
+     justify-content: unset !important;
+
+     opacity: 0;
+     visibility: hidden;
+     pointer-events: none;
+     transform: translateY(-6px) !important;
+     transition:
+       opacity .22s ease,
+       visibility .22s ease,
+       transform .22s ease !important;
+
+     z-index: 100000000 !important;
+   }
+
+   #alertDrawer.open {
+     opacity: 1 !important;
+     visibility: visible !important;
+     pointer-events: auto !important;
+     transform: translateY(0) !important;
+   }
+
+   #eventsDrawer {
+     position: fixed !important;
+     top: 110px !important;
+     left: 24px !important;
+     width: 340px !important;
+     height: auto !important;
+     max-height: 70dvh !important;
+
+     background: transparent !important;
+     -webkit-backdrop-filter: none !important;
+     backdrop-filter: none !important;
+     padding: 0 !important;
+
+     display: block !important;
+     align-items: unset !important;
+     justify-content: unset !important;
+
+     z-index: 100000000 !important;
+   }
+
+   #alertBackdrop,
+   #eventsBackdrop {
+     display: none !important;
+   }
+ }
+
+ .alert-backdrop {
+   display: none;
+ }
+
+ .alert-backdrop.active {
+   display: block;
+   position: fixed;
+   inset: 0;
+   z-index: 999998;
+   background: rgba(0, 0, 0, 0.55);
+ }
+
+ .alert-drawer-wrap.open {
+   opacity: 1 !important;
+   visibility: visible !important;
+   pointer-events: auto !important;
+   transform: translateY(0) !important;
+ }
+
+ @media (max-width: 768px) {
+
+   .overview-toolbar {
+     overflow: visible !important;
+     position: static;
+   }
+
+   #alertDrawer,
+   #eventsDrawer {
+     position: fixed !important;
+     top: 0 !important;
+     left: 12px !important;
+     right: 12px !important;
+     bottom: auto !important;
+     inset: auto !important;
+
+     width: auto !important;
+     max-width: calc(100vw - 24px) !important;
+     max-height: calc(100vh - 144px) !important;
+
+     /* sem fundo próprio — o card dentro que tem fundo */
+     background: transparent !important;
+     -webkit-backdrop-filter: none !important;
+     backdrop-filter: none !important;
+     padding: calc(env(safe-area-inset-top, 12px) + 330px) 0 0 !important;
+
+     /* dropdown desabilitado no mobile */
+     display: block !important;
+     align-items: unset !important;
+     justify-content: unset !important;
+     overflow: visible !important;
+
+     z-index: 99999999 !important;
+
+     /* estado fechado */
+     opacity: 0;
+     visibility: hidden;
+     pointer-events: none;
+     transform: none !important;
+     transition:
+       opacity .22s ease,
+       visibility .22s ease,
+       transform .22s cubic-bezier(.2, .8, .2, 1) !important;
+   }
+
+   /* estado aberto */
+   #alertDrawer.open,
+   #eventsDrawer.active {
+     opacity: 1 !important;
+     visibility: visible !important;
+     pointer-events: auto !important;
+     transform: none !important;
+   }
+
+   /* o card visual dentro do drawer */
+   #alertDrawer .alert-drawer,
+   #eventsDrawer .alert-drawer {
+     width: 100% !important;
+     margin-top: 0 !important;
+     max-height: 70dvh !important;
+     overflow-y: auto !important;
+     border-radius: 22px !important;
+     background: linear-gradient(180deg, #141e30, #0d1424) !important;
+     border: 1px solid rgba(255, 255, 255, 0.09) !important;
+     box-shadow:
+       0 32px 64px rgba(0, 0, 0, 0.55),
+       0 0 0 1px rgba(0, 255, 178, 0.06) !important;
+   }
+ }
+
+ /* ── Telas muito pequenas ── */
+ @media (max-width: 480px) {
+   .events-label {
+     display: none !important;
+   }
+
+   .events-drawer-wrap {
+     width: calc(100vw - 28px);
+   }
+
+   .events-btn {
+     width: 44px !important;
+     min-width: 44px !important;
+     padding: 0 !important;
+     position: relative !important;
+     overflow: visible !important;
+   }
+
+   .events-badge {
+     position: absolute !important;
+     top: -5px !important;
+     right: -5px !important;
+     transform: none !important;
+   }
+
+   #alertDrawer,
+   #eventsDrawer {
+     top: 0 !important;
+     padding-top: calc(env(safe-area-inset-top, 12px) + 150px) !important;
+     max-height: calc(100vh - 164px) !important;
+   }
+ }
+
+ #alertBackdrop,
+ #eventsBackdrop {
+   display: none;
+   position: fixed;
+   inset: 0;
+   z-index: 99999998;
+   background: rgba(0, 0, 0, 0.6);
+   -webkit-backdrop-filter: blur(4px);
+   backdrop-filter: blur(4px);
+ }
+
+ #alertBackdrop.active,
+ #eventsBackdrop.active {
+   display: block;
  }

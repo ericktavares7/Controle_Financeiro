@@ -998,6 +998,127 @@ body.modal-open {
   z-index: 999999 !important;
 }
 
+/* =========================================
+   EXPENSE CATEGORY GROUPS (transactions grouped)
+========================================= */
+
+.despesa-cat {
+  margin-bottom: 10px;
+  border-radius: 8px;
+  overflow: visible;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.03);
+}
+
+.despesa-cat {
+  position: relative;
+}
+
+.despesa-cat-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: var(--txt-principal);
+  cursor: pointer;
+  font-size: 14px;
+  text-align: left;
+}
+
+.despesa-cat-toggle strong {
+  font-weight: 600;
+}
+
+.despesa-cat-total {
+  color: #ffb3a0;
+  font-weight: 700;
+  margin-left: 8px;
+}
+/* Make sure the total sticks to the right inside the toggle */
+.despesa-cat-toggle strong { flex: 0 1 auto; }
+.despesa-cat-toggle .despesa-cat-total { margin-left: auto; }
+
+.despesa-cat-toggle i {
+  transition: transform 0.2s ease;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.despesa-cat.open .despesa-cat-toggle i {
+  transform: rotate(180deg);
+}
+
+.despesa-cat-items {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: calc(100% + 6px);
+  background: rgba(15,23,42,0.98);
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 8px 24px rgba(2,6,23,0.6);
+  padding: 8px 12px 12px 12px;
+  max-height: 360px;
+  overflow-y: auto;
+  z-index: 60;
+  opacity: 0;
+  transform-origin: top center;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  pointer-events: none;
+}
+
+.despesa-cat.open .despesa-cat-items {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.despesa-cat-items .tx-item {
+  background: rgba(255,255,255,0.01);
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+/* Align transaction values to the right inside expanded panel */
+.despesa-cat-items .tx-right { display: grid; grid-template-columns: 1fr 34px 34px; align-items:center; gap:8px; }
+.despesa-cat-items .tx-val { text-align: right; }
+
+/* Ensure despesas container scrolls and doesn't overflow the card */
+#lista-despesas-historico {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+/* Make card-historico behave as a column so lists can grow and scroll inside */
+.historico-segmentado .card-historico {
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+/* Ensure the despesas list fills available card space and scrolls */
+.historico-segmentado #lista-despesas-historico {
+  flex: 1 1 auto;
+  max-height: none;
+  min-height: 120px;
+  overflow-y: auto;
+}
+
+/* Limit individual category expansion to avoid huge heights */
+.despesa-cat.open .despesa-cat-items {
+  max-height: 360px;
+}
+
+.msg-vazio {
+  color: #94a3b8;
+  padding: 10px;
+}
+
 #modal-editar-cartao.active .modal-content {
   transform: translateY(0) scale(1) !important;
   opacity: 1 !important;
@@ -2306,7 +2427,8 @@ body.modal-open {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
+  gap: 16px;
+  padding: 12px 18px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 11px;
   color: #475569;
@@ -2315,10 +2437,18 @@ body.modal-open {
   font-weight: 700;
 }
 
+.alert-header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
 .alert-clear-btn {
-  background: none;
+  background: rgba(255, 255, 255, 0.04);
   border: none;
   font-size: 11px;
+  border-radius: 999px;
+  padding: 8px 12px;
   font-weight: 700;
   color: #475569;
   cursor: pointer;
@@ -2338,7 +2468,7 @@ body.modal-open {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 14px 18px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   transition:
     background 0.15s ease,
@@ -2379,7 +2509,10 @@ body.modal-open {
   font-size: 13px;
   font-weight: 600;
   color: #94a3b8;
-  line-height: 1.45;
+  line-height: 1.8;
+  padding-right: 4px;
+  display: inline-block;
+  white-space: normal;
 }
 
 .alert-chip {
