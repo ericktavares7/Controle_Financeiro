@@ -1088,9 +1088,10 @@ body.modal-open {
 .despesa-cat-items .tx-right { display: grid; grid-template-columns: 1fr 34px 34px; align-items:center; gap:8px; }
 .despesa-cat-items .tx-val { text-align: right; }
 
-/* Ensure despesas container scrolls and doesn't overflow the card */
+/* Ensure despesas container scrolls but shrinks to content; limit by viewport when needed */
 #lista-despesas-historico {
-  max-height: 420px;
+  max-height: min(420px, calc(100vh - 300px));
+  height: auto;
   overflow-y: auto;
 }
 
@@ -1103,9 +1104,9 @@ body.modal-open {
 
 /* Ensure the despesas list fills available card space and scrolls */
 .historico-segmentado #lista-despesas-historico {
-  flex: 1 1 auto;
-  max-height: none;
-  min-height: 120px;
+  flex: 0 0 auto;
+  max-height: min(420px, calc(100vh - 300px));
+  height: auto;
   overflow-y: auto;
 }
 
