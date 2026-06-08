@@ -1796,11 +1796,20 @@
      width: auto !important;
      max-height: 60dvh;
      overflow-y: auto;
-     transform: translateY(10px) !important;
+     transform: none !important;
+     z-index: 999999 !important;
+
+     opacity: 0;
+     visibility: hidden;
+     pointer-events: none;
+     transition: opacity .22s ease, visibility .22s ease;
    }
 
    .events-drawer-wrap.active {
-     transform: translateY(0) !important;
+     opacity: 1 !important;
+     visibility: visible !important;
+     pointer-events: auto !important;
+     transform: none !important;
    }
 
    .events-drawer-wrap .alert-drawer {
