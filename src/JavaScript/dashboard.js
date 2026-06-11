@@ -57,6 +57,19 @@ export function atualizarDashboard() {
 
   let rec = 0, des = 0, desSaldo = 0, res = 0, lazer = 0, ajusteSaldo = 0;
 
+  function getSaldoCaixinha(caixinha) {
+  const totalGasto =
+    (window.transactions || [])
+      .filter(t =>
+        t.type === 'expense' &&
+        t.paymentMethod === 'goal' &&
+        t.goalPaymentId === caixinha.id
+      )
+      .reduce((acc, t) => acc + (Number(t.val) || 0), 0);
+
+  return (Number(caixinha.val) || 0) - totalGasto;
+}
+
   dadosExibicao.forEach(t => {
     const valor = Number(t.val) || 0;
     const catNorm = String(t.cat || '').toLowerCase().trim();
@@ -71,8 +84,8 @@ export function atualizarDashboard() {
       }
       if (bloco === 'lazer') lazer += valor;
     } else if (t.type === 'goal') {
-      res += valor;
-    } else if (t.type === 'adjustment') {
+  res += getSaldoCaixinha(t);
+} else if (t.type === 'adjustment') {
       ajusteSaldo += valor;
     }
   });
@@ -116,9 +129,9 @@ export function atualizarDashboard() {
     } else if (t.type === 'expense') {
       if (t.paymentMethod !== 'credit' && t.paymentMethod !== 'goal') desAnt += valor;
       if (bloco === 'lazer') lazerAnt += valor;
-    } else if (t.type === 'goal') {
-      resAnt += valor;
-    }
+    }else if (t.type === 'goal') {
+  resAnt += getSaldoCaixinha(t);
+}
   });
 
   const desImpactoSaldoAnt = desAnt + faturasPagasAnt;
@@ -249,8 +262,24 @@ function montarSubcategorias(dadosExibicao, blocoAlvo) {
     if (bloco !== blocoAlvo) return;
     if (t.type === 'goal' && blocoAlvo !== 'reserva') return;
 
+    let valorSubcat = Number(t.val) || 0;
+
+if (t.type === 'goal') {
+  const totalGasto =
+    (window.transactions || [])
+      .filter(g =>
+        g.type === 'expense' &&
+        g.paymentMethod === 'goal' &&
+        g.goalPaymentId === t.id
+      )
+      .reduce((acc, g) => acc + (Number(g.val) || 0), 0);
+
+  valorSubcat -= totalGasto;
+}
+
     const cat = t.cat || 'Outros';
-    totais[cat] = (totais[cat] || 0) + (Number(t.val) || 0);
+    totais[cat] =
+  (totais[cat] || 0) + valorSubcat;
   });
 
   const itens = Object.entries(totais).sort((a, b) => b[1] - a[1]);
@@ -478,11 +507,11 @@ window.fecharEventosCartao = function () {
   drawer?.classList.remove('active');
   drawer?.setAttribute('aria-hidden', 'true');
   backdrop?.classList.remove('active');
+};
 
-  document.getElementById('eventsBackdrop')?.addEventListener('click', () => {
+document.getElementById('eventsBackdrop')?.addEventListener('click', () => {
   window.fecharEventosCartao?.();
 });
-};
 
 const alertasDismissed = new Set();
 let alertDrawerOpen = false;

@@ -1195,7 +1195,7 @@
      font-size: 14px;
    }
 
-  }
+ }
 
 
  /* =========================
@@ -2021,4 +2021,19 @@
  #alertBackdrop.active,
  #eventsBackdrop.active {
    display: block;
+ }
+
+ @media (min-width: 769px) {
+
+   #alertBackdrop,
+   #eventsBackdrop {
+     display: none !important;
+   }
+
+   body.modal-open {
+     overflow: auto !important;
+     position: static !important;
+     width: auto !important;
+     touch-action: auto !important;
+   }
  }

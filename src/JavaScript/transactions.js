@@ -19,6 +19,47 @@ import { CATS_LAZER } from './state.js';
 
 let filtroBloco = 'todos';
 
+function popularCaixinhasPagamento() {
+  const select =
+    document.getElementById('input-goal-payment');
+
+  if (!select) return;
+
+  const caixinhas =
+    (window.transactions || [])
+      .filter(t => t.type === 'goal')
+      .map(t => {
+        const totalGasto =
+          (window.transactions || [])
+            .filter(g =>
+              g.type === 'expense' &&
+              g.paymentMethod === 'goal' &&
+              g.goalPaymentId === t.id
+            )
+            .reduce((acc, g) => acc + (Number(g.val) || 0), 0);
+
+        const saldo =
+          (Number(t.val) || 0) - totalGasto;
+
+        return {
+          id: t.id,
+          nome: t.desc || t.cat || 'Caixinha',
+          saldo
+        };
+      })
+      .filter(c => c.saldo > 0);
+
+  select.innerHTML = `
+    <option value="">Selecione uma caixinha</option>
+    ${caixinhas.map(c => `
+      <option value="${c.id}">
+        ${c.nome} — ${formatBRL(c.saldo)}
+      </option>
+    `).join('')}
+  `;
+}
+
+window.popularCaixinhasPagamento = popularCaixinhasPagamento;
 
 function criarDataLocal(value) {
   if (!value) return new Date();
@@ -77,9 +118,12 @@ export async function ajustarSaldoAtual(valorReal) {
     if (t.type === 'income') rec += v;
 
     else if (t.type === 'expense') {
-      if (t.paymentMethod !== 'credit') {
-        desSaldo += v;
-      }
+     if (
+  t.paymentMethod !== 'credit' &&
+  t.paymentMethod !== 'goal'
+) {
+  desSaldo += v;
+}
     }
 
     else if (t.type === 'goal') res += v;
@@ -300,17 +344,41 @@ export function renderListaTransacoes(lista) {
   // ===== Caixinhas (goals) =====
   const caixinhasListEl = document.getElementById('lista-caixinhas-historico');
   const totalCaixinhasEl = document.getElementById('total-caixinhas-lista');
+const caixinhas =
+  lista.filter(t => t.type === 'goal');
 
-  const caixinhas = lista.filter(t => t.type === 'goal');
-  const totalCaixinhas = caixinhas.reduce((acc, t) => acc + (Number(t.val) || 0), 0);
+const getSaldoCaixinha = (caixinha) => {
+  const totalGasto =
+    (window.transactions || [])
+      .filter(t =>
+        t.type === 'expense' &&
+        t.paymentMethod === 'goal' &&
+        t.goalPaymentId === caixinha.id
+      )
+      .reduce((acc, t) => acc + (Number(t.val) || 0), 0);
+
+  return (Number(caixinha.val) || 0) - totalGasto;
+};
+
+const totalCaixinhas =
+  caixinhas.reduce(
+    (acc, c) => acc + getSaldoCaixinha(c),
+    0
+  );
 
   if (totalCaixinhasEl) totalCaixinhasEl.textContent = `◆ ${formatBRL(totalCaixinhas)}`;
 
-  if (caixinhasListEl) {
-    caixinhasListEl.innerHTML = caixinhas.length
-      ? caixinhas.sort((a, b) => Number(b.val) - Number(a.val)).map(template).join('')
-      : `<p class="msg-vazio">Sem caixinhas</p>`;
-  }
+if (caixinhasListEl) {
+  caixinhasListEl.innerHTML = caixinhas.length
+    ? caixinhas
+        .sort((a, b) => getSaldoCaixinha(b) - getSaldoCaixinha(a))
+        .map(c => template({
+          ...c,
+          val: getSaldoCaixinha(c)
+        }))
+        .join('')
+    : `<p class="msg-vazio">Sem caixinhas</p>`;
+}
 
   // ===== Despesas agrupadas por categoria e ordenadas =====
   if (!despesas.length) {
@@ -761,11 +829,14 @@ export function iniciarFormularioTransacao() {
     const categoria =
       document.getElementById('input-cat').value;
 
-    const paymentMethod =
-      document.getElementById('input-payment')?.value || 'debit';
+const paymentMethod =
+  document.getElementById('input-payment')?.value || 'debit';
 
-    const cardId =
-      document.getElementById('input-card')?.value || null;
+const goalPaymentId =
+  document.getElementById('input-goal-payment')?.value || null;
+
+const cardId =
+  document.getElementById('input-card')?.value || null;
 
     const cartao =
       (window.cards || []).find(card => card.id === cardId);
@@ -814,6 +885,20 @@ export function iniciarFormularioTransacao() {
       return;
     }
 
+    if (
+  tipo === 'expense' &&
+  paymentMethod === 'goal' &&
+  !goalPaymentId
+) {
+  window.showToast?.({
+    type: 'error',
+    title: 'Caixinha obrigatória',
+    message: 'Selecione a caixinha que será usada para pagar.'
+  });
+
+  return;
+}
+
     const dadosFatura =
       tipo === 'expense' &&
         paymentMethod === 'credit' &&
@@ -821,14 +906,15 @@ export function iniciarFormularioTransacao() {
         ? calcularDadosFaturaCartao(dataCompra, cartao)
         : {};
 
-    const nova = {
-      desc: descricao,
-      val: valor,
-      type: tipo,
-      cat: categoria,
-      financialCategory,
-      paymentMethod,
-      cardId,
+const nova = {
+  desc: descricao,
+  val: valor,
+  type: tipo,
+  cat: categoria,
+  financialCategory,
+  paymentMethod,
+  goalPaymentId,
+  cardId,
 
       purchaseDate: Timestamp.fromDate(dataCompra),
       createdAt: Timestamp.fromDate(dataCompra),
@@ -969,10 +1055,16 @@ export function iniciarFormularioTransacao() {
 
     e.target.reset();
 
-    document.getElementById('input-payment').value = 'debit';
-    document.getElementById('input-card').value = '';
+document.getElementById('input-payment').value = 'debit';
+document.getElementById('input-card').value = '';
+
+const goalPaymentInput =
+  document.getElementById('input-goal-payment');
+
+if (goalPaymentInput) goalPaymentInput.value = '';
 
     document.getElementById('credit-card-group')?.classList.add('hidden');
+    document.getElementById('goal-payment-group')?.classList.add('hidden');
     document.getElementById('recurrence-group')?.classList.add('hidden');
     document.getElementById('installments-group')?.classList.add('hidden');
     document.getElementById('fixed-expense-group')?.classList.add('hidden');
@@ -1003,35 +1095,72 @@ export function iniciarFormularioTransacao() {
     window.fecharModal?.();
   });
 }
+
 export function iniciarCamposTransacao() {
-  const inputPayment = document.getElementById('input-payment');
-  const creditCardGroup = document.getElementById('credit-card-group');
+  const inputPayment =
+    document.getElementById('input-payment');
+
+  const creditCardGroup =
+    document.getElementById('credit-card-group');
+
+  const recurrenceGroup =
+    document.getElementById('recurrence-group');
+
+  const installmentsGroup =
+    document.getElementById('installments-group');
+
+  const goalPaymentGroup =
+    document.getElementById('goal-payment-group');
+
+  const goalPaymentInput =
+    document.getElementById('input-goal-payment');
 
   inputPayment?.addEventListener('change', () => {
-    const recurrenceGroup = document.getElementById('recurrence-group');
-    const installmentsGroup = document.getElementById('installments-group');
+    const paymentMethod = inputPayment.value;
 
-    if (inputPayment.value === 'credit') {
+    if (paymentMethod === 'credit') {
       creditCardGroup?.classList.remove('hidden');
       recurrenceGroup?.classList.remove('hidden');
-    } else {
+
+      goalPaymentGroup?.classList.add('hidden');
+      if (goalPaymentInput) goalPaymentInput.value = '';
+    }
+
+    else if (paymentMethod === 'goal') {
+      goalPaymentGroup?.classList.remove('hidden');
+      popularCaixinhasPagamento();
+
       creditCardGroup?.classList.add('hidden');
       recurrenceGroup?.classList.add('hidden');
       installmentsGroup?.classList.add('hidden');
     }
+
+    else {
+      creditCardGroup?.classList.add('hidden');
+      recurrenceGroup?.classList.add('hidden');
+      installmentsGroup?.classList.add('hidden');
+
+      goalPaymentGroup?.classList.add('hidden');
+      if (goalPaymentInput) goalPaymentInput.value = '';
+    }
   });
 
   document.getElementById('input-cat')?.addEventListener('change', (e) => {
-    const catNorm = e.target.value.toLowerCase().trim();
-    const financialCatInput = document.getElementById('input-financial-cat');
+    const catNorm =
+      e.target.value.toLowerCase().trim();
+
+    const financialCatInput =
+      document.getElementById('input-financial-cat');
+
     if (!financialCatInput) return;
 
-    financialCatInput.value = CATS_LAZER.includes(catNorm) ? 'lazer' : 'essencial';
+    financialCatInput.value =
+      CATS_LAZER.includes(catNorm)
+        ? 'lazer'
+        : 'essencial';
   });
 
   document.getElementById('input-recurrence')?.addEventListener('change', (e) => {
-    const installmentsGroup = document.getElementById('installments-group');
-
     if (e.target.value === 'installment') {
       installmentsGroup?.classList.remove('hidden');
     } else {
@@ -1040,8 +1169,11 @@ export function iniciarCamposTransacao() {
   });
 
   document.getElementById('input-fixed-expense')?.addEventListener('change', (e) => {
-    const fixedDurationGroup = document.getElementById('fixed-duration-group');
-    const fixedMonthsGroup = document.getElementById('fixed-months-group');
+    const fixedDurationGroup =
+      document.getElementById('fixed-duration-group');
+
+    const fixedMonthsGroup =
+      document.getElementById('fixed-months-group');
 
     if (e.target.value === 'yes') {
       fixedDurationGroup?.classList.remove('hidden');
@@ -1059,7 +1191,8 @@ export function iniciarCamposTransacao() {
   });
 
   document.getElementById('input-fixed-duration')?.addEventListener('change', (e) => {
-    const fixedMonthsGroup = document.getElementById('fixed-months-group');
+    const fixedMonthsGroup =
+      document.getElementById('fixed-months-group');
 
     if (e.target.value === 'limited') {
       fixedMonthsGroup?.classList.remove('hidden');
@@ -1068,11 +1201,15 @@ export function iniciarCamposTransacao() {
     }
   });
 
-  document.getElementById('recurrence-group')?.classList.add('hidden');
-  document.getElementById('installments-group')?.classList.add('hidden');
+  recurrenceGroup?.classList.add('hidden');
+  installmentsGroup?.classList.add('hidden');
+  goalPaymentGroup?.classList.add('hidden');
 
-  const recurrenceInput = document.getElementById('input-recurrence');
-  const installmentsInput = document.getElementById('input-installments');
+  const recurrenceInput =
+    document.getElementById('input-recurrence');
+
+  const installmentsInput =
+    document.getElementById('input-installments');
 
   if (recurrenceInput) recurrenceInput.value = 'single';
   if (installmentsInput) installmentsInput.value = 2;
